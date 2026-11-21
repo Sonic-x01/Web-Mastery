@@ -33,9 +33,9 @@ WORK = ROOT / "tools" / ".work"
 errors: list[str] = []
 IDS: set[str] = set()
 stats = {"sections": 0, "quiz": 0, "lab": 0, "task": 0, "xss": 0, "example": 0, "listing": 0, "scene": 0, "proj": 0}
-SELF = {"tasks": {}, "reject": {}}
+SELF = {"tasks": {}, "reject": {}, "checks": {}}
 
-RAW_TAGS = "html-example|code-block|pre-html|pre-js|pre-css|pre-text|pre-http|starter|solution|test|server|listing|blocked"
+RAW_TAGS = "html-example|code-block|pre-html|pre-js|pre-css|pre-text|pre-http|starter|solution|test|server|listing|blocked|check"
 ATTRS = r"((?:[^>\"']|\"[^\"]*\"|'[^']*')*)"
 RAW_RE = re.compile(rf"<({RAW_TAGS})\b{ATTRS}>([\s\S]*?)</\1>")
 PH_RE = re.compile(r"@@R(\d+)@@")
@@ -261,6 +261,10 @@ def expand_task(m: re.Match, where: str) -> str:
             errors.append(f"{label}: reject {r!r} equals an accepted answer")
     SELF["tasks"][tid] = answers
     SELF["reject"][tid] = rejects
+    for ca, cb in raws(body, "check"):          # machine-verified answer: rendered + evaluated by the self-test
+        if not ca.get("expr"):
+            errors.append(f"{label}: <check> needs expr=")
+        SELF["checks"][tid] = {"html": dedent_block(cb), "expr": ca.get("expr", ""), "expect": norm_answer(answers[0], kind) if answers else ""}
     listings = "".join(render_raw("listing", la, lb, where) for la, lb in raws(body, "listing"))
     lvl = LVL.get(a.get("level", "1"), "أساسي")
     hint_html = f'<details class="task-hint"><summary>💡 تلميح</summary><div>{fin(hint, where)}</div></details>' if hint else ""

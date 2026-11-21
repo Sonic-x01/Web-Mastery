@@ -1,0 +1,239 @@
+      <section class="section" id="c27" data-part="الجزء 2 · CSS" data-pk="css" data-nav="CSS Grid" data-icon="▦" data-keywords="grid display grid grid-template-columns rows fr repeat minmax auto-fit auto-fill gap grid-column grid-row span line numbers grid-template-areas grid-area implicit grid grid-auto-rows grid-auto-flow dense place-items justify-items align-items subgrid dashboard layout gallery">
+        <div class="section-head">
+          <span class="section-index">27</span>
+          <div>
+            <p class="eyebrow">CSS · الدرس 27</p>
+            <h2>CSS Grid: Layouts في بُعدين</h2>
+            <p class="lede">Flexbox ممتاز لصف <b>أو</b> عمود. Grid بيتحكم في الصفوف <b>والأعمدة مع بعض</b>: layout الصفحة كلها (header، sidebar، محتوى، footer)، dashboards، معارض صور بتتظبط لوحدها على أي شاشة من غير ولا media query. القاعدة العملية: <b>Grid للـ layout، وFlexbox للـ components</b> — وغالبًا هتستخدم الاتنين مع بعض.</p>
+          </div>
+        </div>
+
+        <h3 class="sub">الأساسيات: الأعمدة والـ fr</h3>
+        <code-block lang="css" file="grid-basics.css">
+          .grid {
+            display: grid;
+            grid-template-columns: 200px 1fr 2fr;   /* fixed + 1 share + 2 shares of what's left */
+            grid-template-rows: auto 1fr;
+            gap: 16px;                              /* row-gap + column-gap */
+          }
+          /* repeat + minmax: as many 160px+ columns as fit, stretched to fill */
+          .gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+        </code-block>
+        <ul>
+          <li><code>fr</code> = «حصة» من المساحة الفاضية <b>بعد</b> طرح الأعمدة الثابتة والـ gaps.</li>
+          <li><code>repeat(3, 1fr)</code> = 3 أعمدة متساوية. <code>minmax(160px, 1fr)</code> = مش أقل من 160 ومش أكتر من حصة.</li>
+          <li><code>auto-fit</code> مقابل <code>auto-fill</code>: الاتنين بيحطوا أكبر عدد أعمدة ممكن؛ <code>auto-fit</code> بيلم الأعمدة الفاضية فالعناصر تتمط وتملا الصف، و<code>auto-fill</code> بيسيب أعمدة فاضية.</li>
+        </ul>
+        <div class="widget" data-widget="grid"></div>
+
+        <h3 class="sub">التحكم في مكان العنصر</h3>
+        <p>الـ grid ليه <b>خطوط</b> مترقّمة من 1 (والسالب من الآخر: <code>-1</code> = آخر خط). العنصر بتحدد بداية ونهاية:</p>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>الكود</th><th>المعنى</th></tr></thead>
+          <tbody>
+            <tr><td><code>grid-column: 1 / 3</code></td><td>من خط 1 لخط 3 = عمودين</td></tr>
+            <tr><td><code>grid-column: span 2</code></td><td>عمودين من مكانه الطبيعي</td></tr>
+            <tr><td><code>grid-column: 1 / -1</code></td><td>العرض كله (من أول خط لآخر خط)</td></tr>
+            <tr><td><code>grid-row: 2 / span 3</code></td><td>من الصف 2، تلات صفوف</td></tr>
+            <tr><td><code>grid-area: main</code></td><td>المنطقة اللي اسمها main في <code>grid-template-areas</code></td></tr>
+          </tbody>
+        </table></div>
+
+        <h3 class="sub">grid-template-areas: ارسم الـ layout بالكلام</h3>
+        <html-example file="dashboard.html" auto max="420">
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <title>Dashboard</title>
+            <style>
+              body { margin: 0; font-family: system-ui, sans-serif; }
+              .app { display: grid; min-height: 300px; gap: 8px; padding: 8px;
+                     grid-template-columns: 170px 1fr;
+                     grid-template-rows: auto 1fr auto;
+                     grid-template-areas:
+                       "head head"
+                       "side main"
+                       "foot foot"; }
+              .app > * { border-radius: 10px; padding: 10px; }
+              header { grid-area: head; background: #0b1322; color: #fff; }
+              aside  { grid-area: side; background: #ede9fe; }
+              main   { grid-area: main; background: #fff7ed; display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; align-content: start; }
+              main div { background: #fff; border: 1px solid #fed7aa; border-radius: 8px; padding: 8px; }
+              footer { grid-area: foot; background: #f1f5f9; font-size: 13px; }
+            </style>
+          </head>
+          <body>
+            <div class="app">
+              <header>Scanly · Dashboard</header>
+              <aside>Projects<br>Findings<br>Reports</aside>
+              <main><div>12 open</div><div>3 high</div><div>5 fixed</div><div>2 retest</div></main>
+              <footer>v2.4 · status: all systems normal</footer>
+            </div>
+          </body>
+          </html>
+        </html-example>
+        <p>كل سطر نصي = صف، وكل كلمة = خلية، والاسم المكرر = المنطقة بتمتد. ولو عايز خلية فاضية: <code>.</code>. وده بيخلي تغيير الـ layout في الموبايل سطر واحد: <code>grid-template-areas: "head" "main" "side" "foot";</code>.</p>
+
+        <h3 class="sub">Grid ضمني ومحاذاة</h3>
+        <ul>
+          <li>لو العناصر أكتر من الخلايا المتعرّفة، الـ grid بيعمل صفوف جديدة <b>ضمنية</b>: حجمها بـ <code>grid-auto-rows</code> (مثلًا <code>minmax(100px, auto)</code>).</li>
+          <li><code>grid-auto-flow: dense</code> بيملا الفراغات بعناصر جاية بعدين (بيغيّر الترتيب المرئي — نفس تحذير الـ accessibility بتاع <code>order</code>).</li>
+          <li><code>justify-items</code>/<code>align-items</code> (أو اختصار <code>place-items</code>) = محاذاة المحتوى جوه كل خلية. <code>place-items: center</code> على grid = أقصر توسيط في CSS.</li>
+          <li><code>subgrid</code>: عنصر جوه grid يقدر يورث خطوط أبوه (<code>grid-template-columns: subgrid</code>) — بيخلي كروت متجاورة عناوينها وأزرارها على نفس الخط.</li>
+        </ul>
+        <div class="callout dev reveal"><span class="ci">👨‍💻</span><div><strong>DevTools Grid overlay</strong><p>في Chrome/Firefox: جنب أي عنصر <code>display: grid</code> في تاب Elements فيه badge اسمها <b>grid</b> — دوس عليها وهتشوف الخطوط بأرقامها والمناطق بأساميها فوق الصفحة. نفس الحاجة لـ flex. أسرع طريقة تفهم بيها layout أي موقع (بتاعك أو target بتعمله recon).</p></div></div>
+
+        <div class="exercises">
+          <div class="exercises-head"><h3><span class="bulb">✏️</span> تمارين الدرس 27</h3></div>
+          <quiz id="c27-q1" answer="2">
+            <q>إمتى تختار Grid بدل Flexbox؟</q>
+            <o>دايمًا، Flexbox قديم</o>
+            <o>لما يبقى عندك عنصر واحد</o>
+            <o>لما محتاج تتحكم في الصفوف والأعمدة مع بعض (layout في بُعدين)</o>
+            <o>لما محتاج توسّط نص</o>
+            <good>Grid = بُعدين، Flexbox = بُعد واحد. والاتنين بيتجمعوا عادي (grid للصفحة، flex جوه الكروت).</good>
+            <bad>الفرق الجوهري: Flexbox لصف أو عمود، Grid للاتنين مع بعض.</bad>
+          </quiz>
+          <quiz id="c27-q2" answer="0">
+            <q>`grid-column: 1 / -1` معناها إيه؟</q>
+            <o>العنصر بياخد عرض الـ grid كله</o>
+            <o>عمود واحد</o>
+            <o>آخر عمود بس</o>
+            <o>العنصر مخفي</o>
+            <good>من أول خط لآخر خط (السالب بيعد من الآخر) — ممتاز للعناوين والـ banners.</good>
+            <bad>`-1` = آخر خط. فمن 1 لـ -1 = كل الأعمدة.</bad>
+          </quiz>
+          <quiz id="c27-q3" answer="3">
+            <q>`repeat(auto-fit, minmax(200px, 1fr))` في container عرضه 650px (من غير gap). كام عمود؟</q>
+            <o>4</o>
+            <o>2</o>
+            <o>1</o>
+            <o>3</o>
+            <good>3 × 200 = 600 ≤ 650، و4 × 200 = 800 أكبر. فـ 3 أعمدة وكل واحد بيتمط لـ 216.67px.</good>
+            <bad>أكبر عدد أعمدة كل واحد فيهم ≥ 200 في 650: 3. والباقي (50) بيتوزع عليهم.</bad>
+          </quiz>
+          <quiz id="c27-q4" answer="1">
+            <q>إيه الفرق العملي بين `auto-fit` و`auto-fill` لو العناصر قليلة (2 عناصر بس في صف بيساع 5)؟</q>
+            <o>مفيش فرق</o>
+            <o>`auto-fit` بيمط العنصرين يملوا الصف، و`auto-fill` بيسيب 3 أعمدة فاضية والعنصرين بحجمهم الأدنى</o>
+            <o>`auto-fill` بيمطهم</o>
+            <o>`auto-fit` بيعمل overflow</o>
+            <good>`auto-fit` = «لم الفاضي». مفيد لما عايز العناصر القليلة تملا المساحة.</good>
+            <bad>الاتنين بيعملوا نفس عدد الأعمدة، بس `auto-fit` بيلغي الأعمدة الفاضية فالموجودين يتمطوا.</bad>
+          </quiz>
+
+          <html-lab id="c27-lab1" title="معرض بيظبط نفسه (من غير media queries)" level="2">
+            <desc><p>الـ <code>.gallery</code>: grid أعمدته <code>repeat(auto-fit, minmax(160px, 1fr))</code> و<code>gap: 12px</code>. النتيجة: كل الكروت عرضها ≥ 160px، وبيملوا الصف بالكامل في أي عرض.</p></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Gallery</title>
+                <style>
+                  body { margin: 0; padding: 10px; font-family: system-ui; }
+                  .card { background: #ede9fe; border-radius: 10px; padding: 12px; }
+                </style>
+              </head>
+              <body>
+                <div class="gallery">
+                  <div class="card">XSS</div><div class="card">CSRF</div><div class="card">IDOR</div>
+                  <div class="card">SSRF</div><div class="card">SQLi</div><div class="card">RCE</div>
+                </div>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Gallery</title>
+                <style>
+                  body { margin: 0; padding: 10px; font-family: system-ui; }
+                  .gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+                  .card { background: #ede9fe; border-radius: 10px; padding: 12px; }
+                </style>
+              </head>
+              <body>
+                <div class="gallery">
+                  <div class="card">XSS</div><div class="card">CSRF</div><div class="card">IDOR</div>
+                  <div class="card">SSRF</div><div class="card">SQLi</div><div class="card">RCE</div>
+                </div>
+              </body>
+              </html>
+            </solution>
+            <test label="display: grid و gap 12px" live>(() => { const s = getComputedStyle(document.querySelector(".gallery")); return s.display === "grid" && s.columnGap === "12px" && s.rowGap === "12px"; })()</test>
+            <test label="كل كارت عرضه ≥ 160px" live>[...document.querySelectorAll(".card")].every(c => c.getBoundingClientRect().width >= 159.5)</test>
+            <test label="الصف الأول بيملا عرض الـ gallery" live>(() => { const g = document.querySelector(".gallery").getBoundingClientRect(), cards = [...document.querySelectorAll(".card")], top = cards[0].getBoundingClientRect().top; const row = cards.filter(c => Math.abs(c.getBoundingClientRect().top - top) < 1); return Math.abs(row[row.length - 1].getBoundingClientRect().right - g.right) < 1.5 && Math.abs(row[0].getBoundingClientRect().left - g.left) < 1.5; })()</test>
+            <test label="استخدمت auto-fit و minmax">/auto-fit/.test(S) && /minmax\(\s*160px/.test(S)</test>
+          </html-lab>
+
+          <html-lab id="c27-lab2" title="Dashboard بـ grid-template-areas" level="2">
+            <desc><p>الـ <code>.app</code>: grid بـ <code>grid-template-areas</code> بحيث:</p><ul>
+            <li>الـ <code>header</code> والـ <code>footer</code> عرض الـ grid كله.</li>
+            <li>الـ <code>aside</code> عمود عرضه <code>180px</code> على الشمال، والـ <code>main</code> بياخد الباقي.</li>
+            <li><code>gap: 10px</code>.</li></ul></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en" dir="ltr">
+              <head>
+                <meta charset="UTF-8">
+                <title>App</title>
+                <style>
+                  body { margin: 0; font-family: system-ui; }
+                  .app { width: 600px; }
+                  .app > * { background: #f1f5f9; padding: 8px; }
+                </style>
+              </head>
+              <body>
+                <div class="app">
+                  <header>Header</header><aside>Menu</aside><main>Findings</main><footer>Footer</footer>
+                </div>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en" dir="ltr">
+              <head>
+                <meta charset="UTF-8">
+                <title>App</title>
+                <style>
+                  body { margin: 0; font-family: system-ui; }
+                  .app { width: 600px; display: grid; gap: 10px;
+                         grid-template-columns: 180px 1fr;
+                         grid-template-areas: "head head" "side main" "foot foot"; }
+                  .app > * { background: #f1f5f9; padding: 8px; }
+                  header { grid-area: head; } aside { grid-area: side; } main { grid-area: main; } footer { grid-area: foot; }
+                </style>
+              </head>
+              <body>
+                <div class="app">
+                  <header>Header</header><aside>Menu</aside><main>Findings</main><footer>Footer</footer>
+                </div>
+              </body>
+              </html>
+            </solution>
+            <test label="header و footer عرضهم 600px" live>["header", "footer"].every(s => Math.round(document.querySelector(s).getBoundingClientRect().width) === 600)</test>
+            <test label="aside عرضه 180px على الشمال" live>(() => { const a = document.querySelector("aside").getBoundingClientRect(), app = document.querySelector(".app").getBoundingClientRect(); return Math.round(a.width) === 180 && Math.abs(a.left - app.left) < 1; })()</test>
+            <test label="main جنب الـ aside ويكمّل لآخر العرض (gap 10)" live>(() => { const a = document.querySelector("aside").getBoundingClientRect(), m = document.querySelector("main").getBoundingClientRect(), app = document.querySelector(".app").getBoundingClientRect(); return Math.abs(m.left - a.right - 10) < 1 && Math.abs(m.right - app.right) < 1 && Math.abs(m.top - a.top) < 1; })()</test>
+            <test label="استخدمت grid-template-areas">/grid-template-areas/.test(S)</test>
+          </html-lab>
+
+          <task id="c27-t1" title="عرض العمود التالت" level="2" answer="450" norm="int">
+            <desc><p>الـ container عرضه <code>740px</code> (من غير padding). عرض العمود التالت بالـ px؟</p></desc>
+            <listing lang="css" file="grid.css">
+              .grid { display: grid; width: 740px; gap: 20px; grid-template-columns: 100px 1fr 3fr; }
+            </listing>
+            <explain>المساحة للـ fr = 740 − 100 − (2 gaps × 20) = 600. الحصص 1 + 3 = 4 ⇒ الحصة 150 ⇒ العمود التالت = 3 × 150 = <b>450</b>.</explain>
+            <check expr="Math.round(document.querySelectorAll('.grid > div')[2].getBoundingClientRect().width)"><style>.grid { display: grid; width: 740px; gap: 20px; grid-template-columns: 100px 1fr 3fr; } .grid > div { height: 5px; }</style><div class="grid"><div></div><div></div><div></div></div></check>
+          </task>
+          <task id="c27-t2" title="كام عمود؟" level="1" answer="3" norm="int">
+            <desc><p>grid فيه 5 أعمدة. عنصر عليه <code>grid-column: 3 / -1</code>. بياخد كام عمود؟</p></desc>
+            <explain>5 أعمدة = 6 خطوط، و<code>-1</code> = الخط السادس. من خط 3 لخط 6 = <b>3</b> أعمدة.</explain>
+            <check expr="Math.round(document.querySelector('.x').getBoundingClientRect().width / 100)"><style>.g { display: grid; grid-template-columns: repeat(5, 100px); } .x { grid-column: 3 / -1; height: 5px; }</style><div class="g"><div class="x"></div></div></check>
+          </task>
+        </div>
+      </section>

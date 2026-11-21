@@ -1,0 +1,265 @@
+      <section class="section" id="c19" data-part="الجزء 2 · CSS" data-pk="css" data-nav="CSS: البداية" data-icon="🎨" data-keywords="css cascading style sheets rule selector declaration property value inline style attribute style element link stylesheet import cssom computed style user agent stylesheet reset devtools styles computed error recovery csp style-src">
+        <div class="section-head">
+          <span class="section-index">19</span>
+          <div>
+            <p class="eyebrow">CSS · الدرس 19 · الجزء الثاني يبدأ</p>
+            <h2>CSS: إزاي الصفحة بتاخد شكلها</h2>
+            <p class="lede">الـ HTML بيقول «ده إيه»، والـ <b>CSS</b> (Cascading Style Sheets) بيقول «يبان إزاي»: الألوان، الخطوط، المسافات، الأماكن، الحركة، وشكل الصفحة على الموبايل. للمطوّر: ده اللي بيحوّل HTML نضيف لمنتج حلو. وللـ pentester: الـ CSS بيقرر إيه اللي «باين» وإيه اللي «مستخبي» — وأساس الـ clickjacking وإخفاء المحتوى في الـ phishing، وكمان طريقة لسرقة بيانات من غير ولا سطر JavaScript.</p>
+          </div>
+        </div>
+
+        <h3 class="sub">تشريح القاعدة (rule)</h3>
+        <figure class="diagram reveal">
+          <svg viewBox="0 0 1000 190" role="img" aria-label="أجزاء قاعدة CSS">
+            <text x="500" y="92" text-anchor="middle" class="d-t" font-size="26"><tspan style="fill:#ff9e7a">.card h2</tspan><tspan style="fill:#7f8ea8"> { </tspan><tspan style="fill:#82aaff">color</tspan><tspan style="fill:#7f8ea8">: </tspan><tspan style="fill:#f78c6c">#c2410c</tspan><tspan style="fill:#7f8ea8">; </tspan><tspan style="fill:#82aaff">margin</tspan><tspan style="fill:#7f8ea8">: </tspan><tspan style="fill:#f78c6c">0 0 8px</tspan><tspan style="fill:#7f8ea8">; }</tspan></text>
+            <path class="d-ar-acc" d="M180,108 L180,130 L330,130 L330,108"/>
+            <text x="255" y="155" text-anchor="middle" class="d-ts d-acc">selector</text>
+            <path class="d-ar-vio" d="M370,62 L370,40 L560,40 L560,62"/>
+            <text x="465" y="30" text-anchor="middle" class="d-tx d-vio">declaration = property: value;</text>
+            <path class="d-ar-tea" d="M370,108 L370,130 L840,130 L840,108"/>
+            <text x="605" y="155" text-anchor="middle" class="d-ts d-tea">declaration block { … }</text>
+            <text x="500" y="182" text-anchor="middle" class="d-ts ar">الـ selector بيختار عناصر، والـ declarations بتحدد شكلها</text>
+          </svg>
+          <figcaption>كل قاعدة = <b>selector</b> + <b>declaration block</b>. كل declaration بيخلص بـ <code>;</code>، والـ comments بتتكتب <code>/* كده */</code> بس (مفيش <code>//</code> في CSS).</figcaption>
+        </figure>
+
+        <h3 class="sub">3 طرق تحط بيها CSS</h3>
+        <html-example file="three-ways.html" auto>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <title>Three ways</title>
+            <!-- 2) internal: a <style> element (RAWTEXT, remember?) -->
+            <style>
+              p { font-family: system-ui, sans-serif; }
+              .note { background: #fff7d6; padding: 6px 10px; border-radius: 6px; }
+            </style>
+            <!-- 3) external (the professional way): <link rel="stylesheet" href="css/style.css"> -->
+          </head>
+          <body>
+            <!-- 1) inline: the style attribute -->
+            <p style="color: #c2410c; font-weight: 700;">Inline style (only this element)</p>
+            <p class="note">Internal style from the &lt;style&gt; element</p>
+          </body>
+          </html>
+        </html-example>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>الطريقة</th><th>إمتى</th><th>ملاحظات</th></tr></thead>
+          <tbody>
+            <tr><td><b>External</b>: <code>&lt;link rel="stylesheet" href="…"&gt;</code></td><td><b>دايمًا</b> في المشاريع الحقيقية</td><td>ملف واحد لكل الصفحات، والمتصفح بيعمله cache</td></tr>
+            <tr><td><b>Internal</b>: <code>&lt;style&gt;</code></td><td>صفحة واحدة، demos، critical CSS</td><td>محتواه RAWTEXT — زي ما شفنا في الدرس 13</td></tr>
+            <tr><td><b>Inline</b>: <code>style="…"</code></td><td>نادر (قيم بتتحسب بالـ JS)</td><td>بيكسب على معظم القواعد التانية، وصعب في الصيانة، وبيحتاج <code>'unsafe-inline'</code> في CSP</td></tr>
+            <tr><td><code>@import url(…)</code></td><td>تقريبًا أبدًا</td><td>بيحمّل الملفات ورا بعض (أبطأ). 🎯 وبيبقى أداة في هجمات CSS injection</td></tr>
+          </tbody>
+        </table></div>
+
+        <h3 class="sub">المتصفح بيطبّق الـ CSS إزاي؟</h3>
+        <div class="pipeline reveal">
+          <div class="stage"><b>parse CSS</b><small>القواعد → CSSOM</small></div><div class="arrow">→</div>
+          <div class="stage"><b>match</b><small>كل selector بيختار عناصر من الـ DOM</small></div><div class="arrow">→</div>
+          <div class="stage"><b>cascade</b><small>لو أكتر من قاعدة على نفس الخاصية، مين يكسب؟ (الدرس 21)</small></div><div class="arrow">→</div>
+          <div class="stage"><b>computed style</b><small>القيمة النهائية لكل خاصية في كل عنصر</small></div><div class="arrow">→</div>
+          <div class="stage"><b>layout + paint</b><small>الأماكن والرسم</small></div>
+        </div>
+        <p>حتى من غير ولا سطر CSS منك، المتصفح عنده <b>user-agent stylesheet</b>: الـ <code>body</code> عليه margin <code>8px</code>، والـ <code>h1</code> كبير وbold، واللينكات زرقا ومتسطّرة. عشان كده المشاريع بتبدأ غالبًا بـ <b>CSS reset</b> بسيط يوحّد الأساس بين المتصفحات.</p>
+
+        <h3 class="sub">الـ CSS متسامح زي الـ HTML</h3>
+        <p>لو declaration غلط (خاصية مش موجودة، قيمة غلط)، المتصفح <b>بيتجاهلها هي بس</b> ويكمّل الباقي. ولو نسيت <code>;</code> بتضيع الـ declaration اللي بعدها كمان. شغّل وبص على اللي اتطبق:</p>
+        <html-example file="error-recovery.html" auto>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <title>Error recovery</title>
+            <style>
+              h3 {
+                colour: red;                 /* British spelling: unknown property → ignored */
+                color: #2563eb;              /* applied */
+                font-size: 22pxx;            /* invalid value → ignored */
+                background: #eff6ff         /* missing ; … */
+                padding: 6px;                /* … so this line is swallowed into the value above → whole thing invalid */
+                border-left: 4px solid #2563eb;
+              }
+            </style>
+          </head>
+          <body>
+            <h3>Which rules survived?</h3>
+            <script>
+              const s = getComputedStyle(document.querySelector("h3"));
+              console.log("color:", s.color, "| font-size:", s.fontSize, "| background:", s.backgroundColor, "| padding:", s.paddingTop, "| border-left:", s.borderLeftWidth);
+            </script>
+          </body>
+          </html>
+        </html-example>
+        <div class="callout dev reveal"><span class="ci">👨‍💻</span><div><strong>DevTools هو أهم أداة CSS</strong><p>تاب <b>Elements → Styles</b>: كل القواعد اللي بتنطبق على العنصر، والمشطوب = اتغلب عليه، وعلامة ⚠️ = declaration غلط. تاب <b>Computed</b>: القيمة النهائية ومنين جت. تقدر تعدّل لايف، وتعمل <code>:hov</code> عشان تجرّب <code>:hover</code> و<code>:focus</code>. وأي تعديل في DevTools بيروح مع الـ refresh — انقله لملفك.</p></div></div>
+        <div class="callout pt reveal"><span class="ci">🎯</span><div><strong>CSS من منظور أمني</strong><p>(1) <code>style="…"</code> وأي input بيدخل في CSS = <b>CSS injection</b>. (2) الـ CSP بيتحكم في الـ CSS بـ <code>style-src</code> — والـ inline styles محتاجة <code>'unsafe-inline'</code>. (3) الـ CSS بيقرر إيه اللي <b>المستخدم شايفه</b>: زرار شفاف فوق زرار، نص مخفي، صفحة login مزيفة full-screen — كله CSS.</p></div></div>
+
+        <div class="exercises">
+          <div class="exercises-head"><h3><span class="bulb">✏️</span> تمارين الدرس 19</h3></div>
+          <quiz id="c19-q1" answer="2">
+            <q>أنهي طريقة هي الأنسب لموقع فيه 20 صفحة؟</q>
+            <o>`style=""` على كل عنصر</o>
+            <o>`<style>` في كل صفحة</o>
+            <o>ملف خارجي واحد بـ `<link rel="stylesheet">` في كل الصفحات</o>
+            <o>`@import` جوه كل `<style>`</o>
+            <good>ملف واحد = مكان واحد للتعديل، والمتصفح بيعمله cache مرة لكل الصفحات.</good>
+            <bad>التكرار في كل صفحة/عنصر كابوس صيانة. الملف الخارجي هو المعيار.</bad>
+          </quiz>
+          <quiz id="c19-q2" answer="0">
+            <q>`p { color: blue; font-size: 18pxx; margin: 0; }` — إيه اللي هيتطبق؟</q>
+            <o>`color` و`margin` بس (القيمة الغلط بتتجاهل لوحدها)</o>
+            <o>ولا حاجة — القاعدة كلها بتتلغي</o>
+            <o>كله، والـ 18pxx بتتقري 18px</o>
+            <o>`color` بس</o>
+            <good>الـ CSS parser بيتجاهل الـ declaration الغلط ويكمّل. ده error recovery زي HTML.</good>
+            <bad>CSS مش بيرمي القاعدة كلها بسبب قيمة غلط — بيشيل الـ declaration دي بس.</bad>
+          </quiz>
+          <quiz id="c19-q3" answer="3">
+            <q>إزاي تكتب comment في CSS؟</q>
+            <o>`// comment`</o>
+            <o>`<!-- comment -->`</o>
+            <o>`# comment`</o>
+            <o>`/* comment */`</o>
+            <good>CSS فيها نوع واحد بس من الـ comments. `//` مش comment وممكن تبوّظ القاعدة اللي بعدها.</good>
+            <bad>الـ comment الوحيد في CSS هو `/* … */`.</bad>
+          </quiz>
+          <quiz id="c19-q4" answer="1">
+            <q>صفحة مفيهاش ولا سطر CSS، وبرضه الـ `h1` كبير والـ body فيه margin. ليه؟</q>
+            <o>الـ HTML بيحدد الأحجام</o>
+            <o>الـ user-agent stylesheet بتاع المتصفح</o>
+            <o>Windows</o>
+            <o>الـ DOCTYPE</o>
+            <good>كل متصفح عنده CSS افتراضي، والـ resets بتوحّده.</good>
+            <bad>ده الـ CSS الافتراضي بتاع المتصفح (user-agent stylesheet).</bad>
+          </quiz>
+          <quiz id="c19-q5" answer="2">
+            <q>موقع عامل CSP فيها `style-src 'self'` من غير `'unsafe-inline'`. إيه اللي هيحصل لـ `<p style="color:red">`؟</q>
+            <o>هيتطبق عادي</o>
+            <o>الصفحة مش هتفتح</o>
+            <o>الـ inline style هيتمنع (مش هيتطبق)، والـ CSS اللي جاي من ملفات على نفس الـ origin هيشتغل</o>
+            <o>الـ CSS كله هيتمنع</o>
+            <good>ده سبب إن المطوّر المحترف بيتجنّب الـ inline styles: عشان يقدر يقفل `'unsafe-inline'`.</good>
+            <bad>`style-src 'self'` بيسمح بالملفات من نفس الـ origin بس، والـ `style=""` و`<style>` الـ inline بيتمنعوا.</bad>
+          </quiz>
+
+          <html-lab id="c19-lab1" title="أول stylesheet" level="1">
+            <desc><p>اكتب في الـ <code>&lt;style&gt;</code> (في الـ head) قواعد بحيث:</p>
+            <ul><li>كل الـ <code>h1</code> لونهم <code>#c2410c</code>.</li>
+            <li>كل الـ <code>p</code> حجم خطهم <code>18px</code>.</li>
+            <li>أي عنصر عليه class <code>note</code> خلفيته <code>#fff7d6</code>.</li>
+            <li>ومن غير أي <code>style=""</code> attribute في الصفحة.</li></ul></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Styles</title>
+                <style>
+                  /* your rules here */
+                </style>
+              </head>
+              <body>
+                <h1>Findings</h1>
+                <p>Two issues were found.</p>
+                <p class="note">Retest scheduled for Monday.</p>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Styles</title>
+                <style>
+                  h1 { color: #c2410c; }
+                  p { font-size: 18px; }
+                  .note { background: #fff7d6; }
+                </style>
+              </head>
+              <body>
+                <h1>Findings</h1>
+                <p>Two issues were found.</p>
+                <p class="note">Retest scheduled for Monday.</p>
+              </body>
+              </html>
+            </solution>
+            <test label="الـ h1 لونه #c2410c" live>getComputedStyle(document.querySelector("h1")).color === "rgb(194, 65, 12)"</test>
+            <test label="كل الـ p حجمهم 18px" live>[...document.querySelectorAll("p")].every(p => getComputedStyle(p).fontSize === "18px")</test>
+            <test label=".note خلفيتها #fff7d6" live>getComputedStyle(document.querySelector(".note")).backgroundColor === "rgb(255, 247, 214)"</test>
+            <test label="مفيش style attribute">!has("[style]")</test>
+          </html-lab>
+
+          <html-lab id="c19-lab2" title="صلّح الـ CSS المكسور" level="2">
+            <desc><p>الـ CSS ده فيه 4 أخطاء والمتصفح بيتجاهل أجزاء منه. صلّحه بحيث الـ <code>.alert</code> يبقى:</p>
+            <ul><li>لونه <code>#991b1b</code> وخلفيته <code>#fee2e2</code>.</li>
+            <li><code>padding</code> = <code>12px</code>، و<code>border-radius</code> = <code>8px</code>.</li></ul>
+            <p>استخدم الـ preview + DevTools-thinking: إيه اللي مش متطبق وليه؟</p></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Fix</title>
+                <style>
+                  .alert {
+                    colour: #991b1b;
+                    background: #fee2e2
+                    padding: 12px;
+                    border-radius: 8 px;
+                  }
+                </style>
+              </head>
+              <body>
+                <div class="alert">Session expired. Please sign in again.</div>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Fix</title>
+                <style>
+                  .alert {
+                    color: #991b1b;
+                    background: #fee2e2;
+                    padding: 12px;
+                    border-radius: 8px;
+                  }
+                </style>
+              </head>
+              <body>
+                <div class="alert">Session expired. Please sign in again.</div>
+              </body>
+              </html>
+            </solution>
+            <test label="color = #991b1b" live>getComputedStyle(document.querySelector(".alert")).color === "rgb(153, 27, 27)"</test>
+            <test label="background = #fee2e2" live>getComputedStyle(document.querySelector(".alert")).backgroundColor === "rgb(254, 226, 226)"</test>
+            <test label="padding = 12px" live>getComputedStyle(document.querySelector(".alert")).paddingTop === "12px"</test>
+            <test label="border-radius = 8px" live>getComputedStyle(document.querySelector(".alert")).borderTopLeftRadius === "8px"</test>
+            <hint>اتنين في الأسماء/القيم (`colour` و`8 px` بمسافة)، وواحد `;` ناقصة بتبلع السطر اللي بعدها.</hint>
+          </html-lab>
+
+          <task id="c19-t1" title="مين اتجاهل؟" level="1" answer="padding" reject="border|background">
+            <desc><p>في القاعدة دي، <b>اسم الخاصية</b> اللي اتكتبت صح بس <b>اتجاهلت</b> بسبب غلطة في سطر تاني؟</p></desc>
+            <listing lang="css" file="style.css">
+              .card {
+                color: #1e293b;
+                border: 1px solid #cbd5e1
+                padding: 16px;
+                margin: 0 auto;
+              }
+            </listing>
+            <explain>`padding` — الـ `;` ناقصة بعد الـ border، فالمتصفح قرا `border: 1px solid #cbd5e1 padding: 16px` كقيمة واحدة غلط، فـ <b>الاتنين</b> اتجاهلوا (border وpadding). الـ `color` والـ `margin` اتطبقوا. الـ linters (stylelint) وDevTools بيمسكوا ده فورًا.</explain>
+            <check expr="getComputedStyle(document.querySelector(&quot;.card&quot;)).paddingTop === &quot;0px&quot; &amp;&amp; getComputedStyle(document.querySelector(&quot;.card&quot;)).borderTopStyle === &quot;none&quot; ? &quot;padding&quot; : &quot;?&quot;"><style>.card {
+  color: #1e293b;
+  border: 1px solid #cbd5e1
+  padding: 16px;
+  margin: 0 auto;
+}</style><div class="card">x</div></check>
+          </task>
+        </div>
+      </section>

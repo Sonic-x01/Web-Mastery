@@ -6,7 +6,7 @@ Every lesson serves both: developer practice ("👨‍💻" callouts `.callout.d
 
 ## Status
 - [x] Part 1 · HTML — done 2026-11-21: 00 roadmap, 01–17 lessons (17 = developer workflow), 18 projects (9 + capstone), cheat sheet, sources
-- [ ] Part 2 · CSS
+- [x] Part 2 · CSS — done 2026-11-21: lessons 19–31 (13 lessons), 32 projects (6 + graded capstone), CSS cheat cards, CSS sources
 - [ ] Part 3 · JavaScript (core + DOM/browser APIs + Node basics + reading malicious JS)
 - [ ] Part 4 · Web Security (browser security model, XSS deep, CSRF/clickjacking, postMessage, DOM clobbering, prototype pollution, HTML smuggling & phishing kits, defense & reporting, final CTF projects)
 
@@ -34,10 +34,31 @@ Every lesson serves both: developer practice ("👨‍💻" callouts `.callout.d
 | 17-projects-html | p-html | Part 1 projects (shown as 18) + graded capstone |
 | 99-end | cheat, sources | searchable cheat sheet (grows each part), sources, roadmap |
 
+## Part 2 · CSS (files 20-…; displayed lesson numbers continue: 19–31, projects 32; data-pk="css", data-part="الجزء 2 · CSS")
+| file | id | topic | widgets |
+|---|---|---|---|
+| 20-css-basics | c19 | what CSS is, attach (inline/style/link), syntax, comments, DevTools Styles, how the browser applies CSS, CSP style-src | |
+| 21-css-selectors | c20 | type/class/id/universal, attribute selectors (all operators + i), combinators, pseudo-classes (state, structural, :not/:is/:where/:has, form states), pseudo-elements | selector tester |
+| 22-css-cascade | c21 | cascade order (origin, !important, @layer, specificity, order), specificity math, inheritance, initial/inherit/unset/revert | specificity calc |
+| 23-css-box | c22 | box model, box-sizing, margin collapse, display, overflow, sizing (min/max), outline | box visualizer |
+| 24-css-units-type | c23 | units (px/em/rem/%/vw/vh/dvh/ch), colors (hex/rgb/hsl/oklch/alpha/currentColor), fonts (@font-face, stacks, font-display, privacy), text, Arabic typography, logical properties | |
+| 25-css-visuals | c24 | backgrounds & gradients, borders/radius, shadows, object-fit, filters, url() = requests | |
+| 26-css-position | c25 | position (static/relative/absolute/fixed/sticky), inset, z-index & stacking contexts, opacity, pointer-events, clickjacking/UI redressing in depth | |
+| 27-css-flexbox | c26 | flex container/items, axes, justify/align, wrap, gap, grow/shrink/basis, order (a11y) | flex playground |
+| 28-css-grid | c27 | grid templates, fr, repeat/minmax/auto-fit, areas, placement, implicit grid, subgrid | grid playground |
+| 29-css-responsive | c28 | mobile-first, media queries (width, prefers-*, hover/pointer, print), clamp(), container queries, RTL with logical props | |
+| 30-css-motion | c29 | transforms, transitions, @keyframes, performance, prefers-reduced-motion; onanimationstart XSS vector | |
+| 31-css-modern | c30 | custom properties, calc, nesting, :has, @layer, @supports, @container, @property; architecture (BEM, utilities, resets), tooling (Sass/PostCSS) | |
+| 32-css-quality | c31 | a11y (WCAG contrast, :focus-visible, skip link, visually-hidden, forced-colors, target size), performance (render-blocking, fonts, coverage, content-visibility), print stylesheets, DevTools debugging, Stylelint/Baseline; CSS-hiding ≠ access control | contrast checker |
+| 33-css-projects | p-css | p10 profile styled, p11 pentest dashboard, p12 mini design system, p13 animated fast landing, p14 a11y audit, p15 recon from CSS files + graded capstone (findings board) | |
+Note: a dedicated CSS-injection lesson was planned but dropped (generation was stopped by a safety filter); earlier lessons only mention the idea briefly. Don't re-add it.
+Labs use `live` tests with getComputedStyle inside the sandbox.
+
 ## Engine (assets/)
 - `core.js` — highlighters (html/css/js/http), sha256, DOM serializer + tree renderer, `WM.Preview` (sandboxed iframe + hook: console, alert, nav, form-submit → HTTP request preview, meta-refresh, live tree, live eval, storage/cookie shims, analysis-mode sink hooks + no-network CSP), `WM.Editor` (highlight overlay textarea).
 - `app.js` — state (localStorage `webMastery.v1`), theme, nav, progress, quizzes, examples, playground overlay, html-labs, analysis tasks, XSS range, projects, cheat search, self-test (`?selftest`).
 - `widgets.js` — url inspector, encoder chain, tokenizer stepper, parser playground, scene stepper.
+- `csswidgets.js` — specificity calculator (`WM.specificity`), selector tester, box model, flex & grid playgrounds, contrast checker (`WM.contrastRatio`); self-test has unit tests for both.
 - `effects.js` — hero live-typing editor + preview, tag rain, reading size, back-to-top.
 
 ## Verification

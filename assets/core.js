@@ -249,14 +249,17 @@
         return '<div class="dt-root"><div class="dt-l dt-k">' + (n.t === 9 ? "#document" : "#document-fragment") + "</div>" + kids(n, depth) + "</div>";
       }
       var badge = n.ns ? ' <span class="dt-ns">' + n.ns + "</span>" : "";
-      var open = '<span class="dt-tag">&lt;' + esc(n.n) + "</span>" + attrs(n.a) + '<span class="dt-tag">&gt;</span>' + badge;
+      // the selector tester marks matched elements with data-wm-hit (hidden from the listing)
+      var hit = n.a.some(function (p) { return p[0] === "data-wm-hit"; });
+      var shownAttrs = n.a.filter(function (p) { return p[0] !== "data-wm-hit"; });
+      var open = (hit ? '<span class="dt-hitmark">◀</span>' : "") + '<span class="dt-tag">&lt;' + esc(n.n) + "</span>" + attrs(shownAttrs) + '<span class="dt-tag">&gt;</span>' + badge;
       var hasKids = n.c && n.c.some(function (k) { return !(hideWS && k.t === 3 && /^\s*$/.test(k.v)); });
       if (!hasKids && !n.frag) {
         var close = VOID.has(n.n) && !n.ns ? "" : '<span class="dt-tag">&lt;/' + esc(n.n) + "&gt;</span>";
-        return line("dt-el", open + close);
+        return line("dt-el" + (hit ? " dt-hit" : ""), open + close);
       }
       var body = n.frag ? '<div class="dt-kids"><div class="dt-l dt-k">#document-fragment <small>(template.content)</small></div>' + kids(n, depth + 1) + "</div>" : kids(n, depth);
-      return '<details class="dt-el"' + (depth < (opts.openDepth || 8) ? " open" : "") + "><summary>" + open + "</summary>" + body + '<div class="dt-l dt-end"><span class="dt-tag">&lt;/' + esc(n.n) + "&gt;</span></div></details>";
+      return '<details class="dt-el' + (hit ? " dt-hit" : "") + '"' + (depth < (opts.openDepth || 8) ? " open" : "") + "><summary>" + open + "</summary>" + body + '<div class="dt-l dt-end"><span class="dt-tag">&lt;/' + esc(n.n) + "&gt;</span></div></details>";
     }
     function kids(n, depth) {
       return '<div class="dt-kids">' + (n.c || []).map(function (k) { return node(k, depth + 1); }).join("") + (n.more ? '<div class="dt-l dt-k">… (اتقطع: عدد nodes كبير)</div>' : "") + "</div>";

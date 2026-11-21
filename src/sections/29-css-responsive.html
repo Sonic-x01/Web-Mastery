@@ -1,0 +1,224 @@
+      <section class="section" id="c28" data-part="الجزء 2 · CSS" data-pk="css" data-nav="الـ Responsive Design" data-icon="📱" data-keywords="responsive mobile first media query min-width max-width range syntax breakpoints prefers-color-scheme dark mode prefers-reduced-motion hover pointer print clamp min max fluid typography container queries container-type img max-width color-scheme fingerprinting css only">
+        <div class="section-head">
+          <span class="section-index">28</span>
+          <div>
+            <p class="eyebrow">CSS · الدرس 28</p>
+            <h2>الـ Responsive Design: صفحة واحدة لكل الشاشات</h2>
+            <p class="lede">أكتر من نص زيارات الويب من الموبايل. الموقع الاحترافي بيتظبط لوحده من شاشة 360px لشاشة 4K، وبيحترم تفضيلات المستخدم (dark mode، تقليل الحركة). في الدرس ده: mobile-first، الـ media queries، الـ container queries، والأحجام «السايلة». وكمان: إزاي نفس الـ media queries دي ممكن تبصم المستخدم (fingerprinting) من غير ولا سطر JavaScript.</p>
+          </div>
+        </div>
+
+        <h3 class="sub">Mobile-first</h3>
+        <p>اكتب الـ CSS الأساسي للموبايل (عمود واحد، عناصر بعرض كامل)، وبعدين <b>زوّد</b> تعديلات للشاشات الأكبر بـ <code>min-width</code>. ده بيطلع CSS أبسط، والموبايل (الأضعف) بيحمّل أقل. وابدأ دايمًا بـ <code>&lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;</code> (الدرس 10).</p>
+        <code-block lang="css" file="responsive.css">
+          /* base = phones */
+          .cards { display: grid; grid-template-columns: 1fr; gap: 12px; }
+          img { max-width: 100%; height: auto; }          /* images never overflow */
+
+          /* tablets and up */
+          @media (min-width: 600px) { .cards { grid-template-columns: repeat(2, 1fr); } }
+          /* desktops — modern range syntax */
+          @media (width >= 1024px) { .cards { grid-template-columns: repeat(4, 1fr); } }
+        </code-block>
+        <p>الـ <b>breakpoints</b> تتحدد حسب <b>المحتوى</b> (امتى التصميم بيبدأ يبوظ؟) مش حسب أجهزة معينة. جرّب في DevTools: <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd> (Device Mode) وصغّر وكبّر.</p>
+
+        <h3 class="sub">أنواع الـ media queries</h3>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>الـ query</th><th>بيتحقق لما</th></tr></thead>
+          <tbody>
+            <tr><td><code>(min-width: 600px)</code> / <code>(width &gt;= 600px)</code></td><td>عرض الـ viewport 600 أو أكتر</td></tr>
+            <tr><td><code>(prefers-color-scheme: dark)</code></td><td>المستخدم مفعّل الوضع الداكن في نظامه</td></tr>
+            <tr><td><code>(prefers-reduced-motion: reduce)</code></td><td>المستخدم طالب حركة أقل (دوخة، صرع…) — لازم تحترمه</td></tr>
+            <tr><td><code>(hover: hover) and (pointer: fine)</code></td><td>ماوس حقيقي (مش touch)</td></tr>
+            <tr><td><code>print</code></td><td>وقت الطباعة / حفظ PDF</td></tr>
+            <tr><td><code>(orientation: landscape)</code></td><td>الشاشة بالعرض</td></tr>
+          </tbody>
+        </table></div>
+        <html-example file="dark-mode.html" auto>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <title>Dark mode</title>
+            <style>
+              :root { color-scheme: light dark; --bg: #ffffff; --fg: #0f172a; --accent: #c2410c; }
+              @media (prefers-color-scheme: dark) { :root { --bg: #0b1322; --fg: #e2e8f0; --accent: #ff9a6c; } }
+              body { background: var(--bg); color: var(--fg); font-family: system-ui, sans-serif; padding: 10px 14px; }
+              a { color: var(--accent); }
+              @media (prefers-reduced-motion: no-preference) { a { transition: color .3s; } }
+            </style>
+          </head>
+          <body>
+            <h3>Follows your OS theme</h3>
+            <p>Switch your system to dark mode and reload. <a href="#x">A link</a></p>
+            <script>console.log("prefers dark:", matchMedia("(prefers-color-scheme: dark)").matches, "| width:", innerWidth + "px");</script>
+          </body>
+          </html>
+        </html-example>
+
+        <p>الـ <code>--bg</code> و<code>var(--bg)</code> اسمها <b>custom properties</b> (متغيرات CSS): بتعرّف الألوان مرة، وتغيّر قيمها جوه media query واحدة فالصفحة كلها تتقلب dark (تفاصيلها في الدرس 30). و<code>color-scheme: light dark</code> بيقول للمتصفح يلوّن الـ form controls والـ scrollbars بما يناسب الوضع.</p>
+
+        <h3 class="sub">أحجام سايلة: clamp وmin وmax</h3>
+        <p><code>clamp(MIN, PREFERRED, MAX)</code> = القيمة المفضّلة، بس مش أقل من MIN ولا أكتر من MAX. أشهر استخدام: عنوان بيكبر مع الشاشة بحدود: <code>font-size: clamp(1.5rem, 4vw + 0.5rem, 3rem)</code>. وكمان <code>width: min(90%, 700px)</code> = سطر واحد بدل max-width + width.</p>
+
+        <h3 class="sub">Container queries: الـ component يظبط نفسه</h3>
+        <p>الـ media query بتسأل عن عرض <b>الشاشة</b>، بس الكارت نفسه ممكن يبقى في sidebar ضيق على شاشة كبيرة. الـ <b>container queries</b> بتسأل عن عرض <b>الأب</b>:</p>
+        <html-example file="container-queries.html" auto max="380">
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <title>Container queries</title>
+            <style>
+              body { font-family: system-ui, sans-serif; display: grid; grid-template-columns: 180px 1fr; gap: 10px; }
+              .slot { container-type: inline-size; }
+              .card { display: grid; gap: 8px; background: #f1f5f9; border-radius: 10px; padding: 10px; }
+              .card .thumb { height: 50px; border-radius: 8px; background: linear-gradient(135deg,#ff7a45,#b48cff); }
+              @container (min-width: 300px) {
+                .card { grid-template-columns: 90px 1fr; align-items: center; }
+              }
+            </style>
+          </head>
+          <body>
+            <div class="slot"><div class="card"><div class="thumb"></div><div>Narrow slot → stacked</div></div></div>
+            <div class="slot"><div class="card"><div class="thumb"></div><div>Wide slot → side by side (same CSS!)</div></div></div>
+          </body>
+          </html>
+        </html-example>
+
+        <h3 class="sub">🎯 الـ media queries كأداة tracking</h3>
+        <code-block lang="css" file="css-fingerprint.css">
+          /* no JavaScript needed — works even where scripts are blocked (some mail clients) */
+          @media (prefers-color-scheme: dark)        { body { background-image: url("https://t.example/fp?dark=1"); } }
+          @media (max-width: 480px)                  { html { background-image: url("https://t.example/fp?phone=1"); } }
+          @media (pointer: coarse)                   { main { background-image: url("https://t.example/fp?touch=1"); } }
+          @media (min-resolution: 2dppx)             { header { background-image: url("https://t.example/fp?retina=1"); } }
+        </code-block>
+        <p>كل query بتتحقق = request بيقول للسيرفر معلومة عن جهازك. ده نوع من <b>CSS fingerprinting</b>. ومن الناحية التانية، صفحات الـ phishing الحديثة «mobile-first» برضه: بتبان native جدًا على الموبايل (اللي فيه شريط العنوان صغير ومش واضح)، وبعضها بيعرض محتوى بريء للـ desktop/الـ scanners.</p>
+
+        <div class="exercises">
+          <div class="exercises-head"><h3><span class="bulb">✏️</span> تمارين الدرس 28</h3></div>
+          <quiz id="c28-q1" answer="1">
+            <q>«Mobile-first» معناها إيه في الكود؟</q>
+            <o>تعمل موقعين منفصلين</o>
+            <o>الـ CSS الأساسي للشاشات الصغيرة، والتعديلات للأكبر جوه `@media (min-width: …)`</o>
+            <o>تستخدم `max-width` في كل الـ queries</o>
+            <o>تمنع الموقع على الـ desktop</o>
+            <good>البداية من الأبسط والتوسع للأكبر = CSS أقل وأوضح.</good>
+            <bad>Mobile-first = الأساس للموبايل، والـ media queries بـ min-width بتضيف للشاشات الأكبر.</bad>
+          </quiz>
+          <quiz id="c28-q2" answer="3">
+            <q>`font-size: clamp(16px, 5vw, 40px)` على شاشة عرضها 1000px. الحجم؟</q>
+            <o>50px</o>
+            <o>16px</o>
+            <o>5px</o>
+            <o>40px</o>
+            <good>5vw = 50px، بس الحد الأقصى 40px.</good>
+            <bad>5% من 1000 = 50، و`clamp` بيقصها عند الـ MAX = 40.</bad>
+          </quiz>
+          <quiz id="c28-q3" answer="0">
+            <q>كارت بيتحط في sidebar (ضيق) وفي المحتوى الرئيسي (واسع) في نفس الصفحة. عايز شكله يتغير حسب المكان. تستخدم؟</q>
+            <o>Container queries (`container-type` على الأب + `@container`)</o>
+            <o>Media queries</o>
+            <o>JavaScript</o>
+            <o>`!important`</o>
+            <good>الـ media query مبتعرفش غير عرض الشاشة. الـ container query بتعرف عرض المكان الفعلي.</good>
+            <bad>المشكلة إن عرض الشاشة واحد في الحالتين — محتاج تسأل عن عرض الأب: container queries.</bad>
+          </quiz>
+          <quiz id="c28-q4" answer="2">
+            <q>إيميل فيه CSS: `@media (prefers-color-scheme: dark) { body { background: url(https://t.example/?d=1) } }`. لما يتفتح على جهاز dark mode وبرنامج الإيميل بيعرض الصور:</q>
+            <o>مش هيحصل حاجة لأن مفيش JavaScript</o>
+            <o>الإيميل هيتقفل</o>
+            <o>request بيروح لـ t.example يقول إن الجهاز dark mode — fingerprinting من غير JS</o>
+            <o>هيتعرض أبيض</o>
+            <good>الـ CSS بيطلق requests حسب حالة الجهاز. عشان كده برامج الإيميل بتعمل proxy للصور أو بتحجبها.</good>
+            <bad>الـ CSS لوحده يقدر يطلب URLs حسب الشروط — من غير JavaScript.</bad>
+          </quiz>
+
+          <html-lab id="c28-lab1" title="Cards: عمود في الموبايل، عمودين من 600px" level="1">
+            <desc><ul><li>الأساس (برا أي media query): <code>.cards</code> grid بعمود واحد و<code>gap: 12px</code>.</li>
+            <li>من <code>600px</code> وطالع: عمودين متساويين — بـ media query <b>min-width</b> (mobile-first).</li></ul>
+            <p>جرّب في المعمل الحر وغيّر عرض الشاشة (أو DevTools).</p></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <title>Cards</title>
+                <style>
+                  .card { background: #ede9fe; border-radius: 10px; padding: 12px; font-family: system-ui; }
+                </style>
+              </head>
+              <body>
+                <div class="cards"><div class="card">Recon</div><div class="card">Testing</div><div class="card">Report</div><div class="card">Retest</div></div>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <title>Cards</title>
+                <style>
+                  .cards { display: grid; grid-template-columns: 1fr; gap: 12px; }
+                  @media (min-width: 600px) { .cards { grid-template-columns: repeat(2, 1fr); } }
+                  .card { background: #ede9fe; border-radius: 10px; padding: 12px; font-family: system-ui; }
+                </style>
+              </head>
+              <body>
+                <div class="cards"><div class="card">Recon</div><div class="card">Testing</div><div class="card">Report</div><div class="card">Retest</div></div>
+              </body>
+              </html>
+            </solution>
+            <test label="عدد الأعمدة صح للعرض الحالي (1 تحت 600، 2 من 600)" live>(() => { const s = getComputedStyle(document.querySelector(".cards")); const n = s.gridTemplateColumns.split(" ").length; return s.display === "grid" && s.columnGap === "12px" && (innerWidth >= 600 ? n === 2 : n === 1); })()</test>
+            <test label="فيه media query بـ min-width: 600px">/@media[^{]*(min-width\s*:\s*600px|width\s*>=\s*600px)/.test(S)</test>
+            <test label="الأساس (برا الـ media) عمود واحد" live>(() => { const r = [...document.styleSheets[0].cssRules].find(x => x.selectorText === ".cards"); return !!r && r.style.display === "grid" && (r.style.gridTemplateColumns === "1fr" || r.style.gridTemplateColumns === ""); })()</test>
+          </html-lab>
+
+          <html-lab id="c28-lab2" title="عنوان سايل بـ clamp" level="2">
+            <desc><p>الـ <code>h1</code>: <code>font-size: clamp(1.5rem, 4vw, 3rem)</code> — يعني بين 24px و48px ومتناسب مع الشاشة.</p></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Hero</title>
+                <style>
+                  h1 { font-family: system-ui; font-size: 40px; }
+                </style>
+              </head>
+              <body><h1>Find exposed secrets</h1></body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Hero</title>
+                <style>
+                  h1 { font-family: system-ui; font-size: clamp(1.5rem, 4vw, 3rem); }
+                </style>
+              </head>
+              <body><h1>Find exposed secrets</h1></body>
+              </html>
+            </solution>
+            <test label="استخدمت clamp(1.5rem, 4vw, 3rem)">/clamp\(\s*1\.5rem\s*,\s*4vw\s*,\s*3rem\s*\)/.test(S)</test>
+            <test label="الحجم = 4vw محصور بين 24 و48" live>Math.abs(parseFloat(getComputedStyle(document.querySelector("h1")).fontSize) - Math.min(48, Math.max(24, innerWidth * 0.04))) < 0.6</test>
+          </html-lab>
+
+          <task id="c28-t1" title="العرض النهائي" level="1" answer="250" norm="int">
+            <desc><p>الـ container عرضه <code>500px</code>. عرض الـ <code>.box</code> بالـ px؟</p></desc>
+            <listing lang="css" file="box.css">
+              .container { width: 500px; }
+              .box { width: clamp(200px, 50%, 300px); }
+            </listing>
+            <explain>50% من 500 = 250، وده بين 200 و300 ⇒ <b>250</b>.</explain>
+            <check expr="Math.round(document.querySelector('.box').getBoundingClientRect().width)"><style>.container { width: 500px; } .box { width: clamp(200px, 50%, 300px); height: 5px; }</style><div class="container"><div class="box"></div></div></check>
+          </task>
+        </div>
+      </section>

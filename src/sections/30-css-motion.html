@@ -1,0 +1,291 @@
+      <section class="section" id="c29" data-part="الجزء 2 · CSS" data-pk="css" data-nav="الحركة: transform وanimation" data-icon="🎞️" data-keywords="transform translate rotate scale skew transform-origin transition timing function ease cubic-bezier steps keyframes animation fill-mode iteration direction performance layout paint composite will-change reduced motion onanimationstart onanimationend ontransitionend xss filter bypass">
+        <div class="section-head">
+          <span class="section-index">29</span>
+          <div>
+            <p class="eyebrow">CSS · الدرس 29</p>
+            <h2>الحركة: transform وtransition وanimation</h2>
+            <p class="lede">الحركة الصغيرة الصح بتخلّي الواجهة «حيّة» وبتفهّم المستخدم إيه اللي حصل (زرار اتضغط، قايمة فتحت). في الدرس ده هنحرّك العناصر من غير ما نبوّظ الـ layout، ونفهم ليه بعض الخصائص بتهنّج الصفحة وبعضها ناعم على الـ GPU. وفي الآخر: إزاي events الأنيميشن بقت vector مشهور للـ XSS بيعدّي من فلاتر كتير.</p>
+          </div>
+        </div>
+
+        <h3 class="sub">transform: حرّك من غير ما تأثر على الجيران</h3>
+        <p><code>transform</code> بيغيّر <b>شكل رسم</b> العنصر بس — مكانه في الـ layout زي ما هو، فالعناصر اللي جنبه <b>مش بتتحرك</b>.</p>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>الدالة</th><th>بتعمل</th></tr></thead>
+          <tbody>
+            <tr><td><code>translate(20px, -10px)</code></td><td>تحريك (يمين 20 وفوق 10). <code>translate(-50%, -50%)</code> = نسبة من حجم العنصر نفسه</td></tr>
+            <tr><td><code>rotate(45deg)</code></td><td>لف مع عقارب الساعة (<code>turn</code> كمان: <code>0.5turn</code> = 180°)</td></tr>
+            <tr><td><code>scale(1.2)</code> / <code>scale(2, 1)</code></td><td>تكبير/تصغير (من غير ما الـ layout يتغير)</td></tr>
+            <tr><td><code>skew(10deg)</code></td><td>ميل</td></tr>
+          </tbody>
+        </table></div>
+        <p>الـ <code>transform-origin</code> (الافتراضي <code>center</code>) هو النقطة اللي اللف والتكبير بيحصلوا حواليها. و<b>الترتيب بيفرق</b>: <code>translateX(100px) rotate(90deg)</code> غير <code>rotate(90deg) translateX(100px)</code>، لأن كل دالة بتشتغل في الإحداثيات اللي سابتها اللي قبلها (في التانية الـ X نفسه لفّ فالعنصر هينزل لتحت). والحديث: الخصائص المنفصلة <code>translate: 10px 0; rotate: 15deg; scale: 1.1;</code>.</p>
+
+        <h3 class="sub">transition: من حالة لحالة</h3>
+        <code-block lang="css" file="button.css">
+          .btn {
+            background: #2563eb;
+            transition: transform .2s ease-out, background-color .2s;   /* what · how long · curve */
+          }
+          .btn:hover        { transform: translateY(-3px); background: #1d4ed8; }
+          .btn:active       { transform: translateY(0) scale(.97); }
+          .btn:focus-visible { outline: 3px solid #93c5fd; outline-offset: 2px; }
+        </code-block>
+        <p>الشكل الكامل: <code>transition: property duration timing-function delay</code>. ابعد عن <code>transition: all</code> — بيحرّك حاجات مش قاصدها وبيبطّأ. ومش كل خاصية بتتحرّك: <code>display</code> مثلًا «discrete» (يا ده يا ده)، عشان كده الإظهار الناعم بيتعمل بـ <code>opacity</code> + <code>visibility</code>.</p>
+
+        <h3 class="sub">منحنيات التوقيت (timing functions)</h3>
+        <html-example file="timing.html" auto max="300">
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <title>Timing functions</title>
+            <style>
+              body { font: 13px system-ui, sans-serif; margin: 10px; }
+              .row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+              .row code { width: 170px; flex: none; }
+              .track { flex: 1; height: 26px; background: #f1f5f9; border-radius: 13px; }
+              .dot { width: 26px; height: 26px; border-radius: 50%; background: #ff7a45; animation: slide 2.4s infinite alternate; }
+              @keyframes slide { to { margin-left: calc(100% - 26px); } }
+            </style>
+          </head>
+          <body>
+            <div class="row"><code>linear</code><div class="track"><div class="dot" style="animation-timing-function: linear"></div></div></div>
+            <div class="row"><code>ease (default)</code><div class="track"><div class="dot" style="animation-timing-function: ease"></div></div></div>
+            <div class="row"><code>ease-in-out</code><div class="track"><div class="dot" style="animation-timing-function: ease-in-out"></div></div></div>
+            <div class="row"><code>cubic-bezier(.68,-.6,.32,1.6)</code><div class="track"><div class="dot" style="animation-timing-function: cubic-bezier(.68,-.6,.32,1.6)"></div></div></div>
+            <div class="row"><code>steps(5)</code><div class="track"><div class="dot" style="animation-timing-function: steps(5)"></div></div></div>
+          </body>
+          </html>
+        </html-example>
+        <p>(المثال ده بيحرّك <code>margin-left</code> عشان يبقى بسيط في العرض — تحت هتعرف ليه ده <b>مش</b> الأفضل في الحقيقة.)</p>
+
+        <h3 class="sub">@keyframes وanimation</h3>
+        <code-block lang="css" file="spinner.css">
+          @keyframes spin { to { transform: rotate(360deg); } }          /* from = current style */
+          @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50%      { opacity: .4; }
+          }
+          .spinner { animation: spin 1s linear infinite; }
+          /* name | duration | timing | delay | iteration-count | direction | fill-mode */
+          .toast   { animation: pulse .6s ease-in 0.5s 3 alternate both; }
+        </code-block>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>الخاصية</th><th>القيم المهمة</th></tr></thead>
+          <tbody>
+            <tr><td><code>animation-iteration-count</code></td><td><code>3</code>، <code>infinite</code></td></tr>
+            <tr><td><code>animation-direction</code></td><td><code>normal</code>، <code>reverse</code>، <code>alternate</code> (رايح جاي)</td></tr>
+            <tr><td><code>animation-fill-mode</code></td><td><code>forwards</code> = يفضل على آخر frame بعد ما يخلص. <code>backwards</code> = ياخد أول frame أثناء الـ delay. <code>both</code></td></tr>
+            <tr><td><code>animation-play-state</code></td><td><code>paused</code> / <code>running</code></td></tr>
+          </tbody>
+        </table></div>
+        <p>من غير <code>forwards</code>، أول ما الأنيميشن يخلص العنصر بيرجع لـ style بتاعه الأصلي فجأة — غلطة مشهورة.</p>
+
+        <h3 class="sub">الأداء: Layout → Paint → Composite</h3>
+        <scene id="sc-render" title="إيه اللي بيتعاد لما خاصية تتغير؟">
+          <svg viewBox="0 0 1000 250" role="img" aria-label="مراحل الرسم في المتصفح">
+            <rect x="20" y="40" width="215" height="84" rx="14" class="d-box" data-s="1-4"/>
+            <text x="127" y="76" text-anchor="middle" class="d-tb">Style</text>
+            <text x="127" y="100" text-anchor="middle" class="d-tx">which rules match?</text>
+            <rect x="275" y="40" width="215" height="84" rx="14" class="d-box2" data-s="1-2"/>
+            <text x="382" y="76" text-anchor="middle" class="d-tb">Layout</text>
+            <text x="382" y="100" text-anchor="middle" class="d-tx">sizes + positions (expensive)</text>
+            <rect x="530" y="40" width="215" height="84" rx="14" class="d-box3" data-s="1-3"/>
+            <text x="637" y="76" text-anchor="middle" class="d-tb">Paint</text>
+            <text x="637" y="100" text-anchor="middle" class="d-tx">pixels: colors, text, shadows</text>
+            <rect x="785" y="40" width="195" height="84" rx="14" class="d-box4" data-s="1-4"/>
+            <text x="882" y="76" text-anchor="middle" class="d-tb">Composite</text>
+            <text x="882" y="100" text-anchor="middle" class="d-tx">GPU stacks layers</text>
+            <path class="d-ar-acc d-flow" d="M237,82 L271,82" data-s="1-2"/>
+            <path class="d-ar-acc d-flow" d="M492,82 L526,82" data-s="1-3"/>
+            <path class="d-ar-acc d-flow" d="M747,82 L781,82" data-s="1-4"/>
+            <g data-from="2" data-to="2"><text x="500" y="170" text-anchor="middle" class="d-ts d-red">width · height · top · left · margin · padding · font-size</text><text x="500" y="198" text-anchor="middle" class="d-ts ar">كل الخطوات بتتعاد — وكمان للعناصر اللي حواليه</text></g>
+            <g data-from="3" data-to="3"><text x="500" y="170" text-anchor="middle" class="d-ts d-amb">color · background · box-shadow · border-radius</text><text x="500" y="198" text-anchor="middle" class="d-ts ar">من غير layout، بس لسه فيه paint</text></g>
+            <g data-from="4" data-to="4"><text x="500" y="170" text-anchor="middle" class="d-ts d-grn">transform · opacity</text><text x="500" y="198" text-anchor="middle" class="d-ts ar">composite بس — على الـ GPU، ناعم 60fps</text></g>
+          </svg>
+          <step>كل frame المتصفح ممكن يعدّي على 4 مراحل: يحسب الـ <b>Style</b>، يعمل <b>Layout</b> (مقاسات وأماكن)، <b>Paint</b> (يرسم البكسلات)، و<b>Composite</b> (يركّب الطبقات على الـ GPU).</step>
+          <step>لو حرّكت <code>width</code> أو <code>left</code> أو <code>margin</code>: كل frame فيه layout جديد — وغالبًا للصفحة كلها. ده اللي بيعمل «jank» (تقطيع) خصوصًا على الموبايل.</step>
+          <step>الألوان والظلال: مفيش layout، بس فيه paint كل frame. مقبول للحاجات الصغيرة.</step>
+          <step><code>transform</code> و<code>opacity</code>: الـ composite بس. عشان كده القاعدة الذهبية: <b>حرّك بـ transform وopacity</b>. (<code>will-change: transform</code> بيجهّز طبقة مقدمًا — استخدمه بحذر لأنه بياكل memory.) شوف بنفسك: DevTools ← Performance، أو Rendering ← Paint flashing.</step>
+        </scene>
+
+        <h3 class="sub">احترم prefers-reduced-motion</h3>
+        <p>ناس كتير عندهم دوخة أو صداع أو حساسية من الحركة. لما المستخدم يطلب كده من نظامه، قلّل الحركة لأقل حاجة:</p>
+        <code-block lang="css" file="reduced-motion.css">
+          @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+              animation-duration: .01ms !important;
+              animation-iteration-count: 1 !important;
+              transition-duration: .01ms !important;
+              scroll-behavior: auto !important;
+            }
+          }
+        </code-block>
+        <div class="callout dev reveal"><span class="ci">🧑‍💻</span><div><strong>Developer</strong><p>الحركة لازم يكون ليها سبب: feedback (زرار اتضغط)، علاقة (القايمة طلعت من الزرار ده)، أو انتباه لحاجة مهمة. مدة الـ UI العادية <b>150–300ms</b>. ولو محتاج تحكم من JS: <code>element.animate(keyframes, options)</code> (الـ Web Animations API) و<code>element.getAnimations()</code> — هنشوفهم في جزء الـ JavaScript.</p></div></div>
+
+        <h3 class="sub">🎯 Events الأنيميشن: XSS من غير أي click</h3>
+        <p>كل CSS animation بتطلق events على العنصر: <code>animationstart</code>، <code>animationiteration</code>، <code>animationend</code>. والـ transitions: <code>transitionrun</code>، <code>transitionstart</code>، <code>transitionend</code>. وليها attributes: <code>onanimationstart</code>، <code>onanimationend</code>، <code>ontransitionend</code>… — يعني <b>event handler بيشتغل لوحده</b> من غير تفاعل، زي <code>onerror</code> بالظبط.</p>
+        <html-example file="animation-event.html" auto>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <title>Animation events</title>
+            <style>@keyframes x { from { opacity: .99; } }</style>
+          </head>
+          <body>
+            <p>Nobody clicked anything, but the handler ran:</p>
+            <b style="animation: x 1ms" onanimationstart="console.log('fired:', event.type, event.animationName)" onanimationend="console.log('fired:', event.type)">payload element</b>
+          </body>
+          </html>
+        </html-example>
+        <div class="callout pt reveal"><span class="ci">🎯</span><div><strong>Pentester</strong><p>فلاتر كتير بتعمل blocklist لـ <code>onerror</code> و<code>onload</code> و<code>onclick</code> و<code>onmouseover</code> بس. payload زي ده بيعدّي:</p><p><code>&lt;b style="animation-name:x" onanimationstart="alert(document.domain)"&gt;</code></p><p>ولو مش قادر تحقن <code>&lt;style&gt;</code> عشان تعرّف <code>@keyframes</code>، <b>استخدم keyframes موجودة أصلًا في الموقع</b>: الـ frameworks بتعرّف أسماء معروفة (Bootstrap مثلًا: <code>spinner-border</code> و<code>progress-bar-stripes</code>). افتح DevTools ← Sources أو دوّر على <code>@keyframes</code> في ملفات الـ CSS. والحل الصح عند الـ developer: allowlist + output encoding + CSP — مش blocklist لأسماء events (القايمة أطول من أي blocklist).</p></div></div>
+        <div class="callout mal reveal"><span class="ci">🦠</span><div><strong>Malware / Phishing</strong><p>الأنيميشن بيُستخدم في الـ phishing والـ scareware: «progress bar» مزيف لـ «فحص فيروسات»، أو spinner بيوهم بإن الصفحة بتتحقق من حاجة. وفي الـ clickjacking (الدرس 11) ممكن عنصر يتحرك في اللحظة المناسبة تحت الماوس عشان يخطف الضغطة.</p></div></div>
+
+        <div class="exercises">
+          <div class="exercises-head"><h3><span class="bulb">✏️</span> تمارين الدرس 29</h3></div>
+          <quiz id="c29-q1" answer="2">
+            <q>عايز تحرّك كارت من الشمال لليمين بنعومة على الموبايل. أنهي خاصية؟</q>
+            <o>`left` (مع `position: relative`)</o>
+            <o>`margin-left`</o>
+            <o>`transform: translateX(…)`</o>
+            <o>`width`</o>
+            <good>`transform` مبيعملش layout ولا paint — composite بس على الـ GPU.</good>
+            <bad>`left` و`margin` و`width` بيعملوا layout كل frame. الناعم: `transform` (و`opacity`).</bad>
+          </quiz>
+          <quiz id="c29-q2" answer="1">
+            <q>أنيميشن fade-in بيخلص وفجأة العنصر يختفي تاني (يرجع لـ `opacity: 0` الأصلية). إيه الناقص؟</q>
+            <o>`animation-iteration-count: infinite`</o>
+            <o>`animation-fill-mode: forwards`</o>
+            <o>`animation-direction: reverse`</o>
+            <o>`transition: all`</o>
+            <good>`forwards` بيخلّي العنصر على قيم آخر keyframe بعد ما الأنيميشن يخلص.</good>
+            <bad>بعد نهاية الأنيميشن العنصر بيرجع لـ style بتاعه — إلا لو `animation-fill-mode: forwards`.</bad>
+          </quiz>
+          <quiz id="c29-q3" answer="0">
+            <q>عنصر عليه `transform: scale(2)`. العنصر اللي بعده في الصفحة:</q>
+            <o>مكانه مبيتغيرش — الـ transform مبيأثرش على الـ layout (ممكن يحصل تداخل)</o>
+            <o>بيتزق لتحت بمقدار حجم العنصر</o>
+            <o>بيصغر عشان يسيب مساحة</o>
+            <o>بيختفي</o>
+            <good>الـ transform رسم فوق الـ layout؛ المساحة المحجوزة زي ما هي.</good>
+            <bad>الـ layout بيتحسب كأن مفيش transform. الجيران مش بيتحركوا.</bad>
+          </quiz>
+          <quiz id="c29-q4" answer="3">
+            <q>فلتر بيمسح أي attribute من `onerror|onload|onclick|onmouseover|onfocus`. والصفحة فيها Bootstrap. أنهي payload هيشتغل من غير تفاعل؟</q>
+            <o>`<img src=x onerror=alert(1)>`</o>
+            <o>`<input autofocus onfocus=alert(1)>`</o>
+            <o>`<a onclick=alert(1)>x</a>`</o>
+            <o>`<i style="animation-name:spinner-border" onanimationstart=alert(1)>`</o>
+            <good>`onanimationstart` مش في الـ blocklist، والـ keyframes `spinner-border` موجودة أصلًا في Bootstrap.</good>
+            <bad>الباقيين متمنوعين. الـ animation events بتشتغل لوحدها — ومعاك keyframes جاهزة من الـ framework.</bad>
+          </quiz>
+          <quiz id="c29-q5" answer="1">
+            <q>`@media (prefers-reduced-motion: reduce)` بيتحقق إمتى؟</q>
+            <o>لما الجهاز بطيء</o>
+            <o>لما المستخدم يفعّل خيار تقليل الحركة في نظام التشغيل</o>
+            <o>لما البطارية قربت تخلص</o>
+            <o>دايمًا على الموبايل</o>
+            <good>ده تفضيل accessibility من المستخدم — لازم تحترمه.</good>
+            <bad>ده إعداد بيختاره المستخدم بنفسه (Settings ← Accessibility ← Reduce motion).</bad>
+          </quiz>
+
+          <html-lab id="c29-lab1" title="زرار بيرتفع بنعومة" level="1">
+            <desc><ul>
+              <li>على <code>.btn</code>: <code>transition: transform 0.2s ease-out</code>.</li>
+              <li>في <code>.btn:hover</code>: <code>transform: translateY(-3px)</code>.</li>
+              <li>متستخدمش <code>transition: all</code>.</li>
+            </ul></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Button</title>
+                <style>
+                  .btn { font: 600 15px system-ui; color: #fff; background: #2563eb; border: 0; border-radius: 10px; padding: 10px 18px; cursor: pointer; }
+                </style>
+              </head>
+              <body><button class="btn">Start scan</button></body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Button</title>
+                <style>
+                  .btn { font: 600 15px system-ui; color: #fff; background: #2563eb; border: 0; border-radius: 10px; padding: 10px 18px; cursor: pointer; transition: transform 0.2s ease-out; }
+                  .btn:hover { transform: translateY(-3px); }
+                </style>
+              </head>
+              <body><button class="btn">Start scan</button></body>
+              </html>
+            </solution>
+            <test label="الـ transition على transform لمدة 0.2s ease-out" live>(() => { const s = getComputedStyle(document.querySelector(".btn")); return s.transitionProperty.split(",").map(x => x.trim()).includes("transform") && s.transitionDuration.split(",")[0].trim() === "0.2s" && s.transitionTimingFunction.split(",")[0].trim() === "ease-out"; })()</test>
+            <test label="قاعدة .btn:hover فيها translateY(-3px)" live>[...document.styleSheets].flatMap(sh => [...sh.cssRules]).some(r => r.selectorText === ".btn:hover" && /translateY\(\s*-3px\s*\)/.test(r.style.transform))</test>
+            <test label="من غير transition: all">!/transition(-property)?\s*:\s*all\b/.test(S)</test>
+          </html-lab>
+
+          <html-lab id="c29-lab2" title="Spinner بيحترم reduced motion" level="2">
+            <desc><ul>
+              <li>اعمل <code>@keyframes spin</code> فيها <code>to { transform: rotate(360deg); }</code>.</li>
+              <li><code>.spinner</code>: <code>animation: spin 1s linear infinite</code>.</li>
+              <li>جوه <code>@media (prefers-reduced-motion: reduce)</code>: وقّف الأنيميشن على <code>.spinner</code> (<code>animation: none</code>).</li>
+            </ul></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Spinner</title>
+                <style>
+                  .spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top-color: #7c3aed; border-radius: 50%; }
+                </style>
+              </head>
+              <body><div class="spinner" role="status" aria-label="Loading"></div></body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Spinner</title>
+                <style>
+                  @keyframes spin { to { transform: rotate(360deg); } }
+                  .spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top-color: #7c3aed; border-radius: 50%; animation: spin 1s linear infinite; }
+                  @media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
+                </style>
+              </head>
+              <body><div class="spinner" role="status" aria-label="Loading"></div></body>
+              </html>
+            </solution>
+            <test label="@keyframes spin فيها rotate(360deg)" live>[...document.styleSheets].flatMap(sh => [...sh.cssRules]).some(r => r instanceof CSSKeyframesRule && r.name === "spin" && [...r.cssRules].some(k => /rotate\(\s*360deg\s*\)/.test(k.style.transform)))</test>
+            <test label=".spinner: spin 1s linear infinite (خارج الـ media)" live>(() => { const r = [...document.styleSheets].flatMap(sh => [...sh.cssRules]).find(x => x.selectorText === ".spinner"); return !!r && r.style.animationName === "spin" && r.style.animationDuration === "1s" && r.style.animationTimingFunction === "linear" && r.style.animationIterationCount === "infinite"; })()</test>
+            <test label="reduced motion بيوقّف الأنيميشن" live>[...document.styleSheets].flatMap(sh => [...sh.cssRules]).some(m => m instanceof CSSMediaRule && /prefers-reduced-motion:\s*reduce/.test(m.conditionText || m.media.mediaText) && [...m.cssRules].some(r => r.selectorText === ".spinner" && (r.style.animationName === "none" || r.style.animation === "none" || parseFloat(r.style.animationDuration) <= 0.01)))</test>
+          </html-lab>
+
+          <task id="c29-t1" title="offsetWidth مع transform" level="2" answer="140" norm="int" reject="280|240|120">
+            <desc><p>قيمة <code>document.querySelector(".box").offsetWidth</code> كام؟ (<code>offsetWidth</code> = عرض الـ layout: content + padding + border.)</p></desc>
+            <listing lang="css" file="box.css">
+              .box { width: 120px; padding: 10px; transform: scale(2); }
+            </listing>
+            <hint>الـ transform مش بيدخل في الـ layout. والـ box-sizing الافتراضي content-box.</hint>
+            <explain>120 + 10 + 10 = <b>140</b>. الـ <code>scale(2)</code> مش داخل في <code>offsetWidth</code> (لكن <code>getBoundingClientRect().width</code> = 280 لأنه بيقيس الشكل المرسوم).</explain>
+            <check expr="document.querySelector('.box').offsetWidth"><style>.box { width: 120px; padding: 10px; transform: scale(2); height: 5px; }</style><div class="box"></div></check>
+          </task>
+
+          <task id="c29-t2" title="الأنيميشن بيخلص إمتى؟" level="2" answer="2.5|2.5s" norm="text" reject="1.5|3|0.5">
+            <desc><p>الأنيميشن ده بيخلص نهائيًا بعد كام ثانية من تحميل الصفحة؟</p></desc>
+            <listing lang="css" file="toast.css">
+              .toast { animation: pulse 0.5s ease-in 1s 3 alternate; }
+            </listing>
+            <hint>الترتيب: name · duration · timing · delay · iteration-count · direction. أول رقم وقت = duration، والتاني = delay.</hint>
+            <explain>delay ثانية + 3 مرات × 0.5 = <b>2.5</b> ثانية. (الـ <code>alternate</code> بيغيّر الاتجاه بس مش المدة.)</explain>
+            <check expr="document.querySelector('.toast').getAnimations()[0].effect.getComputedTiming().endTime / 1000"><style>@keyframes pulse { to { opacity: .5; } } .toast { animation: pulse 0.5s ease-in 1s 3 alternate; height: 5px; }</style><div class="toast"></div></check>
+          </task>
+        </div>
+      </section>

@@ -1,0 +1,341 @@
+      <section class="section" id="c31" data-part="الجزء 2 · CSS" data-pk="css" data-nav="CSS احترافي: a11y وأداء وdebugging" data-icon="🧰" data-keywords="accessibility a11y wcag contrast ratio aa aaa focus focus-visible outline skip link visually hidden sr-only screen reader forced colors prefers-contrast target size reflow zoom print stylesheet break-inside attr href performance render blocking critical css font-display preload coverage content-visibility devtools debugging stylelint baseline caniuse client-side controls">
+        <div class="section-head">
+          <span class="section-index">31</span>
+          <div>
+            <p class="eyebrow">CSS · الدرس 31</p>
+            <h2>CSS احترافي: Accessibility، أداء، طباعة، وDebugging</h2>
+            <p class="lede">الفرق بين CSS «شغال» وCSS احترافي: إن كل الناس تقدر تستخدم الصفحة (لوحة مفاتيح، قارئ شاشة، نظر ضعيف)، وإنها تفتح بسرعة، وتتطبع كويس، وإنك تعرف تلاقي أي مشكلة في دقايق. وكـ pentester: هتفهم ليه «الزرار المستخبي بـ CSS» مش حماية.</p>
+          </div>
+        </div>
+
+        <h3 class="sub">التباين (contrast)</h3>
+        <p>الـ WCAG بتقيس التباين بنسبة من <code>1:1</code> (نفس اللون) لـ <code>21:1</code> (أسود على أبيض) محسوبة من «الإضاءة النسبية» للونين. الحد الأدنى (مستوى <b>AA</b>):</p>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>العنصر</th><th>AA</th><th>AAA</th></tr></thead>
+          <tbody>
+            <tr><td>نص عادي</td><td><code>4.5:1</code></td><td><code>7:1</code></td></tr>
+            <tr><td>نص كبير (24px+، أو 18.66px+ bold)</td><td><code>3:1</code></td><td><code>4.5:1</code></td></tr>
+            <tr><td>مكونات الواجهة (حدود الـ inputs، أيقونات، الـ focus ring)</td><td><code>3:1</code></td><td>—</td></tr>
+          </tbody>
+        </table></div>
+        <div class="widget" data-widget="contrast"></div>
+        <p>لاحظ: <code>#767676</code> على أبيض = 4.54 (بيعدّي)، و<code>#777777</code> = 4.48 (مش بيعدّي) — فرق مش باين للعين. عشان كده بتقيس، مش بتخمّن. DevTools بيوريك النسبة لما تدوس على أي لون في الـ Styles، وLighthouse بيفحص الصفحة كلها.</p>
+
+        <h3 class="sub">الـ focus: لوحة المفاتيح لازم تشوف هي فين</h3>
+        <code-block lang="css" file="focus.css">
+          /* ❌ never — keyboard users get lost */
+          a:focus, button:focus { outline: none; }
+
+          /* ✅ a clear ring for keyboard users; mouse clicks don't show it */
+          :focus-visible { outline: 3px solid #2563eb; outline-offset: 2px; }
+
+          /* sticky header? keep the focused element from hiding under it */
+          html { scroll-padding-top: 80px; }
+        </code-block>
+        <p>الـ <code>:focus-visible</code> بيتحقق لما المتصفح يقرر إن المستخدم محتاج يشوف الـ focus (لوحة مفاتيح غالبًا)، فالشكل بيفضل نضيف للماوس ومفيد للكيبورد. جرّب الصفحة دي نفسها بـ <kbd>Tab</kbd> و<kbd>Shift</kbd>+<kbd>Tab</kbd>.</p>
+        <p><b>Skip link</b>: أول لينك في الصفحة «Skip to content»، مستخبي لحد ما ياخد focus — بيوفّر على مستخدم الكيبورد إنه يعدّي على 30 لينك في الـ nav كل صفحة.</p>
+
+        <h3 class="sub">الإخفاء: من مين بالظبط؟</h3>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>الطريقة</th><th>بيتشاف؟</th><th>قارئ الشاشة؟</th><th>بياخد مساحة؟</th></tr></thead>
+          <tbody>
+            <tr><td><code>display: none</code> / <code>hidden</code></td><td>لا</td><td>لا</td><td>لا</td></tr>
+            <tr><td><code>visibility: hidden</code></td><td>لا</td><td>لا</td><td>أيوه</td></tr>
+            <tr><td><code>opacity: 0</code></td><td>لا</td><td><b>أيوه</b> (وبيتضغط!)</td><td>أيوه</td></tr>
+            <tr><td><code>.sr-only</code> (visually hidden)</td><td>لا</td><td><b>أيوه</b></td><td>لا</td></tr>
+            <tr><td><code>aria-hidden="true"</code></td><td>أيوه</td><td>لا</td><td>أيوه</td></tr>
+          </tbody>
+        </table></div>
+        <code-block lang="css" file="sr-only.css">
+          /* hidden visually, still read by screen readers (labels for icon buttons, extra context) */
+          .sr-only {
+            position: absolute;
+            width: 1px; height: 1px;
+            padding: 0; margin: -1px;
+            overflow: hidden;
+            clip-path: inset(50%);
+            white-space: nowrap;
+            border: 0;
+          }
+        </code-block>
+
+        <h3 class="sub">قواعد a11y تانية لازم تبقى عادة</h3>
+        <ul>
+          <li><b>متعتمدش على اللون لوحده</b>: الخطأ في form = لون أحمر <b>+</b> أيقونة <b>+</b> نص. حوالي 1 من كل 12 راجل عنده عمى ألوان.</li>
+          <li><b>الأحجام بالـ rem</b> عشان تحترم حجم الخط اللي المستخدم اختاره، والصفحة لازم تفضل مقروءة عند zoom 200% ومن غير scroll أفقي عند عرض 320px.</li>
+          <li><b>Target size</b>: أي حاجة بتتداس لا تقل عن 24×24px (والأحسن 44×44 على الموبايل).</li>
+          <li><code>@media (forced-colors: active)</code>: وضع High Contrast في Windows بيلغي ألوانك — الـ backgrounds بتختفي، فخلّي الحدود والـ outlines هي اللي بتوضّح الأزرار.</li>
+          <li><code>@media (prefers-contrast: more)</code> للي طالب تباين أعلى، و<code>prefers-reduced-motion</code> (الدرس 29).</li>
+        </ul>
+
+        <h3 class="sub">الأداء</h3>
+        <div class="grid-2">
+          <div class="card reveal"><h4>الـ CSS بيوقف الرسم</h4><p>أي <code>&lt;link rel="stylesheet"&gt;</code> في الـ head هو <b>render-blocking</b>: الصفحة مش بتترسم لحد ما يتحمّل. خلّيه صغير، وحط الـ «critical CSS» (اللي محتاجه أول شاشة) inline، وابعد عن <code>@import</code> جوه CSS (بيعمل requests ورا بعض).</p></div>
+          <div class="card reveal"><h4>الخطوط</h4><p><code>font-display: swap</code> = النص يظهر فورًا بخط احتياطي لحد ما الخط ينزل. و<code>&lt;link rel="preload" as="font" type="font/woff2" crossorigin&gt;</code> للخط الأساسي. استخدم <code>woff2</code> بس.</p></div>
+          <div class="card reveal"><h4>CSS مش مستخدم</h4><p>DevTools ← <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> ← «Coverage»: بيوريك نسبة الـ CSS اللي اتنفذت فعلًا. مكتبات كاملة بتتحمّل عشان 3 classes!</p></div>
+          <div class="card reveal"><h4>صفحات طويلة</h4><p><code>content-visibility: auto</code> على الأقسام البعيدة = المتصفح ميعملهاش layout ولا paint لحد ما تقرب من الشاشة (مع <code>contain-intrinsic-size</code> عشان الـ scrollbar).</p></div>
+        </div>
+
+        <h3 class="sub">الطباعة: تقارير شكلها محترم</h3>
+        <p>تقرير الـ pentest أو الفاتورة غالبًا هيتحفظ PDF من المتصفح (<kbd>Ctrl</kbd>+<kbd>P</kbd>). <code>@media print</code> بيخلّيه نضيف:</p>
+        <code-block lang="css" file="print.css">
+          @media print {
+            nav, .no-print, .chat-widget { display: none; }
+            body { color: #000; background: #fff; font-size: 11pt; }
+            a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 9pt; }   /* links stay readable on paper */
+            .finding, table, pre { break-inside: avoid; }                              /* don't split a finding across pages */
+            h2 { break-after: avoid; }
+          }
+          @page { margin: 18mm; }
+        </code-block>
+        <p>جرّبه في DevTools: Rendering ← «Emulate CSS media type: print».</p>
+
+        <h3 class="sub">Debugging الـ CSS زي المحترفين</h3>
+        <div class="steps">
+          <div class="step"><span class="n">1</span><div><h4>Styles pane</h4><p>declaration <b>متشطّب</b> = في قاعدة أقوى غلبته (الدرس 21). <b>مثلث أصفر</b> = اسم خاصية أو قيمة غلط (typo) فالمتصفح تجاهلها. ودوس على <code>:hov</code> عشان تجبر <code>:hover</code>/<code>:focus</code>.</p></div></div>
+          <div class="step"><span class="n">2</span><div><h4>Computed</h4><p>القيمة النهائية لكل خاصية، ودوس على السهم يوديك للقاعدة اللي كسبت بالظبط.</p></div></div>
+          <div class="step"><span class="n">3</span><div><h4>Layout overlays</h4><p>شارة <code>grid</code>/<code>flex</code> جنب العنصر في الـ Elements بتعرض الخطوط والـ gaps. و«عنصر بيعمل scroll أفقي؟» حط مؤقتًا <code>* { outline: 1px solid rgb(255 0 0 / .4); }</code> وهتلاقيه فورًا.</p></div></div>
+          <div class="step"><span class="n">4</span><div><h4>الدعم والجودة</h4><p>قبل ما تستخدم feature جديدة: MDN (جدول الـ compatibility) وcaniuse، وعلامة <b>Baseline</b> (Widely / Newly available). وفي المشروع: <b>Stylelint</b> بيمسك الأخطاء والتكرار، و<b>Prettier</b> بيوحّد التنسيق.</p></div></div>
+        </div>
+
+        <div class="callout pt reveal"><span class="ci">🎯</span><div><strong>Pentester: الإخفاء بـ CSS مش صلاحيات</strong><p>زرار «Delete user» عليه <code>display: none</code> للمستخدم العادي، أو form متقفل بـ <code>pointer-events: none</code> و<code>opacity: .5</code>، ده كله <b>شكل بس</b>. الـ request لسه ممكن يتبعت: اقرا الـ HTML/JS واعرف الـ endpoint، وابعته بنفسك من Burp بحساب مستخدم عادي. لو السيرفر نفّذه = <b>Broken Access Control</b> (رقم 1 في OWASP Top 10). والعكس كـ developer: كل صلاحية لازم تتحقق على السيرفر.</p></div></div>
+
+        <div class="exercises">
+          <div class="exercises-head"><h3><span class="bulb">✏️</span> تمارين الدرس 31</h3></div>
+          <quiz id="c31-q1" answer="2">
+            <q>نص عادي (16px) لونه `#777777` على أبيض، والنسبة 4.48:1. حسب WCAG AA:</q>
+            <o>بيعدّي، لأنه قريب من 4.5</o>
+            <o>بيعدّي، لأن النص الرمادي مسموح</o>
+            <o>مش بيعدّي — الحد 4.5 للنص العادي</o>
+            <o>بيعدّي لأن الحد 3</o>
+            <good>4.48 &lt; 4.5 = فشل. خليه `#767676` أو أغمق.</good>
+            <bad>الحد للنص العادي 4.5:1 بالظبط، و3:1 للنص الكبير بس. 4.48 فشل.</bad>
+          </quiz>
+          <quiz id="c31-q2" answer="0">
+            <q>الديزاينر بيقول «الـ outline الأزرق وحش لما بدوس بالماوس». الحل الاحترافي؟</q>
+            <o>`:focus-visible` لستايل الـ focus، فيظهر للكيبورد ومش للماوس غالبًا</o>
+            <o>`*:focus { outline: none }`</o>
+            <o>`outline: 0` على الزراير بس</o>
+            <o>`tabindex="-1"` على كل حاجة</o>
+            <good>`:focus-visible` بيحل الخلاف ده من غير ما تكسر الـ accessibility.</good>
+            <bad>شيل الـ outline = مستخدم الكيبورد مش عارف هو فين. استخدم `:focus-visible`.</bad>
+          </quiz>
+          <quiz id="c31-q3" answer="3">
+            <q>زرار أيقونة (سلة مهملات) من غير نص. عايز قارئ الشاشة يقول «Delete report» من غير ما النص يبان. أنهي؟</q>
+            <o>`<span style="display:none">Delete report</span>`</o>
+            <o>`<span style="visibility:hidden">Delete report</span>`</o>
+            <o>`<span aria-hidden="true">Delete report</span>`</o>
+            <o>`<span class="sr-only">Delete report</span>` (أو `aria-label` على الزرار)</o>
+            <good>`.sr-only` بيخفي بصريًا بس. و`aria-label="Delete report"` على الزرار حل تاني صح.</good>
+            <bad>`display:none` و`visibility:hidden` و`aria-hidden` كلهم بيخفوا عن قارئ الشاشة كمان.</bad>
+          </quiz>
+          <quiz id="c31-q4" answer="1">
+            <q>في DevTools، declaration ظاهر بخط في النص (متشطّب) من غير أي مثلث تحذير. معناه؟</q>
+            <o>الخاصية مكتوبة غلط</o>
+            <o>القاعدة دي اتطبقت بس في قاعدة تانية أقوى (cascade/specificity) غلبتها في نفس الخاصية</o>
+            <o>المتصفح مش بيدعم CSS</o>
+            <o>الملف متحمّلش</o>
+            <good>الشطب = overridden. والمثلث الأصفر = invalid. شوف الـ Computed عشان تعرف مين كسب.</good>
+            <bad>الشطب معناه «في حاجة غلبتك». الـ typo بيظهر بمثلث تحذير.</bad>
+          </quiz>
+          <quiz id="c31-q5" answer="2">
+            <q>عشان النص يظهر فورًا بخط احتياطي ومايفضلش مختفي لحد ما الـ web font ينزل:</q>
+            <o>`font-weight: swap`</o>
+            <o>`@import` للخط في أول الـ CSS</o>
+            <o>`font-display: swap` في الـ `@font-face`</o>
+            <o>`content-visibility: auto`</o>
+            <good>`swap` = اعرض فورًا بالـ fallback، وبدّل لما الخط يوصل.</good>
+            <bad>الخاصية المسؤولة `font-display` جوه `@font-face`، وقيمتها `swap`.</bad>
+          </quiz>
+          <quiz id="c31-q6" answer="0">
+            <q>كمستخدم عادي، لقيت في الـ HTML زرار «Export all users» عليه `class="admin-only"` و`.admin-only { display: none }`. الخطوة الصح؟</q>
+            <o>تعرف الـ endpoint من الكود وتبعت الـ request بحسابك العادي وتشوف السيرفر هيرفض ولا لأ</o>
+            <o>ولا حاجة، الزرار مستخبي يبقى محمي</o>
+            <o>تبلّغ إن فيه CSS مستخبي كثغرة خطيرة لوحده</o>
+            <o>تمسح الـ CSS من الـ cache</o>
+            <good>الإخفاء مش ثغرة لوحده — الثغرة لو السيرفر نفّذ الطلب من غير ما يتحقق من الصلاحية.</good>
+            <bad>CSS = شكل بس. لازم تختبر الـ endpoint نفسه بصلاحياتك العادية.</bad>
+          </quiz>
+
+          <html-lab id="c31-lab1" title="Focus ring وskip link" level="2">
+            <desc><ul>
+              <li>شيل <code>outline: none</code> خالص.</li>
+              <li>ضيف <code>:focus-visible { outline: 3px solid #2563eb; outline-offset: 2px; }</code>.</li>
+              <li>الـ <code>.skip</code> يبقى برا الشاشة (مش <code>display: none</code> — لازم يفضل يقبل الـ focus)، ويرجع يظهر بقاعدة <code>.skip:focus</code>. مثلًا <code>position: absolute; top: -100px</code> و<code>.skip:focus { top: 8px; }</code>.</li>
+            </ul><p>جرّب بـ <kbd>Tab</kbd> في المعمل الحر.</p></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Focus</title>
+                <style>
+                  body { font-family: system-ui; margin: 0; padding: 12px; }
+                  .skip { background: #0f172a; color: #fff; padding: 8px 14px; border-radius: 8px; }
+                  nav a { margin-right: 12px; color: #1d4ed8; }
+                  a:focus, button:focus { outline: none; }
+                </style>
+              </head>
+              <body>
+                <a class="skip" href="#main">Skip to content</a>
+                <nav><a href="#d">Dashboard</a><a href="#f">Findings</a><a href="#r">Reports</a></nav>
+                <main id="main"><button>New report</button></main>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Focus</title>
+                <style>
+                  body { font-family: system-ui; margin: 0; padding: 12px; }
+                  .skip { background: #0f172a; color: #fff; padding: 8px 14px; border-radius: 8px; position: absolute; left: 8px; top: -100px; }
+                  .skip:focus { top: 8px; }
+                  nav a { margin-right: 12px; color: #1d4ed8; }
+                  :focus-visible { outline: 3px solid #2563eb; outline-offset: 2px; }
+                </style>
+              </head>
+              <body>
+                <a class="skip" href="#main">Skip to content</a>
+                <nav><a href="#d">Dashboard</a><a href="#f">Findings</a><a href="#r">Reports</a></nav>
+                <main id="main"><button>New report</button></main>
+              </body>
+              </html>
+            </solution>
+            <test label="مفيش قاعدة focus بتشيل الـ outline" live>![...document.styleSheets].flatMap(sh => [...sh.cssRules]).some(r => /:focus/.test(r.selectorText || "") && (r.style.outlineStyle === "none" || /^(none|0(px)?)$/.test(r.style.outline.trim())))</test>
+            <test label=":focus-visible بـ outline 3px solid #2563eb وoffset 2px" live>[...document.styleSheets].flatMap(sh => [...sh.cssRules]).some(r => /:focus-visible/.test(r.selectorText || "") && r.style.outlineWidth === "3px" && r.style.outlineStyle === "solid" && /rgb\(37, 99, 235\)|#2563eb/i.test(r.style.outlineColor) && r.style.outlineOffset === "2px")</test>
+            <test label=".skip برا الشاشة بس لسه موجود (مش display:none)" live>(() => { const e = document.querySelector(".skip"), s = getComputedStyle(e), r = e.getBoundingClientRect(); return s.display !== "none" && s.visibility !== "hidden" && (r.bottom <= 0 || r.right <= 0); })()</test>
+            <test label="فيه قاعدة .skip:focus بترجّعه" live>[...document.styleSheets].flatMap(sh => [...sh.cssRules]).some(r => /\.skip:focus/.test(r.selectorText || "") && r.style.length > 0)</test>
+          </html-lab>
+
+          <html-lab id="c31-lab2" title="class .sr-only لزرار أيقونة" level="1">
+            <desc><p>الزرار فيه أيقونة SVG ونص «Delete report». اكتب <code>.sr-only</code> يخفي النص <b>بصريًا بس</b>: العنصر يبقى 1×1px أو أقل، <code>position: absolute</code>، <code>overflow: hidden</code>، ومن غير <code>display: none</code> ولا <code>visibility: hidden</code>.</p></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Icon button</title>
+                <style>
+                  .icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 1px solid #cbd5e1; border-radius: 10px; background: #fff; position: relative; }
+                </style>
+              </head>
+              <body>
+                <button class="icon-btn">
+                  <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>
+                  <span class="sr-only">Delete report</span>
+                </button>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Icon button</title>
+                <style>
+                  .icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 1px solid #cbd5e1; border-radius: 10px; background: #fff; position: relative; }
+                  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+                </style>
+              </head>
+              <body>
+                <button class="icon-btn">
+                  <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>
+                  <span class="sr-only">Delete report</span>
+                </button>
+              </body>
+              </html>
+            </solution>
+            <test label="النص بقى 1×1px أو أقل" live>(() => { const r = document.querySelector(".sr-only").getBoundingClientRect(); return r.width <= 1 && r.height <= 1; })()</test>
+            <test label="absolute + overflow hidden" live>(() => { const s = getComputedStyle(document.querySelector(".sr-only")); return s.position === "absolute" && s.overflow === "hidden"; })()</test>
+            <test label="لسه موجود لقارئ الشاشة (مش display:none ولا visibility:hidden)" live>(() => { const s = getComputedStyle(document.querySelector(".sr-only")); return s.display !== "none" && s.visibility !== "hidden" && document.querySelector(".sr-only").textContent.trim() === "Delete report"; })()</test>
+            <test label="الزرار لسه 44×44" live>(() => { const r = document.querySelector(".icon-btn").getBoundingClientRect(); return Math.round(r.width) === 44 && Math.round(r.height) === 44; })()</test>
+          </html-lab>
+
+          <html-lab id="c31-lab3" title="Print stylesheet لتقرير pentest" level="2">
+            <desc><p>جوه <code>@media print</code>:</p><ul>
+              <li><code>nav</code> و<code>.no-print</code>: <code>display: none</code>.</li>
+              <li><code>a[href^="http"]::after</code>: <code>content: " (" attr(href) ")"</code>.</li>
+              <li><code>.finding</code>: <code>break-inside: avoid</code>.</li>
+            </ul><p>وعلى الشاشة العادية الـ nav لازم يفضل ظاهر.</p></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Report</title>
+                <style>
+                  body { font-family: system-ui; margin: 16px; }
+                  nav { background: #0f172a; color: #fff; padding: 8px 12px; border-radius: 8px; }
+                  .finding { border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 14px; margin: 10px 0; }
+                </style>
+              </head>
+              <body>
+                <nav>Report viewer · <button class="no-print">Download</button></nav>
+                <article class="finding"><h2>F-01 Reflected XSS</h2><p>Reference: <a href="https://owasp.example/xss">OWASP XSS</a></p></article>
+                <article class="finding"><h2>F-02 Missing security headers</h2><p>See <a href="https://headers.example/csp">CSP guide</a></p></article>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Report</title>
+                <style>
+                  body { font-family: system-ui; margin: 16px; }
+                  nav { background: #0f172a; color: #fff; padding: 8px 12px; border-radius: 8px; }
+                  .finding { border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 14px; margin: 10px 0; }
+                  @media print {
+                    nav, .no-print { display: none; }
+                    a[href^="http"]::after { content: " (" attr(href) ")"; }
+                    .finding { break-inside: avoid; }
+                  }
+                </style>
+              </head>
+              <body>
+                <nav>Report viewer · <button class="no-print">Download</button></nav>
+                <article class="finding"><h2>F-01 Reflected XSS</h2><p>Reference: <a href="https://owasp.example/xss">OWASP XSS</a></p></article>
+                <article class="finding"><h2>F-02 Missing security headers</h2><p>See <a href="https://headers.example/csp">CSP guide</a></p></article>
+              </body>
+              </html>
+            </solution>
+            <test label="nav و.no-print بيختفوا في الطباعة" live>(() => { const rules = [...document.styleSheets].flatMap(sh => [...sh.cssRules]).filter(m => m instanceof CSSMediaRule && /print/.test(m.media.mediaText)).flatMap(m => [...m.cssRules]); const hides = sel => rules.some(r => (r.selectorText || "").split(",").map(x => x.trim()).includes(sel) && r.style.display === "none"); return hides("nav") && hides(".no-print"); })()</test>
+            <test label="اللينكات بتطبع الـ href بعدها" live>[...document.styleSheets].flatMap(sh => [...sh.cssRules]).filter(m => m instanceof CSSMediaRule && /print/.test(m.media.mediaText)).flatMap(m => [...m.cssRules]).some(r => /::after/.test(r.selectorText || "") && /a\[href\^="?http/.test(r.selectorText) && /attr\(href\)/.test(r.style.content))</test>
+            <test label=".finding: break-inside avoid في الطباعة" live>[...document.styleSheets].flatMap(sh => [...sh.cssRules]).filter(m => m instanceof CSSMediaRule && /print/.test(m.media.mediaText)).flatMap(m => [...m.cssRules]).some(r => r.selectorText === ".finding" && r.style.breakInside === "avoid")</test>
+            <test label="على الشاشة الـ nav لسه ظاهر" live>getComputedStyle(document.querySelector("nav")).display !== "none"</test>
+          </html-lab>
+
+          <task id="c31-t1" title="احسب التباين" level="1" answer="5.17|5.17:1" norm="text" reject="5.2|3.68|4.5">
+            <desc><p>بالـ Contrast Checker فوق (أو DevTools): نسبة التباين بين نص أبيض <code>#ffffff</code> وخلفية <code>#2563eb</code>؟ اكتبها برقمين عشريين.</p></desc>
+            <explain><b>5.17:1</b> — بيعدّي AA للنص العادي (4.5) ومش بيعدّي AAA (7). وفي المقابل <code>#3b82f6</code> (أفتح درجة) = 3.68 بس: ينفع للنص الكبير بس.</explain>
+            <check expr="(function () { function L(c) { var a = c.match(/[\d.]+/g).slice(0, 3).map(Number), W = [0.2126, 0.7152, 0.0722], s = 0; for (var i = 0; i &lt; 3; i++) { var v = a[i] / 255; s += W[i] * (v &lt;= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)); } return s; } var st = getComputedStyle(document.querySelector('.b')), x = L(st.color), y = L(st.backgroundColor); return ((Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05)).toFixed(2); })()"><div class="b" style="color: #ffffff; background: #2563eb">Text</div></check>
+          </task>
+
+          <task id="c31-t2" title="مين قارئ الشاشة هيقراه؟" level="2" answer="2" norm="int" reject="1|3|0">
+            <desc><p>كام عنصر من دول قارئ الشاشة هيقرا نصه؟ (<code>.sr-only</code> هي الـ class اللي فوق.)</p></desc>
+            <listing lang="html" file="hidden.html">
+              <p style="display: none">A</p>
+              <p style="visibility: hidden">B</p>
+              <p class="sr-only">C</p>
+              <p style="opacity: 0">D</p>
+              <p aria-hidden="true">E</p>
+              <p hidden>F</p>
+            </listing>
+            <explain><b>2</b>: الـ C (مخفي بصريًا بس) والـ D (<code>opacity: 0</code> لسه في الـ accessibility tree — وكمان بيتداس عليه!). الباقيين متشالين من الـ accessibility tree.</explain>
+          </task>
+
+          <task id="c31-t3" title="الزرار المستخبي" level="1" answer="DELETE /api/users/42" norm="text" reject="/api/users/42|delete">
+            <desc><p>إنت مسجّل دخول كمستخدم عادي ولقيت ده في الصفحة. إيه الـ request (method + path) اللي هتختبره بنفسك؟ اكتبه بالشكل <code>METHOD /path</code>.</p></desc>
+            <listing lang="html" file="users.html">
+              <style>.admin-only { display: none; }</style>
+              <button class="admin-only" onclick="fetch('/api/users/42', { method: 'DELETE' })">Delete user</button>
+            </listing>
+            <explain><code>DELETE /api/users/42</code> — ابعته من Burp بالـ cookie بتاعة المستخدم العادي (على حساب اختبار بتاعك، في نطاق الاختبار المسموح). لو السيرفر نفّذه، ده Broken Access Control.</explain>
+          </task>
+        </div>
+      </section>

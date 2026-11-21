@@ -1,0 +1,227 @@
+      <section class="section" id="c26" data-part="الجزء 2 · CSS" data-pk="css" data-nav="Flexbox" data-icon="↔️" data-keywords="flexbox display flex flex-direction main axis cross axis justify-content align-items align-self align-content flex-wrap gap flex-grow flex-shrink flex-basis flex order navbar centering space-between rtl">
+        <div class="section-head">
+          <span class="section-index">26</span>
+          <div>
+            <p class="eyebrow">CSS · الدرس 26</p>
+            <h2>Flexbox: ترتيب العناصر في صف أو عمود</h2>
+            <p class="lede">قبل Flexbox، توسيط حاجة رأسيًا كان «لغز». دلوقتي: <code>display: flex</code> + سطرين. Flexbox مصمم لترتيب عناصر في <b>اتجاه واحد</b> (صف أو عمود) وتوزيع المساحة بينهم: navbars، toolbars، كروت جنب بعض، فورمز، وأي توسيط. وهو أساس كل framework حديث.</p>
+          </div>
+        </div>
+
+        <h3 class="sub">المحورين</h3>
+        <figure class="diagram reveal">
+          <svg viewBox="0 0 1000 220" role="img" aria-label="محاور flexbox">
+            <rect x="60" y="30" width="880" height="150" rx="16" class="d-box2"/>
+            <text x="80" y="58" class="d-tb d-vio">.container { display: flex; flex-direction: row; }</text>
+            <rect x="110" y="80" width="140" height="70" rx="10" class="d-box"/><text x="180" y="120" text-anchor="middle" class="d-tb">1</text>
+            <rect x="270" y="80" width="200" height="70" rx="10" class="d-box"/><text x="370" y="120" text-anchor="middle" class="d-tb">2</text>
+            <rect x="490" y="80" width="120" height="70" rx="10" class="d-box"/><text x="550" y="120" text-anchor="middle" class="d-tb">3</text>
+            <path class="d-ar-acc d-flow" d="M110,195 L890,195"/><path d="M880,189 L892,195 L880,201" class="d-ar-acc"/>
+            <text x="500" y="214" text-anchor="middle" class="d-ts d-acc">main axis → justify-content</text>
+            <path class="d-ar-amb d-flow" d="M960,40 L960,170"/><path d="M954,160 L960,172 L966,160" class="d-ar-amb"/>
+            <text x="975" y="110" class="d-ts d-amb" transform="rotate(90 975 110)">cross axis → align-items</text>
+          </svg>
+          <figcaption>الـ <b>main axis</b> = اتجاه الـ <code>flex-direction</code> (أفقي في <code>row</code>)، والـ <b>cross axis</b> عمودي عليه. <code>justify-*</code> للمحور الرئيسي، و<code>align-*</code> للعمودي. لو قلبتها <code>column</code> المحورين بيتبدلوا. وفي صفحة <code>dir="rtl"</code> الـ <code>row</code> بيبدأ من اليمين لوحده.</figcaption>
+        </figure>
+
+        <h3 class="sub">جرّب كل خاصية</h3>
+        <div class="widget" data-widget="flex"></div>
+
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>على الـ container</th><th>بيعمل إيه</th></tr></thead>
+          <tbody>
+            <tr><td><code>flex-direction</code></td><td><code>row</code> · <code>column</code> · <code>row-reverse</code> · <code>column-reverse</code></td></tr>
+            <tr><td><code>justify-content</code></td><td>التوزيع على المحور الرئيسي: <code>flex-start</code> · <code>center</code> · <code>space-between</code> · <code>space-evenly</code>…</td></tr>
+            <tr><td><code>align-items</code></td><td>المحاذاة على المحور العمودي: <code>stretch</code> (الافتراضي) · <code>center</code> · <code>flex-start</code> · <code>baseline</code></td></tr>
+            <tr><td><code>flex-wrap</code></td><td><code>wrap</code> = لو مفيش مكان، انزل سطر جديد</td></tr>
+            <tr><td><code>gap</code></td><td>مسافة بين العناصر (أحسن من margins)</td></tr>
+            <tr><td><code>align-content</code></td><td>توزيع <b>السطور</b> نفسها لما يبقى فيه wrap</td></tr>
+          </tbody>
+        </table></div>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>على العنصر (item)</th><th>بيعمل إيه</th></tr></thead>
+          <tbody>
+            <tr><td><code>flex-grow</code></td><td>ياخد نصيب من المساحة الفاضية (0 = لأ)</td></tr>
+            <tr><td><code>flex-shrink</code></td><td>يصغر لو مفيش مكان (1 = أيوه)</td></tr>
+            <tr><td><code>flex-basis</code></td><td>الحجم المبدئي قبل التوزيع</td></tr>
+            <tr><td><code>flex: 1</code></td><td>اختصار: grow 1، shrink 1، basis 0 ⇒ العناصر تتقاسم المساحة بالتساوي</td></tr>
+            <tr><td><code>align-self</code></td><td>يكسر <code>align-items</code> للعنصر ده بس</td></tr>
+            <tr><td><code>order</code></td><td>يغيّر الترتيب <b>المرئي</b> بس</td></tr>
+          </tbody>
+        </table></div>
+
+        <h3 class="sub">Patterns هتستخدمها كل يوم</h3>
+        <html-example file="flex-patterns.html" auto max="460">
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <title>Flex patterns</title>
+            <style>
+              body { font-family: system-ui, sans-serif; margin: 0; }
+              /* 1) navbar: logo left, links right */
+              .nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; background: #0b1322; color: #fff; }
+              .nav ul { display: flex; gap: 14px; list-style: none; margin: 0; padding: 0; }
+              /* 2) perfect centering */
+              .center { display: flex; justify-content: center; align-items: center; height: 90px; background: #fff7ed; }
+              /* 3) input + button where the input takes the rest */
+              .search { display: flex; gap: 6px; padding: 10px 14px; }
+              .search input { flex: 1; min-width: 0; }
+              /* 4) cards that wrap */
+              .cards { display: flex; flex-wrap: wrap; gap: 10px; padding: 0 14px 14px; }
+              .cards > div { flex: 1 1 140px; background: #ede9fe; padding: 10px; border-radius: 10px; }
+            </style>
+          </head>
+          <body>
+            <nav class="nav"><b>Scanly</b><ul><li>Docs</li><li>Pricing</li><li>Login</li></ul></nav>
+            <div class="center">Perfectly centered</div>
+            <form class="search"><input placeholder="Search findings"><button>Go</button></form>
+            <div class="cards"><div>XSS</div><div>CSRF</div><div>IDOR</div><div>SSRF</div></div>
+          </body>
+          </html>
+        </html-example>
+        <div class="callout warn reveal"><span class="ci">♿</span><div><strong><code>order</code> و<code>row-reverse</code> بيغيّروا الشكل بس</strong><p>الكيبورد (Tab) وقارئ الشاشة بيمشوا على ترتيب الـ <b>HTML</b> مش الترتيب المرئي. لو قلبت الترتيب بالـ CSS، المستخدم اللي بالكيبورد هيتنطط بين العناصر بشكل غريب. غيّر ترتيب الـ HTML نفسه لو الترتيب له معنى.</p></div></div>
+        <div class="callout tip reveal"><span class="ci">💡</span><div><strong><code>min-width: 0</code> السحري</strong><p>عناصر الـ flex افتراضيًا مش بتصغر أقل من حجم محتواها (<code>min-width: auto</code>). نص طويل (URL أو token) جوه flex item هيكسر الـ layout — الحل: <code>min-width: 0</code> على العنصر + <code>overflow-wrap: anywhere</code>.</p></div></div>
+
+        <div class="exercises">
+          <div class="exercises-head"><h3><span class="bulb">✏️</span> تمارين الدرس 26</h3></div>
+          <quiz id="c26-q1" answer="1">
+            <q>container عليه `display: flex; flex-direction: column;`. عايز العناصر في النص <b>أفقيًا</b>. تستخدم إيه؟</q>
+            <o>`justify-content: center`</o>
+            <o>`align-items: center`</o>
+            <o>`text-align: center`</o>
+            <o>`align-content: center`</o>
+            <good>في `column` المحور الرئيسي رأسي، فالأفقي هو الـ cross axis ⇒ `align-items`.</good>
+            <bad>`justify-content` على المحور الرئيسي، وفي column ده الرأسي. الأفقي = cross axis = `align-items`.</bad>
+          </quiz>
+          <quiz id="c26-q2" answer="3">
+            <q>3 عناصر عليهم `flex: 1` في container عرضه 600px (من غير gap). عرض كل واحد؟</q>
+            <o>حسب المحتوى</o>
+            <o>600px</o>
+            <o>مش محدد</o>
+            <o>200px</o>
+            <good>`flex: 1` = basis 0 وgrow 1 ⇒ المساحة كلها بتتقسم بالتساوي.</good>
+            <bad>`flex: 1` بيخلي الـ basis صفر، فكل المساحة (600) بتتوزع بنسب الـ grow (1:1:1).</bad>
+          </quiz>
+          <quiz id="c26-q3" answer="0">
+            <q>navbar: اللوجو على طرف واللينكات على الطرف التاني. أبسط حل؟</q>
+            <o>`display: flex; justify-content: space-between;`</o>
+            <o>`float: left` و`float: right`</o>
+            <o>`position: absolute` للاتنين</o>
+            <o>`text-align: justify`</o>
+            <good>`space-between` بيحط أول وآخر عنصر على الطرفين والباقي بالتساوي في النص.</good>
+            <bad>الـ floats والـ absolute حلول قديمة/هشة. Flexbox + space-between سطر واحد.</bad>
+          </quiz>
+          <quiz id="c26-q4" answer="2">
+            <q>عملت `order: -1` لزرار «Delete» عشان يبان الأول. مستخدم الكيبورد هيحس بإيه؟</q>
+            <o>هيوصله الأول</o>
+            <o>مش هيقدر يوصله</o>
+            <o>هيوصله بترتيبه في الـ HTML (مش المرئي) — فالـ focus هيتنطط بشكل مربك</o>
+            <o>مفيش فرق</o>
+            <good>`order` بصري بس. الترتيب المنطقي (Tab، قارئ الشاشة) = ترتيب الـ DOM.</good>
+            <bad>Tab بيمشي على ترتيب الـ HTML. الـ CSS order بيغيّر الرسم بس.</bad>
+          </quiz>
+
+          <html-lab id="c26-lab1" title="Navbar بالـ Flexbox" level="1">
+            <desc><ul><li><code>.nav</code>: flex، اللوجو على طرف والـ <code>ul</code> على الطرف التاني (<code>space-between</code>)، والعناصر متوسطة رأسيًا.</li>
+            <li>الـ <code>ul</code>: flex برضه، مع <code>gap: 16px</code> ومن غير bullets.</li></ul></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Nav</title>
+                <style>
+                  body { margin: 0; font-family: system-ui; }
+                  .nav { background: #0b1322; color: #fff; padding: 10px 16px; }
+                  .nav a { color: inherit; }
+                </style>
+              </head>
+              <body>
+                <nav class="nav">
+                  <b class="logo">Scanly</b>
+                  <ul><li><a href="#docs">Docs</a></li><li><a href="#pricing">Pricing</a></li><li><a href="#login">Login</a></li></ul>
+                </nav>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Nav</title>
+                <style>
+                  body { margin: 0; font-family: system-ui; }
+                  .nav { background: #0b1322; color: #fff; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; }
+                  .nav ul { display: flex; gap: 16px; list-style: none; margin: 0; padding: 0; }
+                  .nav a { color: inherit; }
+                </style>
+              </head>
+              <body>
+                <nav class="nav">
+                  <b class="logo">Scanly</b>
+                  <ul><li><a href="#docs">Docs</a></li><li><a href="#pricing">Pricing</a></li><li><a href="#login">Login</a></li></ul>
+                </nav>
+              </body>
+              </html>
+            </solution>
+            <test label=".nav: flex + space-between + align center" live>(() => { const s = getComputedStyle(document.querySelector(".nav")); return s.display === "flex" && s.justifyContent === "space-between" && s.alignItems === "center"; })()</test>
+            <test label="اللوجو على طرف والـ ul على الطرف التاني" live>(() => { const n = document.querySelector(".nav").getBoundingClientRect(), l = document.querySelector(".logo").getBoundingClientRect(), u = document.querySelector(".nav ul").getBoundingClientRect(); return Math.abs(l.left - n.left - 16) < 2 && Math.abs(n.right - 16 - u.right) < 2; })()</test>
+            <test label="الـ ul: flex + gap 16px + من غير bullets" live>(() => { const s = getComputedStyle(document.querySelector(".nav ul")); return s.display === "flex" && s.columnGap === "16px" && s.listStyleType === "none"; })()</test>
+            <test label="اللينكات التلاتة في سطر واحد" live>(() => { const t = [...document.querySelectorAll(".nav li")].map(li => Math.round(li.getBoundingClientRect().top)); return t.every(x => x === t[0]); })()</test>
+          </html-lab>
+
+          <html-lab id="c26-lab2" title="Search bar: الـ input ياخد الباقي" level="2">
+            <desc><p>الـ <code>.search</code>: الـ input بياخد كل المساحة الفاضية، والزرار حجمه حسب نصه بس، وبينهم <code>gap: 8px</code>. الـ container عرضه <code>400px</code>.</p></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Search</title>
+                <style>
+                  .search { width: 400px; }
+                  input, button { font: 14px system-ui; padding: 6px 8px; }
+                </style>
+              </head>
+              <body>
+                <form class="search"><input name="q" placeholder="Search findings"><button>Search</button></form>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Search</title>
+                <style>
+                  .search { width: 400px; display: flex; gap: 8px; }
+                  .search input { flex: 1; min-width: 0; }
+                  input, button { font: 14px system-ui; padding: 6px 8px; }
+                </style>
+              </head>
+              <body>
+                <form class="search"><input name="q" placeholder="Search findings"><button>Search</button></form>
+              </body>
+              </html>
+            </solution>
+            <test label="input + gap + button = 400px بالظبط" live>(() => { const i = document.querySelector("input").getBoundingClientRect(), b = document.querySelector("button").getBoundingClientRect(), f = document.querySelector(".search").getBoundingClientRect(); return Math.abs((b.right - i.left) - f.width) < 1.5 && Math.abs(b.left - i.right - 8) < 1; })()</test>
+            <test label="الزرار مكبرش (أصغر من 120px)" live>document.querySelector("button").getBoundingClientRect().width < 120</test>
+          </html-lab>
+
+          <task id="c26-t1" title="عرض العنصر التاني" level="2" answer="400" norm="int" reject="300|466|200">
+            <desc><p>الـ container عرضه <code>700px</code> ومفيش gap ولا padding ولا borders. عرض <code>.b</code> النهائي بالـ px؟</p></desc>
+            <listing lang="css" file="flex.css">
+              .row { display: flex; width: 700px; }
+              .a { flex: 0 0 100px; }
+              .b { flex: 2 1 0; }
+              .c { flex: 1 1 0; }
+            </listing>
+            <hint>المساحة الفاضية = 700 − مجموع الـ basis. وبعدين وزّعها بنسب الـ grow على اللي بيكبروا بس.</hint>
+            <explain>مجموع الـ basis = 100 + 0 + 0 = 100 ⇒ الفاضي 600. `.a` مش بيكبر (grow 0) فيفضل 100. الـ 600 بتتقسم 2:1 بين `.b` و`.c` ⇒ `.b` = 0 + 400 = <b>400</b>، و`.c` = 200.</explain>
+            <check expr="Math.round(document.querySelector(&quot;.b&quot;).getBoundingClientRect().width)"><style>.row { display: flex; width: 700px; } .a { flex: 0 0 100px; } .b { flex: 2 1 0; } .c { flex: 1 1 0; } .row > div { height: 10px; }</style><div class="row"><div class="a"></div><div class="b"></div><div class="c"></div></div></check>
+          </task>
+        </div>
+      </section>

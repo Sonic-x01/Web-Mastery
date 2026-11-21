@@ -1,16 +1,16 @@
-      <section class="section" id="cheat" data-part="المرجع" data-pk="end" data-nav="Cheat Sheet" data-icon="📇" data-keywords="cheat sheet reference tags attributes entities forms meta iframe sandbox contexts encoding xss vectors recon parser rawtext rcdata">
+      <section class="section" id="cheat" data-part="المرجع" data-pk="end" data-nav="Cheat Sheet" data-icon="📇" data-keywords="cheat sheet reference tags attributes entities forms meta iframe sandbox contexts encoding xss vectors recon parser rawtext rcdata css selectors specificity cascade box model flexbox grid position z-index responsive media container queries clamp animation transition custom properties nesting layer contrast focus-visible sr-only print">
         <div class="section-head">
           <span class="section-index">98</span>
           <div>
             <p class="eyebrow">المرجع السريع</p>
-            <h2>Cheat Sheet — HTML للـ Pentester</h2>
+            <h2>Cheat Sheet — HTML وCSS</h2>
             <p class="lede">كل اللي محتاج ترجعله بسرعة في مكان واحد، وبيتحدّث مع كل جزء جديد من الكورس. اكتب في البحث أي كلمة (tag، attribute، context، حرف…).</p>
           </div>
         </div>
 
         <div class="cheat-search">
           <span class="ic">🔎</span>
-          <input type="search" id="cheatSearch" placeholder="ابحث… (sandbox, enctype, &amp;lt;, RCDATA, formaction, referrer)" autocomplete="off" aria-label="بحث في المرجع">
+          <input type="search" id="cheatSearch" placeholder="ابحث… (sandbox, enctype, RCDATA, specificity, grid, clamp, focus-visible)" autocomplete="off" aria-label="بحث في المرجع">
         </div>
 
         <div class="cheat-grid" id="cheatGrid">
@@ -221,6 +221,103 @@
               <li><code>dir="auto"</code> · <code>hreflang</code><span>مواقع عربي</span></li>
             </ul>
           </div>
+          <div class="cheat-card">
+            <h4>CSS: Selectors</h4>
+            <ul>
+              <li><code>[a="v"]</code> · <code>[a^="v"]</code> · <code>[a$="v"]</code> · <code>[a*="v"]</code><span>بالظبط · بيبدأ · بينتهي · فيه</span></li>
+              <li><code>[a~="v"]</code> · <code>[a="v" i]</code><span>كلمة في list · case-insensitive</span></li>
+              <li><code>A B</code> · <code>A > B</code> · <code>A + B</code> · <code>A ~ B</code><span>جوه · ابن مباشر · اللي بعده · أي أخ بعده</span></li>
+              <li><code>:is()</code> · <code>:where()</code> · <code>:not()</code> · <code>:has()</code><span>where وزنها صفر · has = الأب</span></li>
+              <li><code>:nth-child(2n+1 of .x)</code><span>odd من الـ .x بس</span></li>
+              <li><code>::before</code> · <code>::after</code> · <code>::placeholder</code> · <code>::selection</code><span>pseudo-elements</span></li>
+            </ul>
+          </div>
+          <div class="cheat-card">
+            <h4>CSS: مين يكسب؟</h4>
+            <ul>
+              <li>1 · origin + <code>!important</code><span>user-agent → author → !important مقلوبة</span></li>
+              <li>2 · <code>@layer</code><span>الأخيرة تكسب · برا الـ layers أقوى</span></li>
+              <li>3 · specificity <code>(id, class, type)</code><span><code>#a</code>=1,0,0 · <code>.a:hover</code>=0,2,0</span></li>
+              <li>4 · الترتيب<span>الأخير يكسب</span></li>
+              <li><code>style=""</code><span>أقوى من أي selector</span></li>
+              <li><code>inherit</code> · <code>initial</code> · <code>unset</code> · <code>revert</code><span>إعادة ضبط</span></li>
+            </ul>
+          </div>
+          <div class="cheat-card">
+            <h4>CSS: Box model والوحدات</h4>
+            <ul>
+              <li><code>box-sizing: border-box</code><span>width شامل padding + border</span></li>
+              <li>margin collapse<span>رأسي بس، بين blocks</span></li>
+              <li><code>outline</code><span>مش بياخد مكان · للـ focus</span></li>
+              <li><code>rem</code> · <code>em</code> · <code>%</code> · <code>vw/vh</code> · <code>dvh</code> · <code>ch</code><span>root · الأب · الـ containing block · الشاشة · موبايل · عرض حرف</span></li>
+              <li><code>max-width: 70ch</code><span>سطر مريح للقراية</span></li>
+            </ul>
+          </div>
+          <div class="cheat-card">
+            <h4>CSS: Flexbox</h4>
+            <ul>
+              <li><code>justify-content</code><span>المحور الرئيسي</span></li>
+              <li><code>align-items</code><span>المحور العرضي</span></li>
+              <li><code>flex: 1</code><span>= 1 1 0% · يقسّم الباقي</span></li>
+              <li><code>flex-wrap: wrap</code> + <code>gap</code><span>صفوف متعددة</span></li>
+              <li><code>min-width: 0</code><span>علاج النص اللي بيطلع برا</span></li>
+              <li><code>margin-left: auto</code><span>يزق العنصر للآخر</span></li>
+            </ul>
+          </div>
+          <div class="cheat-card">
+            <h4>CSS: Grid</h4>
+            <ul>
+              <li><code>repeat(auto-fit, minmax(220px, 1fr))</code><span>responsive من غير media</span></li>
+              <li><code>fr</code><span>نصيب من المساحة الفاضية</span></li>
+              <li><code>grid-column: 1 / -1</code><span>العرض كله</span></li>
+              <li><code>span 2</code><span>ياخد عمودين</span></li>
+              <li><code>grid-template-areas</code><span>layout بالأسماء</span></li>
+              <li><code>place-items: center</code><span>توسيط في سطر</span></li>
+            </ul>
+          </div>
+          <div class="cheat-card">
+            <h4>CSS: Position والطبقات</h4>
+            <ul>
+              <li><code>relative</code><span>مرجع للـ absolute · مكانه محفوظ</span></li>
+              <li><code>absolute</code><span>بالنسبة لأقرب أب positioned</span></li>
+              <li><code>fixed</code> · <code>sticky</code><span>الشاشة · لازق لما يوصل</span></li>
+              <li><code>inset: 0</code><span>= top/right/bottom/left: 0</span></li>
+              <li>stacking context<span>opacity &lt; 1 · transform · z-index + position</span></li>
+            </ul>
+          </div>
+          <div class="cheat-card">
+            <h4>CSS: Responsive والحركة</h4>
+            <ul>
+              <li><code>@media (width >= 600px)</code><span>mobile-first</span></li>
+              <li><code>clamp(1.5rem, 4vw, 3rem)</code><span>حجم سايل بحدود</span></li>
+              <li><code>container-type: inline-size</code> + <code>@container</code><span>حسب عرض الأب</span></li>
+              <li><code>prefers-color-scheme</code> · <code>prefers-reduced-motion</code><span>احترم المستخدم</span></li>
+              <li>حرّك <code>transform</code> و<code>opacity</code><span>composite بس</span></li>
+              <li><code>animation-fill-mode: forwards</code><span>يفضل على آخر frame</span></li>
+            </ul>
+          </div>
+          <div class="cheat-card">
+            <h4>CSS: الحديث والجودة</h4>
+            <ul>
+              <li><code>var(--x, fallback)</code><span>الـ fallback لو مش متعرّف بس</span></li>
+              <li><code>calc(100% - 2rem)</code><span>مسافات حوالين + و -</span></li>
+              <li><code>&amp;:hover</code> · <code>@supports</code> · <code>@property</code><span>nesting · feature query · متغير بيتحرك</span></li>
+              <li>تباين <code>4.5:1</code> · <code>3:1</code><span>نص عادي · نص كبير/UI</span></li>
+              <li><code>:focus-visible</code> · <code>.sr-only</code><span>focus للكيبورد · مخفي للعين بس</span></li>
+              <li><code>@media print</code> · <code>break-inside: avoid</code><span>تقارير PDF نضيفة</span></li>
+            </ul>
+          </div>
+          <div class="cheat-card">
+            <h4>🎯 CSS للـ Pentester</h4>
+            <ul>
+              <li>banner comments<span>نسخ المكتبات ← CVEs</span></li>
+              <li><code>url(…)</code> · <code>a[href="/…"]</code><span>hosts ومسارات مخفية</span></li>
+              <li><code>sourceMappingURL=….css.map</code><span>الـ SCSS الأصلي</span></li>
+              <li><code>display: none</code> ≠ صلاحيات<span>اختبر الـ endpoint بنفسك</span></li>
+              <li><code>onanimationstart</code> · <code>ontransitionend</code><span>handlers بتشتغل لوحدها</span></li>
+              <li>media queries + <code>url()</code><span>fingerprinting من غير JS</span></li>
+            </ul>
+          </div>
         </div>
       </section>
 
@@ -242,6 +339,16 @@
           <a class="source" href="https://web.dev/learn/html" target="_blank" rel="noopener noreferrer"><span class="sico">🎓</span><span><b>web.dev — Learn HTML</b><span>كورس Google المجاني: كويس للمراجعة.</span><span class="url">web.dev/learn/html</span></span></a>
           <a class="source" href="https://validator.w3.org/" target="_blank" rel="noopener noreferrer"><span class="sico">✅</span><span><b>W3C Markup Validator</b><span>اتأكد إن الـ HTML بتاعك سليم.</span><span class="url">validator.w3.org</span></span></a>
           <a class="source" href="https://software.hixie.ch/utilities/js/live-dom-viewer/" target="_blank" rel="noopener noreferrer"><span class="sico">🌳</span><span><b>Live DOM Viewer</b><span>أداة كاتب الـ spec نفسه: اكتب HTML وشوف الـ DOM.</span><span class="url">software.hixie.ch</span></span></a>
+        </div>
+
+        <h3 class="sub">مراجع CSS</h3>
+        <div class="sources">
+          <a class="source" href="https://developer.mozilla.org/en-US/docs/Web/CSS" target="_blank" rel="noopener noreferrer"><span class="sico">📘</span><span><b>MDN Web Docs — CSS</b><span>المرجع العملي لكل خاصية وselector، ومعاه جدول الدعم في المتصفحات.</span><span class="url">developer.mozilla.org</span></span></a>
+          <a class="source" href="https://www.w3.org/Style/CSS/specs.en.html" target="_blank" rel="noopener noreferrer"><span class="sico">📜</span><span><b>CSS Specifications (W3C)</b><span>الـ specs الرسمية: Cascade، Selectors، Flexbox، Grid…</span><span class="url">w3.org/Style/CSS</span></span></a>
+          <a class="source" href="https://web.dev/learn/css" target="_blank" rel="noopener noreferrer"><span class="sico">🎓</span><span><b>web.dev — Learn CSS</b><span>كورس مجاني منظم للمراجعة، ومعاه Learn Accessibility.</span><span class="url">web.dev/learn/css</span></span></a>
+          <a class="source" href="https://caniuse.com/" target="_blank" rel="noopener noreferrer"><span class="sico">🧭</span><span><b>Can I use</b><span>أي feature مدعومة في أنهي متصفح ونسخة.</span><span class="url">caniuse.com</span></span></a>
+          <a class="source" href="https://www.w3.org/WAI/WCAG22/quickref/" target="_blank" rel="noopener noreferrer"><span class="sico">♿</span><span><b>WCAG 2.2 Quick Reference</b><span>معايير الـ accessibility (contrast، focus، target size…) بأمثلة.</span><span class="url">w3.org/WAI</span></span></a>
+          <a class="source" href="https://cssgridgarden.com/" target="_blank" rel="noopener noreferrer"><span class="sico">🌱</span><span><b>Grid Garden / Flexbox Froggy</b><span>ألعاب صغيرة تثبّت بيها Grid وFlexbox.</span><span class="url">cssgridgarden.com</span></span></a>
         </div>
 
         <h3 class="sub">الأمن والـ Pentest</h3>
@@ -271,8 +378,8 @@
         </ul>
 
         <div class="final-cta">
-          <h3>خلصت الجزء الأول: HTML 🎯</h3>
-          <p>دلوقتي إنت بتكتب HTML نضيف ومنظّم وقابل للنشر زي أي مطوّر محترف، وبتقراه زي المتصفح: عارف إيه اللي بيتبعت، وفين الـ input بيقع، وإزاي الـ parser بيفكر. الجزء الجاي <b>CSS</b> ثم <b>JavaScript</b> ثم <b>Web Security</b> — ونفس المعمل هيكبر معاك.</p>
+          <h3>خلصت الجزء التاني: CSS 🎨</h3>
+          <p>دلوقتي بتكتب HTML نضيف وبتديله شكل احترافي: أي layout بـ Flexbox وGrid، responsive من الموبايل للـ 4K، accessible، ومتحرك من غير ما يهنّج. وبتبص على الـ CSS بعين الـ pentester كمان: recon من الملفات، الإخفاء اللي مش حماية، والـ fingerprinting. الجزء الجاي: <b>JavaScript</b>.</p>
           <div class="final-stats">
             <div><b id="finalSolved">0</b> تمرين محلول</div>
             <div><b id="finalTotal">0</b> إجمالي التمارين</div>
@@ -280,7 +387,7 @@
           </div>
           <div style="margin-top:22px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
             <a href="#xss-1" class="btn btn-primary">🏴 الـ XSS Range</a>
-            <a href="#p-html" class="btn btn-ghost">🛠️ المشاريع</a>
+            <a href="#p-css" class="btn btn-ghost">🛠️ مشاريع CSS</a>
             <button type="button" class="btn btn-ghost" data-pg-open>🧪 المعمل الحر</button>
           </div>
         </div>

@@ -1,0 +1,252 @@
+      <section class="section" id="c23" data-part="الجزء 2 · CSS" data-pk="css" data-nav="الوحدات والألوان والخطوط" data-icon="🔤" data-keywords="units px em rem percent vw vh dvh svh ch lh colors hex rgb hsl oklch alpha currentcolor transparent fonts font-family stack system-ui web fonts font-face woff2 font-display google fonts gdpr typography font-size weight line-height letter-spacing text-align text-decoration text-transform overflow-wrap arabic typography logical properties">
+        <div class="section-head">
+          <span class="section-index">23</span>
+          <div>
+            <p class="eyebrow">CSS · الدرس 23</p>
+            <h2>الوحدات والألوان والخطوط</h2>
+            <p class="lede">«<code>font-size: 16px</code> ولا <code>1rem</code>؟»، «اللون ده hex ولا hsl؟»، «الخط العربي بيتقطّع ليه؟». الدرس ده بيدّيك أساس الـ typography والألوان اللي بيفرّق بين صفحة «شغالة» وصفحة احترافية ومريحة للعين ومحترمة لإعدادات المستخدم — وكمان ليه تحميل خط من Google ممكن يبقى مشكلة خصوصية.</p>
+          </div>
+        </div>
+
+        <h3 class="sub">الوحدات</h3>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>الوحدة</th><th>نسبة لإيه</th><th>استخدمها في</th></tr></thead>
+          <tbody>
+            <tr><td><code>px</code></td><td>pixel «CSS» ثابت</td><td>الـ borders، الـ shadows، التفاصيل الصغيرة</td></tr>
+            <tr><td><code>rem</code></td><td>حجم خط الـ <code>html</code> (افتراضيًا 16px)</td><td><b>أحجام الخطوط والمسافات</b> — بتحترم إعداد حجم الخط عند المستخدم</td></tr>
+            <tr><td><code>em</code></td><td>حجم خط العنصر نفسه (ولـ <code>font-size</code>: حجم خط الأب)</td><td>padding الزراير اللي يكبر مع خطها — بس بيتراكم لو متداخل!</td></tr>
+            <tr><td><code>%</code></td><td>الأب (العرض غالبًا)</td><td>layouts مرنة</td></tr>
+            <tr><td><code>vw</code> / <code>vh</code></td><td>1% من عرض / ارتفاع الشاشة</td><td>hero sections</td></tr>
+            <tr><td><code>dvh</code> / <code>svh</code> / <code>lvh</code></td><td>ارتفاع الشاشة مع/من غير شريط العنوان في الموبايل</td><td><code>min-height: 100dvh</code> بدل <code>100vh</code> على الموبايل</td></tr>
+            <tr><td><code>ch</code></td><td>عرض حرف «0»</td><td><code>max-width: 70ch</code> لسطور مريحة للقراية</td></tr>
+          </tbody>
+        </table></div>
+        <html-example file="em-vs-rem.html" auto>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <title>em vs rem</title>
+            <style>
+              body { font-family: system-ui, sans-serif; }
+              .em  { font-size: 1.2em; }   /* compounds when nested */
+              .rem { font-size: 1.2rem; }  /* always relative to <html> */
+            </style>
+          </head>
+          <body>
+            <div class="em">em level 1 <div class="em">em level 2 <div class="em">em level 3</div></div></div>
+            <div class="rem">rem level 1 <div class="rem">rem level 2 <div class="rem">rem level 3</div></div></div>
+            <script>
+              document.querySelectorAll(".em, .rem").forEach(el => console.log(el.className, getComputedStyle(el).fontSize));
+            </script>
+          </body>
+          </html>
+        </html-example>
+
+        <h3 class="sub">الألوان</h3>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>الصيغة</th><th>مثال (نفس البرتقاني)</th><th>ملاحظات</th></tr></thead>
+          <tbody>
+            <tr><td>hex</td><td><code>#ff7a45</code> · <code>#ff7a4580</code> (بشفافية)</td><td>الأشهر في التصميم</td></tr>
+            <tr><td>rgb</td><td><code>rgb(255 122 69)</code> · <code>rgb(255 122 69 / 50%)</code></td><td>الصيغة الحديثة بمسافات (القديمة <code>rgba(255,122,69,.5)</code> لسه شغّالة)</td></tr>
+            <tr><td>hsl</td><td><code>hsl(17 100% 64%)</code></td><td>Hue/Saturation/Lightness — سهل تعمل درجات من نفس اللون</td></tr>
+            <tr><td>oklch</td><td><code>oklch(72% 0.17 45)</code></td><td>حديث و«perceptual»: الدرجات بتتغير بشكل متساوي للعين</td></tr>
+            <tr><td>keywords</td><td><code>currentColor</code> · <code>transparent</code> · <code>tomato</code></td><td><code>currentColor</code> = قيمة <code>color</code> الحالية (ممتاز للأيقونات والـ borders)</td></tr>
+          </tbody>
+        </table></div>
+
+        <h3 class="sub">الخطوط</h3>
+        <code-block lang="css" file="fonts.css">
+          /* a font "stack": the first available wins, always end with a generic family */
+          body { font-family: "Cairo", "Segoe UI", system-ui, sans-serif; }
+          code { font-family: "JetBrains Mono", Consolas, monospace; }
+
+          /* self-hosted web font */
+          @font-face {
+            font-family: "Cairo";
+            src: url("/fonts/cairo-var.woff2") format("woff2");
+            font-weight: 200 1000;      /* variable font: one file, all weights */
+            font-display: swap;         /* show fallback text immediately, swap when loaded */
+            unicode-range: U+0600-06FF, U+0020-007E;   /* only download for these characters */
+          }
+        </code-block>
+        <div class="callout pt reveal"><span class="ci">🛡️</span><div><strong>الخطوط والخصوصية</strong><p>تحميل خط من <code>fonts.googleapis.com</code> = متصفح كل زائر بيبعت IP بتاعه لـ Google. محكمة في ميونخ (يناير 2022) اعتبرت ده مخالفة لـ GDPR لموقع ألماني. الحل الاحترافي: <b>استضافة الخطوط على سيرفرك</b> (woff2). 🎯 ومن الناحية الهجومية: الـ <code>unicode-range</code> بيخلي المتصفح يحمّل ملف الخط بس لو حرف معيّن ظهر في الصفحة — وده اتستغل في هجمات CSS injection لمعرفة الحروف الموجودة في نص.</p></div></div>
+
+        <h3 class="sub">خصائص النص</h3>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>الخاصية</th><th>ملاحظة</th></tr></thead>
+          <tbody>
+            <tr><td><code>font-size</code></td><td>بـ <code>rem</code> للنصوص الأساسية</td></tr>
+            <tr><td><code>font-weight</code></td><td>100–900 (400 = normal، 700 = bold)</td></tr>
+            <tr><td><code>line-height</code></td><td><b>من غير وحدة</b> (<code>1.6</code>) عشان يتناسب مع حجم الخط في كل عنصر</td></tr>
+            <tr><td><code>text-align</code></td><td><code>start</code>/<code>end</code> أحسن من <code>left</code>/<code>right</code> (بيتقلب مع العربي)</td></tr>
+            <tr><td><code>text-decoration</code> / <code>text-transform</code></td><td>خط تحت/فوق/وسط · uppercase/lowercase/capitalize</td></tr>
+            <tr><td><code>letter-spacing</code> / <code>word-spacing</code></td><td>⚠ متستخدمش letter-spacing على العربي (بيقطّع الحروف المتصلة)</td></tr>
+            <tr><td><code>white-space</code> / <code>overflow-wrap: anywhere</code></td><td>كسر السطور — الـ URLs والـ tokens الطويلة بتكسر الـ layout من غيرها</td></tr>
+          </tbody>
+        </table></div>
+        <html-example file="arabic-type.html" auto>
+          <!DOCTYPE html>
+          <html lang="ar" dir="rtl">
+          <head>
+            <meta charset="UTF-8">
+            <title>عربي</title>
+            <style>
+              body { font-family: "Segoe UI", Tahoma, system-ui, sans-serif; line-height: 1.9; max-width: 60ch; }
+              .bad { letter-spacing: 3px; }
+              code { direction: ltr; unicode-bidi: isolate; background: #f1f5f9; padding: 0 4px; }
+              .token { overflow-wrap: anywhere; background: #fff7ed; }
+            </style>
+          </head>
+          <body>
+            <p>نص عربي عادي بيتقري مريح مع <code>line-height: 1.9</code>.</p>
+            <p class="bad">ومع letter-spacing الحروف بتتقطع كده.</p>
+            <p class="token">token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwicm9sZSI6InVzZXIifQ.Sfl</p>
+          </body>
+          </html>
+        </html-example>
+
+        <div class="exercises">
+          <div class="exercises-head"><h3><span class="bulb">✏️</span> تمارين الدرس 23</h3></div>
+          <quiz id="c23-q1" answer="2">
+            <q>ليه `rem` أحسن من `px` لأحجام الخطوط؟</q>
+            <o>أسرع في الرسم</o>
+            <o>بيشتغل في كل المتصفحات وpx لأ</o>
+            <o>بيتناسب مع حجم خط الـ root، فبيحترم المستخدم اللي كبّر الخط الافتراضي في إعدادات المتصفح</o>
+            <o>مفيش فرق</o>
+            <good>Accessibility: مستخدمين ضعاف النظر بيكبّروا الخط الافتراضي، والـ px الثابت بيتجاهل ده.</good>
+            <bad>الفرق في الـ accessibility: الـ rem بيكبر مع إعداد المستخدم، الـ px لأ.</bad>
+          </quiz>
+          <quiz id="c23-q2" answer="0">
+            <q>`.a { font-size: 2em }` جوه `.a` جوه `.a`، والـ root = 16px. حجم الخط في التالت؟</q>
+            <o>128px</o>
+            <o>32px</o>
+            <o>96px</o>
+            <o>64px</o>
+            <good>16 × 2 × 2 × 2 = 128. ده «الـ em compounding» — والـ rem مبيعملوش.</good>
+            <bad>الـ em في font-size نسبة لخط الأب، فكل مستوى بيضرب في 2: 32 → 64 → 128.</bad>
+          </quiz>
+          <quiz id="c23-q3" answer="3">
+            <q>`border: 1px solid currentColor` على عنصر `color: #2563eb`. لون الـ border؟</q>
+            <o>أسود</o>
+            <o>شفاف</o>
+            <o>لون الأب</o>
+            <o>`#2563eb`</o>
+            <good>`currentColor` = قيمة `color` على نفس العنصر.</good>
+            <bad>`currentColor` بيرجع لقيمة خاصية `color` على العنصر نفسه.</bad>
+          </quiz>
+          <quiz id="c23-q4" answer="1">
+            <q>نص عربي عليه `letter-spacing: 2px`. المشكلة؟</q>
+            <o>مفيش</o>
+            <o>الحروف العربية المتصلة بتتفصل عن بعض وشكل الكلمات بيبوظ</o>
+            <o>النص بيتقلب</o>
+            <o>الخط بيصغر</o>
+            <good>العربي مكتوب متصل؛ الـ letter-spacing بيكسر الوصلات.</good>
+            <bad>المسافة بين الحروف بتقطع الوصل بين حروف العربي المتصلة.</bad>
+          </quiz>
+          <quiz id="c23-q5" answer="2">
+            <q>`font-family: "MyFont", Arial;` و"MyFont" مش متحمّل. إيه اللي هيحصل؟</q>
+            <o>النص مش هيظهر</o>
+            <o>الخط الافتراضي للمتصفح (Times)</o>
+            <o>Arial — أول خط متاح في الـ stack</o>
+            <o>error</o>
+            <good>ودايمًا اختم الـ stack بـ generic family (`sans-serif`، `serif`، `monospace`).</good>
+            <bad>المتصفح بيمشي على القايمة بالترتيب وبياخد أول خط متاح.</bad>
+          </quiz>
+
+          <html-lab id="c23-lab1" title="Typography بالـ rem" level="1">
+            <desc><p>الـ <code>html</code> سيبه على الافتراضي (16px). اكتب بالـ <code>rem</code>:</p>
+            <ul><li><code>h1</code>: <code>2rem</code> (= 32px)، <code>p</code>: <code>1rem</code>، <code>small</code>: <code>0.875rem</code>.</li>
+            <li>الـ <code>p</code>: <code>line-height: 1.6</code> من غير وحدة، و<code>max-width: 65ch</code>.</li>
+            <li>ممنوع <code>px</code> في أحجام الخطوط.</li></ul></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Type</title>
+                <style>
+                  body { font-family: system-ui, sans-serif; }
+                  h1 { font-size: 32px; }
+                </style>
+              </head>
+              <body>
+                <h1>Writeup</h1>
+                <p>Long paragraph text that should stay comfortable to read on wide screens and respect user font settings.</p>
+                <small>Published Nov 2026</small>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Type</title>
+                <style>
+                  body { font-family: system-ui, sans-serif; }
+                  h1 { font-size: 2rem; }
+                  p { font-size: 1rem; line-height: 1.6; max-width: 65ch; }
+                  small { font-size: 0.875rem; }
+                </style>
+              </head>
+              <body>
+                <h1>Writeup</h1>
+                <p>Long paragraph text that should stay comfortable to read on wide screens and respect user font settings.</p>
+                <small>Published Nov 2026</small>
+              </body>
+              </html>
+            </solution>
+            <test label="h1 = 32px و p = 16px و small = 14px" live>["h1:32px", "p:16px", "small:14px"].every(x => { const [s, v] = x.split(":"); return getComputedStyle(document.querySelector(s)).fontSize === v; })</test>
+            <test label="line-height = 1.6 (25.6px)" live>getComputedStyle(document.querySelector("p")).lineHeight === "25.6px"</test>
+            <test label="max-width بالـ ch" live>/ch\b/.test([...document.styleSheets[0].cssRules].map(r => r.cssText).join(" "))</test>
+            <test label="مفيش font-size بالـ px">!/font-size\s*:\s*[\d.]+px/.test(S)</test>
+          </html-lab>
+
+          <html-lab id="c23-lab2" title="ألوان بالصيغ الحديثة" level="2">
+            <desc><ul><li><code>.badge</code>: لونه (<code>color</code>) <code>#c2410c</code>، وخلفيته نفس البرتقاني <code>rgb(255 122 69)</code> بشفافية <b>20%</b> بالصيغة الحديثة (<code>/ 20%</code>).</li>
+            <li>الـ border بتاعه <code>1px solid currentColor</code>.</li></ul></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Badge</title>
+                <style>
+                  .badge { font: 700 13px system-ui; padding: 2px 10px; border-radius: 99px; }
+                </style>
+              </head>
+              <body><span class="badge">HIGH</span></body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Badge</title>
+                <style>
+                  .badge { font: 700 13px system-ui; padding: 2px 10px; border-radius: 99px;
+                           color: #c2410c; background: rgb(255 122 69 / 20%); border: 1px solid currentColor; }
+                </style>
+              </head>
+              <body><span class="badge">HIGH</span></body>
+              </html>
+            </solution>
+            <test label="color = #c2410c" live>getComputedStyle(document.querySelector(".badge")).color === "rgb(194, 65, 12)"</test>
+            <test label="الخلفية rgb(255 122 69) بشفافية 0.2" live>getComputedStyle(document.querySelector(".badge")).backgroundColor === "rgba(255, 122, 69, 0.2)"</test>
+            <test label="الـ border بلون currentColor" live>(() => { const s = getComputedStyle(document.querySelector(".badge")); return s.borderTopColor === s.color && s.borderTopWidth === "1px"; })()</test>
+            <test label="استخدمت الصيغة الحديثة ( / ) و currentColor">/rgb\(\s*255\s+122\s+69\s*\/\s*20%\s*\)/i.test(S) && /currentcolor/.test(S)</test>
+          </html-lab>
+
+          <task id="c23-t1" title="الحجم في المستوى التالت" level="1" answer="36" norm="int">
+            <desc><p>الـ root = 16px. حجم خط الـ <code>span</code> بالـ px؟</p></desc>
+            <listing lang="html" file="nested.html">
+              <style> .x { font-size: 1.5em; } </style>
+              <div class="x"><div class="x"><span>text</span></div></div>
+            </listing>
+            <explain>16 × 1.5 = 24 (الـ div الأول)، × 1.5 = 36 (التاني)، والـ span بيورث 36px (مالوش class). الإجابة <b>36</b>.</explain>
+            <check expr="parseFloat(getComputedStyle(document.querySelector(&quot;span&quot;)).fontSize)"><style>html { font-size: 16px; } .x { font-size: 1.5em; }</style><div class="x"><div class="x"><span>text</span></div></div></check>
+          </task>
+        </div>
+      </section>

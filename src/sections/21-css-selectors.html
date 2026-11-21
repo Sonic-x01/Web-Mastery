@@ -1,0 +1,318 @@
+      <section class="section" id="c20" data-part="الجزء 2 · CSS" data-pk="css" data-nav="الـ Selectors" data-icon="🎯" data-keywords="selectors type class id universal attribute selector ^= $= *= ~= |= case-insensitive combinators descendant child adjacent sibling pseudo-class hover focus focus-visible nth-child not is where has checked disabled invalid user-invalid target pseudo-element before after content attr placeholder selection marker visited">
+        <div class="section-head">
+          <span class="section-index">20</span>
+          <div>
+            <p class="eyebrow">CSS · الدرس 20</p>
+            <h2>الـ Selectors: إزاي تختار أي عنصر بالظبط</h2>
+            <p class="lede">الـ selector هو «عنوان» القاعدة: بيحدد العناصر اللي الـ CSS هيتطبق عليها. نفس اللغة دي بتستخدمها في JavaScript (<code>querySelectorAll</code>)، وفي أدوات الـ scraping والاختبار (Playwright، Selenium)، و— للـ pentester — في <b>هجمات CSS injection</b> اللي بتسرق داتا حرف حرف عن طريق attribute selectors.</p>
+          </div>
+        </div>
+
+        <h3 class="sub">الأساسيات</h3>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>الـ selector</th><th>بيختار</th><th>مثال</th></tr></thead>
+          <tbody>
+            <tr><td><code>*</code></td><td>كل العناصر</td><td><code>* { box-sizing: border-box; }</code></td></tr>
+            <tr><td><code>p</code> (type)</td><td>كل الـ <code>&lt;p&gt;</code></td><td></td></tr>
+            <tr><td><code>.btn</code> (class)</td><td>أي عنصر الـ class بتاعه فيه <code>btn</code></td><td><code>&lt;a class="btn primary"&gt;</code> ✓</td></tr>
+            <tr><td><code>#main</code> (id)</td><td>العنصر اللي الـ id بتاعه <code>main</code></td><td>قوي جدًا في الـ cascade — استخدمه قليل</td></tr>
+            <tr><td><code>a.btn</code> (compound)</td><td><code>a</code> <b>وكمان</b> عليه <code>.btn</code></td><td>من غير مسافة!</td></tr>
+            <tr><td><code>h1, h2, h3</code> (list)</td><td>أي واحد منهم</td><td>قواعد مشتركة</td></tr>
+          </tbody>
+        </table></div>
+
+        <h3 class="sub">Attribute selectors <span class="tag">🎯 مهمة جدًا أمنيًا</span></h3>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>الـ selector</th><th>بيطابق لو الـ attribute…</th><th>مثال</th></tr></thead>
+          <tbody>
+            <tr><td><code>[attr]</code></td><td>موجود (بأي قيمة)</td><td><code>input[required]</code></td></tr>
+            <tr><td><code>[attr="v"]</code></td><td>يساوي <code>v</code> بالظبط</td><td><code>input[type="password"]</code></td></tr>
+            <tr><td><code>[attr^="v"]</code></td><td><b>بيبدأ</b> بـ <code>v</code></td><td><code>a[href^="https://"]</code></td></tr>
+            <tr><td><code>[attr$="v"]</code></td><td><b>بيخلص</b> بـ <code>v</code></td><td><code>a[href$=".pdf"]</code></td></tr>
+            <tr><td><code>[attr*="v"]</code></td><td><b>فيه</b> <code>v</code> في أي حتة</td><td><code>a[href*="logout"]</code></td></tr>
+            <tr><td><code>[attr~="v"]</code></td><td>فيه <code>v</code> ككلمة كاملة في قايمة مفصولة بمسافات</td><td><code>[class~="primary"]</code> = <code>.primary</code></td></tr>
+            <tr><td><code>[attr|="v"]</code></td><td>يساوي <code>v</code> أو بيبدأ بـ <code>v-</code></td><td><code>[lang|="ar"]</code> ← ar، ar-EG</td></tr>
+            <tr><td><code>[attr="v" i]</code></td><td>من غير ما الحروف الكبيرة/الصغيرة تفرق</td><td><code>a[href$=".PDF" i]</code></td></tr>
+          </tbody>
+        </table></div>
+        <div class="callout pt reveal"><span class="ci">🎯</span><div><strong>الـ selector «بيقرا» القيم</strong><p><code>input[name="csrf"][value^="a"]</code> بيطابق بس لو الـ token بيبدأ بـ <code>a</code>. لو المهاجم قدر يحقن CSS، يكتب قاعدة لكل حرف محتمل، وكل قاعدة تطلب صورة خلفية من سيرفره — فالسيرفر يعرف أول حرف من الـ token. وبعدين التاني… ده <b>CSS exfiltration</b>. كله من غير ولا سطر JavaScript.</p></div></div>
+
+        <h3 class="sub">الـ Combinators: العلاقات بين العناصر</h3>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>الـ combinator</th><th>المعنى</th><th>مثال</th></tr></thead>
+          <tbody>
+            <tr><td><code>A B</code> (مسافة)</td><td>B في أي مستوى جوه A (descendant)</td><td><code>nav a</code></td></tr>
+            <tr><td><code>A &gt; B</code></td><td>B ابن <b>مباشر</b> لـ A</td><td><code>ul &gt; li</code></td></tr>
+            <tr><td><code>A + B</code></td><td>B الأخ اللي <b>بعد</b> A مباشرة</td><td><code>h2 + p</code> (أول فقرة بعد العنوان)</td></tr>
+            <tr><td><code>A ~ B</code></td><td>أي أخ B بعد A</td><td><code>h2 ~ p</code></td></tr>
+          </tbody>
+        </table></div>
+
+        <h3 class="sub">Pseudo-classes: الحالة والمكان</h3>
+        <div class="table-wrap reveal"><table class="ref wrap">
+          <thead><tr><th>المجموعة</th><th>الـ pseudo-classes</th></tr></thead>
+          <tbody>
+            <tr><td>تفاعل المستخدم</td><td><code>:hover</code> · <code>:active</code> · <code>:focus</code> · <code>:focus-visible</code> (focus من الكيبورد) · <code>:focus-within</code> (حاجة جوايا عليها focus)</td></tr>
+            <tr><td>اللينكات</td><td><code>:link</code> · <code>:visited</code> (مقيّد للخصوصية — تحت)</td></tr>
+            <tr><td>المكان في الشجرة</td><td><code>:first-child</code> · <code>:last-child</code> · <code>:nth-child(an+b)</code> · <code>:nth-of-type()</code> · <code>:only-child</code> · <code>:empty</code> · <code>:root</code></td></tr>
+            <tr><td>منطق</td><td><code>:not(…)</code> · <code>:is(…)</code> · <code>:where(…)</code> (زي is بس وزنه صفر) · <code>:has(…)</code> («الأب اللي فيه…»)</td></tr>
+            <tr><td>الفورمز</td><td><code>:checked</code> · <code>:disabled</code> · <code>:enabled</code> · <code>:required</code> · <code>:optional</code> · <code>:valid</code> · <code>:invalid</code> · <code>:user-invalid</code> (بعد ما المستخدم يتفاعل) · <code>:placeholder-shown</code> · <code>:read-only</code></td></tr>
+            <tr><td>أخرى</td><td><code>:target</code> (العنصر اللي الـ <code>#fragment</code> بيشاور عليه) · <code>:lang(ar)</code> · <code>:dir(rtl)</code></td></tr>
+          </tbody>
+        </table></div>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th><code>:nth-child(…)</code></th><th>بيختار</th></tr></thead>
+          <tbody>
+            <tr><td><code>odd</code> / <code>even</code></td><td>1، 3، 5… / 2، 4، 6…</td></tr>
+            <tr><td><code>3n</code></td><td>3، 6، 9…</td></tr>
+            <tr><td><code>3n+1</code></td><td>1، 4، 7، 10…</td></tr>
+            <tr><td><code>-n+3</code></td><td>أول 3 بس</td></tr>
+            <tr><td><code>n+4</code></td><td>من الرابع وطالع</td></tr>
+            <tr><td><code>2n+1 of .high</code></td><td>العد بين العناصر اللي عليها <code>.high</code> بس</td></tr>
+          </tbody>
+        </table></div>
+        <html-example file="pseudo-classes.html" auto max="520">
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <title>Pseudo-classes</title>
+            <style>
+              body { font-family: system-ui, sans-serif; }
+              li:nth-child(odd) { background: #f1f5f9; }
+              li:first-child { font-weight: 700; }
+              a:hover { color: #c2410c; }
+              input:focus-visible { outline: 3px solid #ff7a45; }
+              input:user-invalid { border: 2px solid #dc2626; }
+              form:has(input:invalid) button { opacity: .45; }
+              .card:has(> img) { border: 2px solid #8b5cf6; padding: 6px; }
+              :target { background: #fef3c7; }
+            </style>
+          </head>
+          <body>
+            <ul><li>Recon</li><li>Mapping</li><li>Exploitation</li><li>Reporting</li></ul>
+            <form><input type="email" required placeholder="email"> <button>Send</button></form>
+            <p>The button is faded while the form is invalid (<code>:has()</code>) — type a valid email.</p>
+            <div class="card"><img alt="" width="20" height="20" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='20' height='20' fill='%238b5cf6'/%3E%3C/svg%3E"> card with an image</div>
+          </body>
+          </html>
+        </html-example>
+
+        <h3 class="sub">Pseudo-elements: أجزاء مش موجودة في الـ HTML</h3>
+        <p>بيتكتبوا بـ <code>::</code>: <code>::before</code> و<code>::after</code> (عنصر «وهمي» قبل/بعد المحتوى — لازم معاه <code>content</code>)، <code>::first-letter</code>، <code>::first-line</code>، <code>::placeholder</code>، <code>::selection</code>، <code>::marker</code> (نقطة الـ list)، <code>::backdrop</code> (خلفية الـ dialog)، و<code>::file-selector-button</code>.</p>
+        <html-example file="pseudo-elements.html" auto>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <title>Pseudo-elements</title>
+            <style>
+              body { font-family: system-ui, sans-serif; }
+              a[href^="http"]::after { content: " ↗"; }
+              a[href$=".pdf" i]::before { content: "📄 "; }
+              .sev::before { content: "[" attr(data-level) "] "; color: #b91c1c; font-weight: 700; }
+              li::marker { color: #ff7a45; }
+              ::selection { background: #ffd8c2; }
+            </style>
+          </head>
+          <body>
+            <p><a href="https://owasp.org/">OWASP</a> · <a href="/files/Report.PDF">Report</a> · <a href="/home">Home</a></p>
+            <p class="sev" data-level="HIGH">Reflected XSS in /search</p>
+            <ul><li>Select this text</li></ul>
+          </body>
+          </html>
+        </html-example>
+        <div class="callout pt reveal"><span class="ci">🎯</span><div><strong><code>content: attr()</code> والمحتوى اللي «مش موجود»</strong><p>النص اللي بيطلع من <code>::before</code>/<code>::after</code> <b>مش في الـ DOM</b> ومش بيتلاقي بـ Ctrl+F في الـ source بسهولة — صفحات phishing بتستخدم ده عشان كلمات زي «Microsoft» أو «Password» متبقاش موجودة كنص قدام الفلاتر، وتظهر للضحية بس. ولو قدرت تحقن CSS، <code>content: attr(value)</code> يقدر «يعرض» قيم مخفية زي tokens.</p></div></div>
+        <div class="callout spec reveal"><span class="ci">📜</span><div><strong><code>:visited</code> متقيّد عشان الخصوصية</strong><p>زمان كان أي موقع يقدر يعرف تاريخ تصفحك: يحط لينكات لمواقع كتير، ويشوف أنهي واحد لونه «visited» بـ <code>getComputedStyle</code>. دلوقتي المتصفحات بتسمح بخصائص ألوان بس في <code>:visited</code>، والـ <code>getComputedStyle</code> بيكدب ويرجّع قيمة الـ unvisited. (الهجمات بقت side-channels أعقد، والمتصفحات بتقسّم الـ history حسب الموقع.)</p></div></div>
+
+        <h3 class="sub">جرّب: Selector Tester</h3>
+        <div class="widget" data-widget="selector"></div>
+
+        <div class="exercises">
+          <div class="exercises-head"><h3><span class="bulb">✏️</span> تمارين الدرس 20</h3></div>
+          <quiz id="c20-q1" answer="1">
+            <q>إيه الفرق بين `div .note` و`div.note`؟</q>
+            <o>مفيش فرق</o>
+            <o>الأول: أي `.note` <b>جوه</b> div. التاني: div <b>نفسه</b> عليه class note</o>
+            <o>الأول غلط في الـ syntax</o>
+            <o>التاني: أي `.note` جوه div</o>
+            <good>المسافة combinator (descendant). من غير مسافة = نفس العنصر عليه الشرطين.</good>
+            <bad>المسافة بين جزئين = «جوه». لزقهم = «نفس العنصر».</bad>
+          </quiz>
+          <quiz id="c20-q2" answer="3">
+            <q>أنهي selector بيختار اللينكات اللي بتروح لملفات PDF حتى لو الامتداد مكتوب `.PDF`؟</q>
+            <o>`a[href*="pdf"]`</o>
+            <o>`a[href^=".pdf"]`</o>
+            <o>`a[href$=".pdf"]`</o>
+            <o>`a[href$=".pdf" i]`</o>
+            <good>`$=` = بيخلص بـ، و`i` = case-insensitive.</good>
+            <bad>محتاج «بيخلص بـ» (`$=`) ومن غير ما الحروف تفرق (`i`). `*=` هيطابق حاجات زي `/pdfs/page.html`.</bad>
+          </quiz>
+          <quiz id="c20-q3" answer="0">
+            <q>`li:nth-child(-n+3)` بيختار إيه؟</q>
+            <o>أول 3 عناصر</o>
+            <o>آخر 3 عناصر</o>
+            <o>كل تالت عنصر</o>
+            <o>ولا حاجة (n سالب)</o>
+            <good>n = 0، 1، 2… ⇒ 3، 2، 1، 0، -1… والمواضع الموجبة بس هي اللي بتتحسب: 1 و2 و3.</good>
+            <bad>عوّض n = 0، 1، 2، 3…: النتايج 3، 2، 1، 0… والمواضع الصالحة 1–3 = أول 3.</bad>
+          </quiz>
+          <quiz id="c20-q4" answer="2">
+            <q>عايز تلوّن `label` لو الـ `input` اللي جواه متعلّم عليه. أنهي selector؟</q>
+            <o>`input:checked label`</o>
+            <o>`label + input:checked`</o>
+            <o>`label:has(input:checked)`</o>
+            <o>`label:checked`</o>
+            <good>`:has()` بيخليك تختار الأب حسب اللي جواه — حاجة كانت مستحيلة في CSS قبل كده.</good>
+            <bad>الـ combinators العادية بتنزل لتحت أو لقدام بس. عشان «الأب اللي جواه» محتاج `:has()`.</bad>
+          </quiz>
+          <quiz id="c20-q5" answer="1">
+            <q>`a::after { color: red; }` ومفيش ولا نص اتضاف. ليه؟</q>
+            <o>`::after` مش بيشتغل على اللينكات</o>
+            <o>لازم `content` (حتى لو فاضي `""`) عشان الـ pseudo-element يتعمل</o>
+            <o>لازم `:after` بنقطة واحدة</o>
+            <o>الـ color مش مسموح فيه</o>
+            <good>من غير `content`، `::before`/`::after` مش بيتولّدوا أصلًا.</good>
+            <bad>القاعدة الأساسية: `content` إجباري لـ `::before` و`::after`.</bad>
+          </quiz>
+          <quiz id="c20-q6" answer="3">
+            <q>ليه مبقاش ينفع موقع يعرف المواقع اللي زرتها عن طريق `:visited` و`getComputedStyle`؟</q>
+            <o>`:visited` اتشال من CSS</o>
+            <o>المتصفح بيمسح الـ history</o>
+            <o>بيشتغل على HTTPS بس</o>
+            <o>المتصفحات بتسمح بخصائص ألوان بس في `:visited`، و`getComputedStyle` بيرجّع قيمة اللينك العادي</o>
+            <good>ده mitigation مقصود لهجمات history sniffing.</good>
+            <bad>`:visited` لسه موجود، بس متقيّد جدًا لأسباب خصوصية.</bad>
+          </quiz>
+
+          <html-lab id="c20-lab1" title="جدول findings بخطوط مقلّمة" level="1">
+            <desc><ul><li>الصفوف <b>الزوجية</b> في الـ <code>tbody</code> خلفيتها <code>#f1f5f9</code> (والفردية من غير خلفية).</li>
+            <li>أول صف في الـ <code>tbody</code> خطه bold (<code>font-weight: 700</code>).</li>
+            <li>أي صف عليه class <code>high</code> لونه <code>#b91c1c</code>.</li></ul>
+            <p>من غير ما تغيّر الـ HTML.</p></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Findings</title>
+                <style>
+                  table { border-collapse: collapse; font-family: system-ui; }
+                  td { padding: 4px 10px; }
+                </style>
+              </head>
+              <body>
+                <table>
+                  <tbody>
+                    <tr><td>F-01</td><td>Reflected XSS</td></tr>
+                    <tr class="high"><td>F-02</td><td>IDOR</td></tr>
+                    <tr><td>F-03</td><td>Open redirect</td></tr>
+                    <tr><td>F-04</td><td>Info leak</td></tr>
+                  </tbody>
+                </table>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Findings</title>
+                <style>
+                  table { border-collapse: collapse; font-family: system-ui; }
+                  td { padding: 4px 10px; }
+                  tbody tr:nth-child(even) { background: #f1f5f9; }
+                  tbody tr:first-child { font-weight: 700; }
+                  tr.high { color: #b91c1c; }
+                </style>
+              </head>
+              <body>
+                <table>
+                  <tbody>
+                    <tr><td>F-01</td><td>Reflected XSS</td></tr>
+                    <tr class="high"><td>F-02</td><td>IDOR</td></tr>
+                    <tr><td>F-03</td><td>Open redirect</td></tr>
+                    <tr><td>F-04</td><td>Info leak</td></tr>
+                  </tbody>
+                </table>
+              </body>
+              </html>
+            </solution>
+            <test label="الصفوف 2 و4 خلفيتها #f1f5f9، و1 و3 من غير" live>(() => { const r = [...document.querySelectorAll("tbody tr")].map(t => getComputedStyle(t).backgroundColor); return r[1] === "rgb(241, 245, 249)" && r[3] === "rgb(241, 245, 249)" && r[0] === "rgba(0, 0, 0, 0)" && r[2] === "rgba(0, 0, 0, 0)"; })()</test>
+            <test label="أول صف bold" live>getComputedStyle(document.querySelector("tbody tr")).fontWeight === "700"</test>
+            <test label="tr.high لونه #b91c1c" live>getComputedStyle(document.querySelector("tr.high")).color === "rgb(185, 28, 28)"</test>
+            <test label="الـ HTML زي ما هو (4 صفوف، class واحد)">count("tbody tr") === 4 && count("tr.high") === 1 && !has("[style]")</test>
+          </html-lab>
+
+          <html-lab id="c20-lab2" title="علامات اللينكات بالـ attribute selectors" level="2">
+            <desc><ul><li>أي لينك <b>خارجي</b> (الـ href بيبدأ بـ <code>http</code>) يتضاف بعده <code>" ↗"</code> بـ <code>::after</code>.</li>
+            <li>أي لينك لملف PDF (بيخلص بـ <code>.pdf</code> بأي case) لونه <code>#b91c1c</code>.</li>
+            <li>أي لينك فيه كلمة <code>logout</code> في الـ href يبقى <code>font-weight: 700</code>.</li>
+            <li>من غير ما تضيف ولا class للـ HTML.</li></ul></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Links</title>
+                <style>
+                  body { font-family: system-ui; }
+                </style>
+              </head>
+              <body>
+                <a href="https://owasp.org/">OWASP</a>
+                <a href="/files/Q4-Report.PDF">Q4 report</a>
+                <a href="/help">Help</a>
+                <a href="/account/logout?next=/">Sign out</a>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Links</title>
+                <style>
+                  body { font-family: system-ui; }
+                  a[href^="http"]::after { content: " ↗"; }
+                  a[href$=".pdf" i] { color: #b91c1c; }
+                  a[href*="logout"] { font-weight: 700; }
+                </style>
+              </head>
+              <body>
+                <a href="https://owasp.org/">OWASP</a>
+                <a href="/files/Q4-Report.PDF">Q4 report</a>
+                <a href="/help">Help</a>
+                <a href="/account/logout?next=/">Sign out</a>
+              </body>
+              </html>
+            </solution>
+            <test label="اللينك الخارجي بس عليه ↗" live>(() => { const a = document.querySelectorAll("a"); return getComputedStyle(a[0], "::after").content === '" ↗"' && getComputedStyle(a[2], "::after").content === "none"; })()</test>
+            <test label="لينك الـ PDF (بـ .PDF كابيتال) لونه #b91c1c" live>getComputedStyle(document.querySelectorAll("a")[1]).color === "rgb(185, 28, 28)"</test>
+            <test label="لينك الـ logout bold، والـ Help لأ" live>getComputedStyle(document.querySelectorAll("a")[3]).fontWeight === "700" && getComputedStyle(document.querySelectorAll("a")[2]).fontWeight === "400"</test>
+            <test label="مفيش class اتضاف">!has("a[class]")</test>
+            <hint>`^=` بيبدأ، `$=` بيخلص (و`i` للـ case)، `*=` فيه.</hint>
+          </html-lab>
+
+          <task id="c20-t1" title="كام عنصر؟" level="1" answer="4" norm="int">
+            <desc><p>قايمة فيها <b>10</b> عناصر <code>li</code> (كلهم أخوات). <code>li:nth-child(3n+1)</code> هيختار كام عنصر؟</p></desc>
+            <explain>4: المواضع 1، 4، 7، 10 (n = 0، 1، 2، 3).</explain>
+            <check expr="document.querySelectorAll(&quot;li:nth-child(3n+1)&quot;).length"><ul><li>i</li><li>i</li><li>i</li><li>i</li><li>i</li><li>i</li><li>i</li><li>i</li><li>i</li><li>i</li></ul></check>
+          </task>
+          <task id="c20-t2" title="مين اتطابق؟" level="2" answer="3" norm="int">
+            <desc><p>كام لينك من دول بيطابق <code>a[href*="admin" i]:not([href^="/public"])</code>؟</p></desc>
+            <listing lang="html" file="links.html">
+              <a href="/Admin/users">Users</a>
+              <a href="/public/admin-guide.pdf">Guide</a>
+              <a href="https://admin.shop.example/">Panel</a>
+              <a href="/administrator">Old panel</a>
+              <a href="/account">Account</a>
+            </listing>
+            <hint>`*=` + `i` = فيه «admin» بأي case في أي حتة (حتى جوه كلمة أطول). وبعدين استبعد اللي بيبدأ بـ `/public`.</hint>
+            <explain><b>3</b>. فيه «admin» (من غير ما الحروف تفرق): `/Admin/users` و`/public/admin-guide.pdf` و`https://admin.shop.example/` و`/administrator` (جوه كلمة أطول — `*=` مش بيدوّر على كلمة كاملة). الـ `:not([href^="/public"])` بيشيل الـ guide ⇒ يفضل 3. ولو كنت عايز «كلمة كاملة» في قايمة مسافات كنت هتستخدم `~=`.</explain>
+            <check expr="document.querySelectorAll(&#x27;a[href*=&quot;admin&quot; i]:not([href^=&quot;/public&quot;])&#x27;).length"><a href="/Admin/users">Users</a><a href="/public/admin-guide.pdf">Guide</a><a href="https://admin.shop.example/">Panel</a><a href="/administrator">Old panel</a><a href="/account">Account</a></check>
+          </task>
+        </div>
+      </section>

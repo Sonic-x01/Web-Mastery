@@ -1,0 +1,214 @@
+      <section class="section" id="c24" data-part="الجزء 2 · CSS" data-pk="css" data-nav="الخلفيات والحدود والظلال" data-icon="🖌️" data-keywords="background background-image url gradient linear-gradient radial-gradient conic-gradient background-size cover contain multiple backgrounds border border-radius box-shadow text-shadow object-fit object-position aspect-ratio filter blur grayscale backdrop-filter mix-blend-mode tracking requests phishing blurred document">
+        <div class="section-head">
+          <span class="section-index">24</span>
+          <div>
+            <p class="eyebrow">CSS · الدرس 24</p>
+            <h2>الخلفيات والحدود والظلال والصور</h2>
+            <p class="lede">ده الجزء اللي بيدّي الواجهة «روح»: gradients، كروت بحواف مدورة وظلال ناعمة، صور بتتقص صح، وتأثيرات زجاج. وفي نفس الوقت: كل <code>url()</code> في CSS = request بيطلع من متصفح الزائر — وده باب للـ tracking وتسريب البيانات، وقلب واحدة من أشهر حيل صفحات الـ phishing («المستند متشوّش، سجّل دخول عشان تشوفه»).</p>
+          </div>
+        </div>
+
+        <h3 class="sub">الخلفيات</h3>
+        <html-example file="backgrounds.html" auto max="420">
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <title>Backgrounds</title>
+            <style>
+              body { font-family: system-ui, sans-serif; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+              .tile { height: 80px; border-radius: 12px; display: grid; place-items: center; color: #fff; font-weight: 700; }
+              .t1 { background: linear-gradient(135deg, #ff7a45, #b48cff); }
+              .t2 { background: radial-gradient(circle at 30% 30%, #fde68a, #f97316); color: #1c1917; }
+              .t3 { background: conic-gradient(from 90deg, #ff7a45, #facc15, #22c55e, #38bdf8, #ff7a45); }
+              .t4 { background:
+                      linear-gradient(rgb(0 0 0 / 55%), rgb(0 0 0 / 55%)),
+                      repeating-linear-gradient(45deg, #334155 0 10px, #1e293b 10px 20px); }
+            </style>
+          </head>
+          <body>
+            <div class="tile t1">linear-gradient</div>
+            <div class="tile t2">radial-gradient</div>
+            <div class="tile t3">conic-gradient</div>
+            <div class="tile t4">multiple layers</div>
+          </body>
+          </html>
+        </html-example>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>الخاصية</th><th>القيم المهمة</th></tr></thead>
+          <tbody>
+            <tr><td><code>background-color</code></td><td>لون (تحت أي صورة)</td></tr>
+            <tr><td><code>background-image</code></td><td><code>url(…)</code> أو gradients — وممكن أكتر من layer بفواصل (الأولى فوق)</td></tr>
+            <tr><td><code>background-size</code></td><td><code>cover</code> (يملا ويقص) · <code>contain</code> (يبان كله) · مقاسات</td></tr>
+            <tr><td><code>background-position</code> / <code>-repeat</code></td><td><code>center</code> · <code>no-repeat</code></td></tr>
+            <tr><td>الاختصار</td><td><code>background: #000 url(hero.webp) center / cover no-repeat;</code></td></tr>
+          </tbody>
+        </table></div>
+
+        <h3 class="sub">الحدود والظلال</h3>
+        <html-example file="cards.html" auto>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <title>Cards</title>
+            <style>
+              body { font-family: system-ui, sans-serif; background: #f1f5f9; display: flex; gap: 14px; padding: 10px; }
+              .card { background: #fff; border-radius: 14px; padding: 14px 16px; width: 170px;
+                      box-shadow: 0 1px 2px rgb(0 0 0 / 6%), 0 10px 24px -8px rgb(15 23 42 / 25%); }
+              .outline { border: 2px dashed #ff7a45; box-shadow: none; }
+              .inset { box-shadow: inset 0 0 0 2px #b48cff; }
+              .avatar { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg,#ff7a45,#b48cff); }
+              h3 { margin: 6px 0 0; text-shadow: 0 1px 0 #fff, 0 2px 6px rgb(0 0 0 / 15%); }
+            </style>
+          </head>
+          <body>
+            <div class="card"><div class="avatar"></div><h3>Shadow</h3></div>
+            <div class="card outline"><h3>Dashed border</h3></div>
+            <div class="card inset"><h3>Inset ring</h3></div>
+          </body>
+          </html>
+        </html-example>
+        <ul>
+          <li><code>border-radius</code>: <code>12px</code> لكارت، <code>50%</code> لدايرة، <code>999px</code> لـ pill.</li>
+          <li><code>box-shadow: x y blur spread color</code> — وممكن أكتر من ظل، و<code>inset</code> للظل الداخلي (حلقة focus مثلًا من غير ما تغيّر المقاس).</li>
+          <li><code>text-shadow</code> للنص، و<code>outline</code> + <code>outline-offset</code> لحلقات الـ focus.</li>
+        </ul>
+
+        <h3 class="sub">الصور: object-fit وaspect-ratio</h3>
+        <p><code>object-fit: cover</code> بيخلي الصورة تملا المكان من غير ما تتمط (وبيقص الزيادة)، و<code>object-position</code> بيحدد أنهي جزء يفضل. و<code>aspect-ratio: 16 / 9</code> بيحجز مساحة بنسبة ثابتة — مفيد جدًا ضد الـ layout shift.</p>
+
+        <h3 class="sub">الفلاتر والتأثيرات</h3>
+        <html-example file="filters.html" auto max="380">
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <title>Filters</title>
+            <style>
+              body { margin: 0; font-family: system-ui, sans-serif; }
+              .doc { padding: 16px; height: 210px; background:
+                     repeating-linear-gradient(#fff 0 22px, #e2e8f0 22px 23px); filter: blur(3px); color: #334155; }
+              .modal { position: absolute; inset: 40px 50px auto; padding: 14px 16px; border-radius: 12px; text-align: center;
+                       background: rgb(255 255 255 / 70%); backdrop-filter: blur(6px) saturate(1.2);
+                       box-shadow: 0 20px 40px -10px rgb(0 0 0 / 35%); }
+            </style>
+          </head>
+          <body>
+            <div class="doc"><b>INVOICE #88213</b><br>Amount due: $4,980.00<br>Bank: …<br>IBAN: …</div>
+            <div class="modal">🔒 <b>This document is protected</b><br><small>Sign in with your email account to view</small><br><button>Sign in</button></div>
+          </body>
+          </html>
+        </html-example>
+        <div class="callout mal reveal"><span class="ci">🦠</span><div><strong>«المستند متشوّش — سجّل دخول عشان تشوفه»</strong><p>اللي فوق بالظبط هو template متكرر في phishing kits: صورة لمستند/فاتورة عليها <code>filter: blur()</code>، وفوقها modal زجاجي بـ <code>backdrop-filter</code> بيطلب الإيميل والـ password. مفيش ولا سطر JavaScript «مشبوه» — كله CSS، والمستند ممكن يكون حتى صورة <code>data:</code>. 🔎 للمحلل: blur على خلفية + فورم password في صفحة مرفقة = علامة قوية.</p></div></div>
+
+        <h3 class="sub">🎯 كل url() = request</h3>
+        <code-block lang="css" file="tracking.css">
+          /* loaded only when the element matches → reveals behaviour to the server */
+          .order-confirmed { background-image: url("https://track.example/px?event=purchase&id=8812"); }
+          a:hover          { background-image: url("https://track.example/px?event=hover"); }
+          @media print     { body { background-image: url("https://track.example/px?event=printed"); } }
+        </code-block>
+        <p>الـ CSS مبيقدرش <b>يقرا</b> الـ response، بس يقدر <b>يطلق</b> requests حسب الحالة (عنصر ظهر، hover، طباعة، selector اتطابق). ده بيستخدم في tracking من غير JavaScript (حتى في إيميلات)، وده نفس السبب اللي بيخلي CSS injection خطير. 🛡️ الـ CSP <code>img-src</code> بيتحكم في صور الخلفية كمان.</p>
+
+        <div class="exercises">
+          <div class="exercises-head"><h3><span class="bulb">✏️</span> تمارين الدرس 24</h3></div>
+          <quiz id="c24-q1" answer="1">
+            <q>صورة hero لازم تملا مساحة 1200×400 من غير ما تتمط، ومش مهم لو اتقصّ جزء منها:</q>
+            <o>`background-size: contain`</o>
+            <o>`background-size: cover`</o>
+            <o>`background-size: 100% 100%`</o>
+            <o>`background-repeat: repeat`</o>
+            <good>`cover` بيملا ويحافظ على النسبة (بيقص الزيادة)، و`contain` بيبيّن الصورة كلها (ممكن يسيب فراغ).</good>
+            <bad>`100% 100%` بتمط الصورة، و`contain` بتسيب فراغات. `cover` هو المطلوب.</bad>
+          </quiz>
+          <quiz id="c24-q2" answer="3">
+            <q>`background: linear-gradient(red, blue), url(photo.jpg);` — أنهي layer فوق؟</q>
+            <o>الصورة</o>
+            <o>مبيعرضش غير واحدة</o>
+            <o>حسب حجم كل واحدة</o>
+            <o>الـ gradient (أول layer في القايمة بيترسم فوق)</o>
+            <good>الطبقات بالترتيب: الأولى فوق. عشان كده بنحط gradient شفاف فوق صورة عشان النص يتقري.</good>
+            <bad>في الخلفيات المتعددة، أول قيمة = أعلى طبقة.</bad>
+          </quiz>
+          <quiz id="c24-q3" answer="0">
+            <q>CSS فيه `.paid { background: url(https://t.example/p?u=7) }`. الـ request ده بيتبعت إمتى؟</q>
+            <o>بس لما عنصر عليه `.paid` يتعرض في الصفحة</o>
+            <o>أول ما ملف الـ CSS يتحمّل، دايمًا</o>
+            <o>عمره ما بيتبعت</o>
+            <o>بس لو فيه JavaScript</o>
+            <good>المتصفح بيطلب صور الخلفية للعناصر اللي اتطابقت واتعرضت بس — وده اللي بيخلّي CSS يكشف «حالة» الصفحة للسيرفر.</good>
+            <bad>صور الخلفية بتتطلب لما قاعدة بيها تتطبق فعلًا على عنصر معروض.</bad>
+          </quiz>
+          <quiz id="c24-q4" answer="2">
+            <q>عايز دايرة 64×64 لصورة بروفايل مربعة أو مستطيلة من غير ما تتمط:</q>
+            <o>`border-radius: 64px`</o>
+            <o>`border-radius: 50%` بس</o>
+            <o>`width/height: 64px` + `border-radius: 50%` + `object-fit: cover`</o>
+            <o>`clip: circle`</o>
+            <good>المقاس الثابت + نص قطر 50% + object-fit عشان الصور المستطيلة متتمطش.</good>
+            <bad>من غير `object-fit: cover` الصورة المستطيلة هتتمط جوه المربع.</bad>
+          </quiz>
+
+          <html-lab id="c24-lab1" title="كارت احترافي" level="1">
+            <desc><p>الـ <code>.card</code>:</p><ul>
+            <li><code>border-radius: 14px</code> وخلفيته <code>linear-gradient</code> (أي ألوان).</li>
+            <li>عليه <code>box-shadow</code> (أي ظل، مش none).</li>
+            <li>الـ <code>.avatar</code> جواه 48×48 ودايرة (<code>border-radius: 50%</code>) و<code>object-fit: cover</code>.</li></ul></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Card</title>
+                <style>
+                  .card { width: 260px; padding: 16px; font-family: system-ui; color: #fff; }
+                </style>
+              </head>
+              <body>
+                <div class="card">
+                  <img class="avatar" alt="Researcher avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='80'%3E%3Crect width='120' height='80' fill='%23fde68a'/%3E%3C/svg%3E">
+                  <h3>Omar Hassan</h3><p>Web pentester</p>
+                </div>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Card</title>
+                <style>
+                  .card { width: 260px; padding: 16px; font-family: system-ui; color: #fff;
+                          border-radius: 14px; background: linear-gradient(135deg, #f0602a, #7c3aed);
+                          box-shadow: 0 12px 28px -10px rgb(15 23 42 / 45%); }
+                  .avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; }
+                </style>
+              </head>
+              <body>
+                <div class="card">
+                  <img class="avatar" alt="Researcher avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='80'%3E%3Crect width='120' height='80' fill='%23fde68a'/%3E%3C/svg%3E">
+                  <h3>Omar Hassan</h3><p>Web pentester</p>
+                </div>
+              </body>
+              </html>
+            </solution>
+            <test label="border-radius 14px + خلفية linear-gradient" live>(() => { const s = getComputedStyle(document.querySelector(".card")); return s.borderTopLeftRadius === "14px" && /linear-gradient/.test(s.backgroundImage); })()</test>
+            <test label="فيه box-shadow" live>getComputedStyle(document.querySelector(".card")).boxShadow !== "none"</test>
+            <test label="الـ avatar دايرة 48×48 بـ object-fit: cover" live>(() => { const a = document.querySelector(".avatar"), s = getComputedStyle(a), r = a.getBoundingClientRect(); return Math.round(r.width) === 48 && Math.round(r.height) === 48 && s.borderTopLeftRadius === "50%" && s.objectFit === "cover"; })()</test>
+          </html-lab>
+
+          <task id="c24-t1" title="كام request؟" level="2" answer="3" norm="int" reject="2|4">
+            <desc><p>الصفحة فيها العناصر دي بس: <code>&lt;div class="cart"&gt;</code> و<code>&lt;p class="note"&gt;</code>. لما تتعرض (من غير hover ولا طباعة)، كام request صور هيطلع بسبب الـ CSS ده؟</p></desc>
+            <listing lang="css" file="style.css">
+              .cart  { background: url("/img/cart.svg") no-repeat; }
+              .note  { background-image: url("https://t.example/p?e=note"), url("/img/paper.png"); }
+              .admin { background: url("https://t.example/p?e=admin"); }
+              .cart:hover { background-image: url("https://t.example/p?e=hover"); }
+            </listing>
+            <hint>بس القواعد اللي بتتطبق على عناصر موجودة دلوقتي — وخلي بالك إن `.note` فيها طبقتين.</hint>
+            <explain><b>3</b>: `.cart` ⇒ 1 (`cart.svg`)، و`.note` ⇒ 2 (فيها طبقتين صور). `.admin` مفيش عنصر بيطابقها، و`:hover` مش متحقق دلوقتي. لو الماوس جه على الـ cart هيطلع request رابع للـ tracker — يعني السيرفر «عرف» إن المستخدم عمل hover.</explain>
+          </task>
+        </div>
+      </section>

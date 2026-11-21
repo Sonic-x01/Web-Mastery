@@ -582,6 +582,15 @@
           ok(!t._check("definitely wrong answer 123"), "task " + t.dataset.ex + ": accepts a wrong answer");
           (J.reject[t.dataset.ex] || []).forEach(function (a) { ok(!t._check(a), "task " + t.dataset.ex + ": accepts rejected answer '" + a + "'"); });
         });
+        var checks = J.checks || {};
+        return Object.keys(checks).reduce(function (p, tid) {
+          return p.then(function () {
+            var c = checks[tid], pv = new WM.Preview(host, {});
+            return pv.run(c.html).then(function () { return sleep(60); }).then(function () {
+              return pv.evalLive("String(" + c.expr + ").trim().toLowerCase().replace(/\\s+/g, \" \") === " + JSON.stringify(c.expect));
+            }).then(function (r) { ok(r && r.ok, "task " + tid + ": <check> computes something else than the stored answer '" + c.expect + "'" + (r && r.err ? " — " + r.err : "")); pv.destroy(); });
+          });
+        }, Promise.resolve());
       }, function () { ok(false, "could not load tools/.work/selftest.json (serve the folder over http)"); });
     });
     $$(".xss[data-ex]").forEach(function (x) {
@@ -604,6 +613,22 @@
           ok(hx.hasAttribute("data-errors-ok") || !errs.length, "example " + (hx.dataset.file || "?") + " in " + (hx.closest(".section") || {}).id + ": console error: " + errs.join(" | "));
           pv.destroy();
         });
+      });
+    });
+    if (WM.specificity) step("specificity unit tests", function () {
+      [["#id", "1,0,0"], [".a.b", "0,2,0"], ["div p", "0,0,2"], ["a:hover", "0,1,1"], ["ul li::before", "0,0,3"], ["p:first-line", "0,0,2"],
+       [":is(#a, .b) p", "1,0,1"], [":where(#a) p", "0,0,1"], [":not(.a, #b)", "1,0,0"], ["[type=\"text\"]", "0,1,0"], ["*", "0,0,0"],
+       ["input:not([disabled]):focus", "0,2,1"], ["li:nth-child(2n+1 of .x)", "0,2,1"], [".a, #b", "1,0,0"], ["a[href$=\".pdf\" i]", "0,1,1"],
+       ["main:has(> form) button", "0,0,3"], ["#a #b .c > d + e ~ f", "2,1,3"]].forEach(function (t) {
+        var got = WM.specificity(t[0]).join(",");
+        ok(got === t[1], "specificity of " + t[0] + " = " + got + " (expected " + t[1] + ")");
+      });
+    });
+    if (WM.contrastRatio) step("contrast unit tests", function () {
+      [["#000", "#fff", "21.00"], ["#767676", "#ffffff", "4.54"], ["#777777", "#fff", "4.48"], ["#999999", "white", "2.85"],
+       ["#fff", "#2563eb", "5.17"], ["#ffffff", "#3b82f6", "3.68"], ["#ff7a45", "#0b1322", "7.18"], ["rgb(255, 255, 255)", "#dc2626", "4.83"]].forEach(function (t) {
+        var got = WM.contrastRatio(t[0], t[1]).toFixed(2);
+        ok(got === t[2], "contrast " + t[0] + " on " + t[1] + " = " + got + " (expected " + t[2] + ")");
       });
     });
     step("quiz indices", function () {

@@ -674,6 +674,7 @@
         else if (w === "tokenizer") tokenizerWidget(box);
         else if (w === "parser") parserWidget(box);
         else if (w === "smuggle") smuggleWidget(box);
+        else if (WM.widgetRegistry && WM.widgetRegistry[w]) WM.widgetRegistry[w](box, API);
       } catch (e) { box.textContent = "widget error: " + e.message; console.error(e); }
     });
   };

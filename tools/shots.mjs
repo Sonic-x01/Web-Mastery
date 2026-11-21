@@ -34,7 +34,17 @@ const SHOTS = [
   ["12-light", 1440, 900, "light", "location.hash='#s13'", 1200],
   ["13-mobile", 390, 844, "dark", "location.hash='#s08'", 1200],
   ["14-cheat", 1440, 900, "dark", "location.hash='#cheat'", 900],
+  ["15-css-spec", 1440, 900, "dark", "(async()=>{const w=document.querySelector('[data-widget=specificity]'); w.scrollIntoView({block:'start'}); scrollBy(0,-70);})()", 900],
+  ["16-css-grid", 1440, 900, "dark", "(async()=>{const w=document.querySelector('[data-widget=grid]'); w.scrollIntoView({block:'start'}); scrollBy(0,-70); w.querySelectorAll('.u-presets button')[4].click();})()", 900],
+  ["17-css-scene", 1440, 900, "dark", "(async()=>{const s=document.getElementById('sc-render'); s.scrollIntoView({block:'center'}); for(let i=0;i<3;i++) s.querySelector('.sc-next').click();})()", 1200],
+  ["18-css-contrast", 1440, 900, "dark", "(async()=>{const w=document.querySelector('[data-widget=contrast]'); w.scrollIntoView({block:'start'}); scrollBy(0,-70); w.querySelectorAll('.u-presets button')[3].click();})()", 900],
+  ["19-css-capstone", 1440, 900, "dark", "(async()=>{const l=document.getElementById('p-css-capstone'); l.scrollIntoView({block:'start'}); scrollBy(0,-70); l.querySelector('.lab-check').click();})()", 2500],
+  ["20-css-projects", 1440, 900, "dark", "location.hash='#p-css'", 1200],
+  ["21-css-cheat", 1440, 900, "dark", "(async()=>{const h=[...document.querySelectorAll('.cheat-card h4')].find(x=>x.textContent.includes('CSS: Selectors')); h.scrollIntoView({block:'start'}); scrollBy(0,-90);})()", 900],
+  ["22-css-mobile", 390, 844, "dark", "location.hash='#c27'", 1500],
+  ["23-css-light", 1440, 900, "light", "location.hash='#c31'", 1500],
 ];
+const only = process.argv[4] ? new RegExp(process.argv[4]) : null;
 
 async function main() {
   let targets = null;
@@ -43,7 +53,7 @@ async function main() {
   await new Promise((r) => (ws.onopen = r));
   ws.onmessage = (m) => { const d = JSON.parse(m.data); if (d.method === "Runtime.exceptionThrown") console.log("  ⚠ exception:", d.params.exceptionDetails.exception ? d.params.exceptionDetails.exception.description.split(String.fromCharCode(10)).slice(0, 3).join(" | ") : d.params.exceptionDetails.text); if (d.id && pending.has(d.id)) { const p = pending.get(d.id); pending.delete(d.id); d.error ? p.rej(new Error(d.error.message)) : p.res(d.result); } };
   await send("Page.enable"); await send("Runtime.enable");
-  for (const [name, w, h, theme, script, wait] of SHOTS) {
+  for (const [name, w, h, theme, script, wait] of SHOTS.filter((x) => !only || only.test(x[0]))) {
     await send("Emulation.setDeviceMetricsOverride", { width: w, height: h, deviceScaleFactor: 1, mobile: w < 600 });
     await send("Page.navigate", { url: `${base}?shot=${name}` });
     for (let i = 0; i < 60; i++) { await sleep(500); try { if (await evaluate("document.querySelectorAll('#nav a').length > 0 && !!document.querySelector('.xss-ui .xss-go')")) break; } catch {} }

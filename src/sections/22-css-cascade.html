@@ -1,0 +1,262 @@
+      <section class="section" id="c21" data-part="الجزء 2 · CSS" data-pk="css" data-nav="الـ Cascade والـ Specificity" data-icon="⚖️" data-keywords="cascade origin importance important layer specificity order of appearance inheritance inherit initial unset revert revert-layer all element-attached style attribute :where zero specificity bem">
+        <div class="section-head">
+          <span class="section-index">21</span>
+          <div>
+            <p class="eyebrow">CSS · الدرس 21</p>
+            <h2>الـ Cascade: لما قاعدتين يتخانقوا مين يكسب؟</h2>
+            <p class="lede">الـ «C» في CSS = <b>Cascading</b>. على أي عنصر ممكن 10 قواعد تحاول تحدد نفس الخاصية. المتصفح عنده خوارزمية ثابتة بتقرر مين يكسب. أغلب «الـ CSS مش شغّال!» اللي بتقابلها كمطوّر سببها إنك مش فاهم الخوارزمية دي — وكمهاجم، فهمها بيقولك الـ CSS اللي حقنته هيغلب ولا لأ.</p>
+          </div>
+        </div>
+
+        <h3 class="sub">ترتيب الحكم (Cascade Level 5)</h3>
+        <div class="steps">
+          <div class="step"><span class="n">1</span><div><h4>Origin + Importance</h4><p>للقواعد العادية: CSS المتصفح &lt; CSS المستخدم &lt; <b>CSS الموقع</b>. ومع <code>!important</code> الترتيب <b>بيتعكس</b> (الـ <code>!important</code> بتاع المستخدم بيغلب بتاع الموقع — عشان الـ accessibility). وأي <code>!important</code> بيغلب أي قاعدة عادية.</p></div></div>
+          <div class="step"><span class="n">2</span><div><h4>Element-attached styles</h4><p>الـ <code>style=""</code> attribute بيغلب أي قاعدة من stylesheet (من نفس المستوى) مهما كانت الـ specificity.</p></div></div>
+          <div class="step"><span class="n">3</span><div><h4>Layers (<code>@layer</code>)</h4><p>الطبقة اللي اتعرّفت <b>أخيرًا</b> بتكسب، والـ CSS اللي برا أي layer بيغلب كل الـ layers (للقواعد العادية).</p></div></div>
+          <div class="step"><span class="n">4</span><div><h4>Specificity</h4><p>الأوزن selector يكسب: (A ids، B classes/attributes/pseudo-classes، C types/pseudo-elements) وبتتقارن من الشمال: A الأول.</p></div></div>
+          <div class="step"><span class="n">5</span><div><h4>Order of appearance</h4><p>لو كل اللي فات اتعادل: اللي <b>مكتوب أخيرًا</b> يكسب.</p></div></div>
+        </div>
+        <html-example file="cascade.html" auto>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <title>Cascade</title>
+            <style>
+              button { background: gray; color: white; padding: 6px 12px; border: 0; }
+              .btn { background: royalblue; }            /* (0,1,0) beats (0,0,1) */
+              #save { background: seagreen; }            /* (1,0,0) beats classes */
+              .btn.btn.btn { background: orange; }       /* (0,3,0) still loses to one id */
+              .danger { background: crimson !important; } /* !important beats everything normal */
+              .same { background: purple; }
+              .same { background: teal; }                 /* tie → the later one wins */
+            </style>
+          </head>
+          <body>
+            <button>type</button>
+            <button class="btn">class</button>
+            <button class="btn" id="save">id</button>
+            <button class="btn danger" id="del" style="background: black">!important beats inline</button>
+            <button class="same">order</button>
+            <button style="background: #c2410c">inline</button>
+          </body>
+          </html>
+        </html-example>
+
+        <h3 class="sub">احسب بنفسك</h3>
+        <div class="widget" data-widget="specificity"></div>
+        <div class="callout tip reveal"><span class="ci">💡</span><div><strong>قواعد عملية للمطوّر</strong><p>(1) استخدم classes تقريبًا لكل حاجة، وابعد عن الـ ids في الـ CSS. (2) <code>!important</code> = علامة إن فيه حرب specificity — استخدمه بس في utilities أو لتجاوز CSS خارجي. (3) <code>:where()</code> بيدّي specificity صفر، ممتاز للـ resets والمكتبات عشان المستخدم يعدّلها بسهولة. (4) منهجيات زي <b>BEM</b> (<code>.card__title--active</code>) بتخلي كل الـ selectors class واحدة فالـ specificity مسطّحة ومتوقعة.</p></div></div>
+
+        <h3 class="sub">الـ Layers: نظّم الحرب من الأول</h3>
+        <code-block lang="css" file="layers.css">
+          /* declare the order once: later layers win */
+          @layer reset, base, components, utilities;
+
+          @layer components {
+            .card .title { color: navy; }          /* (0,2,0) */
+          }
+          @layer utilities {
+            .text-red { color: crimson; }          /* (0,1,0) — still wins: its layer is later */
+          }
+          /* unlayered CSS beats every layer (for normal declarations) */
+        </code-block>
+
+        <h3 class="sub">الوراثة (Inheritance)</h3>
+        <p>خصائص النص (<code>color</code>، <code>font-*</code>، <code>line-height</code>، <code>text-align</code>، <code>direction</code>، <code>visibility</code>، <code>cursor</code>…) بتتورث من الأب للأبناء. خصائص الصندوق (<code>margin</code>، <code>padding</code>، <code>border</code>، <code>background</code>، <code>width</code>، <code>display</code>…) <b>مش</b> بتتورث. وتقدر تتحكم صراحة:</p>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>القيمة</th><th>المعنى</th></tr></thead>
+          <tbody>
+            <tr><td><code>inherit</code></td><td>خد قيمة الأب</td></tr>
+            <tr><td><code>initial</code></td><td>القيمة الابتدائية في الـ spec (مثلًا <code>display: inline</code>)</td></tr>
+            <tr><td><code>unset</code></td><td><code>inherit</code> لو الخاصية بتتورث، وإلا <code>initial</code></td></tr>
+            <tr><td><code>revert</code></td><td>ارجع لقيمة المتصفح (user-agent) أو المستخدم</td></tr>
+            <tr><td><code>revert-layer</code></td><td>ارجع لقيمة الـ layer اللي قبلي</td></tr>
+            <tr><td><code>all: unset</code></td><td>صفّر كل الخصائص مرة واحدة</td></tr>
+          </tbody>
+        </table></div>
+        <html-example file="inheritance.html" auto>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <title>Inheritance</title>
+            <style>
+              .panel { color: #334155; font-family: Georgia, serif; border: 2px solid #c2410c; padding: 8px; }
+              .panel a { color: inherit; }                 /* links don't inherit color by default */
+              .panel button { font: inherit; }             /* form controls don't inherit fonts by default */
+            </style>
+          </head>
+          <body>
+            <div class="panel">
+              Text inherits color + font. <a href="#x">So does this link (inherit)</a>.
+              <p>The paragraph inherits too, but NOT the border/padding.</p>
+              <button>button with font: inherit</button> <button style="font: initial">font: initial</button>
+            </div>
+          </body>
+          </html>
+        </html-example>
+        <div class="callout pt reveal"><span class="ci">🎯</span><div><strong>هل الـ CSS اللي حقنته هيغلب؟</strong><p>لو حقنت قيمة جوه <code>style=""</code> attribute: بتغلب كل قواعد الـ stylesheet العادية (element-attached). لو حقنت <code>&lt;style&gt;</code>: لازم تغلب بالـ specificity أو الترتيب أو <code>!important</code> — والـ <code>!important</code> بتاعك بيغلب الـ <code>!important</code> بتاع الموقع لو specificity أعلى أو جاي بعده. ده بيفرق جدًا في هجمات UI redressing: إظهار عنصر مخفي (<code>display: block !important</code>)، أو إخفاء تحذير أمني، أو تغطية الصفحة بطبقة مزيفة.</p></div></div>
+
+        <div class="exercises">
+          <div class="exercises-head"><h3><span class="bulb">✏️</span> تمارين الدرس 21</h3></div>
+          <quiz id="c21-q1" answer="2">
+            <q>`#nav a` و`.menu .item .link` على نفس اللينك (بدون !important). مين يكسب؟</q>
+            <o>`.menu .item .link` لأنه فيه 3 classes</o>
+            <o>اللي مكتوب أخيرًا</o>
+            <o>`#nav a` — (1,0,1) أكبر من (0,3,0) لأن الـ A بتتقارن الأول</o>
+            <o>متعادلين</o>
+            <good>الـ specificity بتتقارن خانة خانة من الشمال. id واحد بيغلب أي عدد من الـ classes.</good>
+            <bad>(1,0,1) ضد (0,3,0): الخانة الأولى 1 ضد 0 ⇒ الـ id كسب، من غير ما نبص على الباقي.</bad>
+          </quiz>
+          <quiz id="c21-q2" answer="0">
+            <q>`<p style="color: red">` وفي الـ stylesheet: `#lead.intro p { color: blue; }` (وبيطابق نفس الـ p). اللون؟</q>
+            <o>أحمر — الـ style attribute بيغلب أي selector عادي</o>
+            <o>أزرق — specificity أعلى</o>
+            <o>بنفسجي</o>
+            <o>حسب الترتيب</o>
+            <good>الـ element-attached styles بتيجي في الـ cascade قبل الـ specificity.</good>
+            <bad>الـ inline style مالوش «specificity» يتقارن — هو مرحلة أعلى في الحكم. بس `!important` في الـ stylesheet بيغلبه.</bad>
+          </quiz>
+          <quiz id="c21-q3" answer="3">
+            <q>إيه specificity الـ selector ده: `:where(#main .nav) a:hover`؟</q>
+            <o>(1,2,1)</o>
+            <o>(1,1,1)</o>
+            <o>(0,2,1)</o>
+            <o>(0,1,1)</o>
+            <good>`:where()` = صفر، يفضل `a` (C) و`:hover` (B).</good>
+            <bad>كل اللي جوه `:where()` وزنه صفر. اللي بيتحسب: `a` = (0,0,1) و`:hover` = (0,1,0).</bad>
+          </quiz>
+          <quiz id="c21-q4" answer="1">
+            <q>لينك جوه div لونه أحمر، واللينك نفسه بيفضل أزرق. ليه؟</q>
+            <o>الـ color مش بيتورث</o>
+            <o>الـ user-agent stylesheet بيدّي اللينك لون صريح (`:link`)، والقيمة الصريحة بتغلب الوراثة دايمًا</o>
+            <o>bug في المتصفح</o>
+            <o>لازم `!important`</o>
+            <good>الوراثة بتشتغل بس لو مفيش ولا قاعدة (حتى من المتصفح) بتحدد قيمة. الحل: `a { color: inherit; }`.</good>
+            <bad>`color` بيتورث فعلًا، بس أي قيمة صريحة على العنصر — حتى من CSS المتصفح — بتغلب الموروث.</bad>
+          </quiz>
+          <quiz id="c21-q5" answer="2">
+            <q>`@layer base, utilities;` وفي `base`: `#app .title { color: blue }`، وفي `utilities`: `.red { color: red }`. العنصر عليه الاتنين. اللون؟</q>
+            <o>أزرق — specificity أعلى</o>
+            <o>حسب الترتيب في الملف</o>
+            <o>أحمر — الـ layer المتأخرة بتكسب قبل ما نبص على الـ specificity</o>
+            <o>متعادلين</o>
+            <good>الـ layers مرحلة قبل الـ specificity في الـ cascade. ده بيخلّي الـ utilities دايمًا تغلب من غير `!important`.</good>
+            <bad>ترتيب الـ layers بيتحكم قبل الـ specificity: `utilities` جاية بعد `base` فبتكسب.</bad>
+          </quiz>
+
+          <html-lab id="c21-lab1" title="اكسب الحرب من غير !important" level="2">
+            <desc><p>الزرار <code>.danger</code> لازم خلفيته تبقى <code>#dc2626</code>. عندك قاعدة موجودة قوية مش مسموح تعدّلها ولا تمسحها. ممنوع <code>!important</code>، وممنوع تغيّر الـ HTML. ضيف قاعدة واحدة <b>بعدها</b> بـ specificity كفاية.</p></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Toolbar</title>
+                <style>
+                  /* do not edit this rule */
+                  #app .toolbar button { background: #64748b; color: #fff; border: 0; padding: 6px 12px; }
+
+                  /* your rule below */
+                  .danger { background: #dc2626; }
+                </style>
+              </head>
+              <body>
+                <div id="app"><div class="toolbar"><button>Save</button> <button class="danger">Delete</button></div></div>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Toolbar</title>
+                <style>
+                  /* do not edit this rule */
+                  #app .toolbar button { background: #64748b; color: #fff; border: 0; padding: 6px 12px; }
+
+                  /* your rule below */
+                  #app .toolbar button.danger { background: #dc2626; }
+                </style>
+              </head>
+              <body>
+                <div id="app"><div class="toolbar"><button>Save</button> <button class="danger">Delete</button></div></div>
+              </body>
+              </html>
+            </solution>
+            <test label=".danger خلفيته #dc2626" live>getComputedStyle(document.querySelector(".danger")).backgroundColor === "rgb(220, 38, 38)"</test>
+            <test label="Save لسه #64748b" live>getComputedStyle(document.querySelector("button")).backgroundColor === "rgb(100, 116, 139)"</test>
+            <test label="من غير !important ومن غير style attribute">!/!\s*important/.test(S) && !has("[style]")</test>
+            <test label="القاعدة الأصلية لسه موجودة زي ما هي">/#app \.toolbar button \{ background: #64748b;/.test(src)</test>
+            <hint>محتاج specificity أكبر من (1,1,1): زوّد class على نفس الـ selector.</hint>
+          </html-lab>
+
+          <html-lab id="c21-lab2" title="الوراثة صح" level="1">
+            <desc><ul><li>الـ <code>.panel</code> لونه <code>#334155</code> وخطه <code>Georgia, serif</code>.</li>
+            <li>اللينكات جوه الـ panel <b>تورث</b> اللون (<code>inherit</code>).</li>
+            <li>الزرار جوه الـ panel يورث الخط كله (<code>font: inherit</code>).</li></ul></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Panel</title>
+                <style>
+                  .panel { padding: 8px; }
+                </style>
+              </head>
+              <body>
+                <div class="panel">Read the <a href="#guide">guide</a> first. <button>Start</button></div>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Panel</title>
+                <style>
+                  .panel { padding: 8px; color: #334155; font-family: Georgia, serif; }
+                  .panel a { color: inherit; }
+                  .panel button { font: inherit; }
+                </style>
+              </head>
+              <body>
+                <div class="panel">Read the <a href="#guide">guide</a> first. <button>Start</button></div>
+              </body>
+              </html>
+            </solution>
+            <test label=".panel لونه #334155 وخطه Georgia" live>(() => { const s = getComputedStyle(document.querySelector(".panel")); return s.color === "rgb(51, 65, 85)" && /georgia/i.test(s.fontFamily); })()</test>
+            <test label="اللينك لونه زي الـ panel" live>getComputedStyle(document.querySelector(".panel a")).color === "rgb(51, 65, 85)"</test>
+            <test label="الزرار خطه Georgia" live>/georgia/i.test(getComputedStyle(document.querySelector(".panel button")).fontFamily)</test>
+            <test label="استخدمت inherit">/inherit/.test(S)</test>
+          </html-lab>
+
+          <task id="c21-t1" title="اللون النهائي" level="2" answer="orange">
+            <desc><p>إيه لون الـ <code>&lt;p id="lead" class="intro"&gt;</code> النهائي؟ (اسم اللون بالإنجليزي)</p></desc>
+            <listing lang="css" file="style.css">
+              p { color: green; }
+              #lead { color: purple; }
+              .intro { color: blue !important; }
+              p.intro { color: orange !important; }
+              body p { color: red; }
+            </listing>
+            <hint>الأول: مين عليه `!important`؟ وبينهم، مين أوزن؟</hint>
+            <explain>`orange`. القاعدتين اللي عليهم `!important` بيغلبوا الكل (حتى الـ id). بينهم: `p.intro` = (0,1,1) أكبر من `.intro` = (0,1,0).</explain>
+            <check expr="({&quot;rgb(255, 165, 0)&quot;:&quot;orange&quot;,&quot;rgb(128, 0, 128)&quot;:&quot;purple&quot;,&quot;rgb(0, 0, 255)&quot;:&quot;blue&quot;,&quot;rgb(255, 0, 0)&quot;:&quot;red&quot;,&quot;rgb(0, 128, 0)&quot;:&quot;green&quot;,&quot;rgb(0, 128, 128)&quot;:&quot;teal&quot;})[getComputedStyle(document.querySelector(&quot;p&quot;)).color]"><style>p { color: green; } #lead { color: purple; } .intro { color: blue !important; } p.intro { color: orange !important; } body p { color: red; }</style><p id="lead" class="intro">x</p></check>
+          </task>
+          <task id="c21-t2" title="ومن غير !important؟" level="2" answer="purple">
+            <desc><p>نفس العنصر <code>&lt;p id="lead" class="intro"&gt;</code>، بس القواعد دي (مفيش <code>!important</code>):</p></desc>
+            <listing lang="css" file="style2.css">
+              body p.intro { color: red; }
+              #lead { color: purple; }
+              p.intro.intro.intro { color: orange; }
+              :where(#lead) { color: teal; }
+            </listing>
+            <explain>`purple`. `#lead` = (1,0,0) أكبر من `p.intro.intro.intro` = (0,3,1) ومن `body p.intro` = (0,1,2)، و`:where(#lead)` وزنه (0,0,0).</explain>
+            <check expr="({&quot;rgb(255, 165, 0)&quot;:&quot;orange&quot;,&quot;rgb(128, 0, 128)&quot;:&quot;purple&quot;,&quot;rgb(0, 0, 255)&quot;:&quot;blue&quot;,&quot;rgb(255, 0, 0)&quot;:&quot;red&quot;,&quot;rgb(0, 128, 0)&quot;:&quot;green&quot;,&quot;rgb(0, 128, 128)&quot;:&quot;teal&quot;})[getComputedStyle(document.querySelector(&quot;p&quot;)).color]"><style>body p.intro { color: red; } #lead { color: purple; } p.intro.intro.intro { color: orange; } :where(#lead) { color: teal; }</style><p id="lead" class="intro">x</p></check>
+          </task>
+        </div>
+      </section>

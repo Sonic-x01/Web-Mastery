@@ -1,0 +1,297 @@
+      <section class="section" id="c30" data-part="الجزء 2 · CSS" data-pk="css" data-nav="CSS الحديث والأدوات" data-icon="🧬" data-keywords="custom properties css variables var fallback setProperty calc nesting & supports feature query property registered animate gradient bem utility first tailwind css modules reset sass scss postcss autoprefixer minify bundler vite source map bootstrap version cve recon">
+        <div class="section-head">
+          <span class="section-index">30</span>
+          <div>
+            <p class="eyebrow">CSS · الدرس 30</p>
+            <h2>CSS الحديث: متغيرات، nesting، وأدوات الشغل الحقيقي</h2>
+            <p class="lede">الـ CSS اتطور جدًا: بقى فيه متغيرات بتتغير وقت التشغيل، و nesting، وfeature queries، وخصائص مسجّلة تتحرك. وفي المشاريع الحقيقية فيه طرق لتنظيم آلاف السطور (BEM، utility-first) وأدوات بتعالج الـ CSS قبل ما يتنشر. وفي آخر الدرس: إزاي ملف الـ CSS نفسه بيعمل recon لك.</p>
+          </div>
+        </div>
+
+        <h3 class="sub">Custom properties (متغيرات CSS)</h3>
+        <code-block lang="css" file="tokens.css">
+          :root {                       /* defined once, globally */
+            --accent: #7c3aed;
+            --radius: 12px;
+            --space: 16px;
+          }
+          .btn {
+            background: var(--accent);
+            border-radius: var(--radius);
+            padding: calc(var(--space) / 2) var(--space);
+            color: var(--btn-fg, white);           /* fallback if --btn-fg is not defined */
+          }
+          .btn.danger { --accent: #dc2626; }        /* override the variable, not the property */
+        </code-block>
+        <ul>
+          <li>الاسم لازم يبدأ بـ <code>--</code>، وهو <b>case-sensitive</b> و<b>بيتورّث</b> للأبناء — فتقدر تغيّره لجزء من الصفحة بس (<code>.btn.danger</code> فوق).</li>
+          <li>مش زي متغيرات Sass: دي <b>حيّة</b> في المتصفح. تتغير في media query أو من JavaScript: <code>el.style.setProperty("--accent", "#0ea5e9")</code>، وتتقرا بـ <code>getComputedStyle(el).getPropertyValue("--accent")</code>.</li>
+          <li>الـ fallback في <code>var(--x, fallback)</code> بيُستخدم لما المتغير <b>مش متعرّف</b> بس — مش لما قيمته غلط للخاصية.</li>
+        </ul>
+        <html-example file="theme-hue.html" auto>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <title>Live theme</title>
+            <style>
+              :root { --hue: 265; --accent: hsl(var(--hue) 80% 55%); --soft: hsl(var(--hue) 90% 95%); }
+              body { font-family: system-ui, sans-serif; margin: 12px; }
+              .card { background: var(--soft); border: 2px solid var(--accent); border-radius: 12px; padding: 12px; }
+              .card h3 { margin: 0 0 6px; color: var(--accent); }
+              button { background: var(--accent); color: #fff; border: 0; border-radius: 8px; padding: 8px 14px; font: inherit; }
+            </style>
+          </head>
+          <body>
+            <label>Hue: <input type="range" min="0" max="360" value="265" oninput="document.documentElement.style.setProperty('--hue', this.value); out.textContent = this.value"> <output id="out">265</output></label>
+            <div class="card"><h3>One variable, whole theme</h3><button>Run scan</button></div>
+          </body>
+          </html>
+        </html-example>
+
+        <h3 class="sub">calc(): خلط الوحدات</h3>
+        <p><code>width: calc(100% - 2rem)</code> = نسبة ناقص rem — حاجة مستحيلة من غير calc. <b>لازم مسافات</b> حوالين <code>+</code> و<code>-</code>: <code>calc(100%-2rem)</code> غلط والـ declaration كله بيتجاهل (الـ <code>*</code> و<code>/</code> مش لازم). وبيشتغل مع المتغيرات: <code>calc(var(--space) * 3)</code>.</p>
+
+        <h3 class="sub">Nesting (native)</h3>
+        <code-block lang="css" file="card.css">
+          .card {
+            padding: 16px;
+            border: 1px solid #e2e8f0;
+
+            & .title { font-weight: 700; }           /* = .card .title */
+            &:hover  { border-color: #7c3aed; }      /* = .card:hover */
+            &.featured { border-width: 3px; }        /* = .card.featured */
+            @media (width >= 600px) { padding: 24px; }
+          }
+        </code-block>
+        <p>الـ <code>&</code> = الـ selector الأب. ده مدعوم في كل المتصفحات الحديثة (من 2023) من غير أي أداة. متعملش nesting أعمق من 2–3 مستويات — الـ specificity بتكبر والـ CSS بيبقى صعب.</p>
+
+        <h3 class="sub">@supports و@property</h3>
+        <code-block lang="css" file="progressive.css">
+          .gallery { display: flex; flex-wrap: wrap; }                 /* works everywhere */
+          @supports (display: grid) { .gallery { display: grid; } }    /* upgrade if supported */
+          @supports selector(:has(a)) { /* … */ }                       /* test a selector */
+          @supports not (backdrop-filter: blur(4px)) { .glass { background: #fff; } }
+        </code-block>
+        <p>الـ <code>@property</code> بيسجّل متغير بنوع (<code>&lt;angle&gt;</code>، <code>&lt;color&gt;</code>، <code>&lt;length&gt;</code>…) — فالمتصفح يقدر <b>يحرّكه</b> بنعومة (المتغير العادي بيتنطّ من قيمة لقيمة):</p>
+        <html-example file="at-property.html" auto max="220">
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <title>@property</title>
+            <style>
+              @property --angle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+              body { display: flex; gap: 24px; justify-content: center; align-items: center; margin: 14px; font: 13px system-ui; }
+              .ring { width: 110px; height: 110px; border-radius: 50%; display: grid; place-items: center; animation: turn 3s linear infinite;
+                      background: conic-gradient(from var(--angle), #ff7a45, #b48cff, #38bdf8, #ff7a45); }
+              .ring span { width: 84px; height: 84px; border-radius: 50%; background: #fff; display: grid; place-items: center; }
+              @keyframes turn { to { --angle: 360deg; } }
+            </style>
+          </head>
+          <body>
+            <div class="ring"><span>@property</span></div>
+          </body>
+          </html>
+        </html-example>
+
+        <h3 class="sub">تنظيم الـ CSS في المشاريع الكبيرة</h3>
+        <div class="grid-3">
+          <div class="card reveal"><h4>BEM</h4><p><code>.block__element--modifier</code>: <code>.card</code>، <code>.card__title</code>، <code>.card--featured</code>. أسماء واضحة، specificity واطية (class واحدة)، ومفيش تعارض.</p></div>
+          <div class="card reveal"><h4>Utility-first</h4><p>classes صغيرة لكل خاصية: <code>class="flex gap-4 p-6 rounded-xl"</code> (Tailwind). سريع جدًا في الشغل، والـ build بيشيل اللي مش مستخدم.</p></div>
+          <div class="card reveal"><h4>Scoped / Modules</h4><p>الـ CSS Modules وأطر زي Vue/Svelte بتحوّل <code>.title</code> لـ <code>.title_x7f3a</code> فمفيش تصادم بين components.</p></div>
+        </div>
+        <code-block lang="css" file="reset.css">
+          /* a small modern reset — the first file in most projects */
+          *, *::before, *::after { box-sizing: border-box; }
+          body { margin: 0; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+          img, picture, video, canvas, svg { display: block; max-width: 100%; }
+          input, button, textarea, select { font: inherit; }
+          p, h1, h2, h3 { overflow-wrap: break-word; }
+        </code-block>
+
+        <h3 class="sub">الأدوات: من الكود للإنتاج</h3>
+        <div class="pipeline reveal">
+          <div class="stage"><b>SCSS / CSS</b><small>اللي بتكتبه</small></div><div class="arrow">→</div>
+          <div class="stage"><b>Sass</b><small>$vars · @mixin · @use</small></div><div class="arrow">→</div>
+          <div class="stage"><b>PostCSS</b><small>Autoprefixer · nesting</small></div><div class="arrow">→</div>
+          <div class="stage"><b>Minify</b><small>Lightning CSS · cssnano</small></div><div class="arrow">→</div>
+          <div class="stage"><b>app.4f9c.css</b><small>+ app.css.map</small></div>
+        </div>
+        <p>الـ <b>Sass</b> لغة فوق CSS بتتحوّل لـ CSS عادي (متغيراته بتختفي بعد الـ compile، عكس الـ custom properties). الـ <b>PostCSS</b> plugins بتعدّل الـ CSS (Autoprefixer بيضيف <code>-webkit-</code> للمتصفحات القديمة). والـ bundlers (Vite مثلًا) بيعملوا ده كله ويحطّوا hash في اسم الملف عشان الـ cache.</p>
+        <div class="callout pt reveal"><span class="ci">🎯</span><div><strong>Pentester: ملف الـ CSS بيعمل recon</strong><p>(1) <b>الـ banner comments</b>: <code>/*! Bootstrap v3.3.7 */</code> = نسخة معروفة الثغرات (Bootstrap قبل 3.4.1 و4.3.1 فيه XSS في <code>data-*</code> attributes بتاعة tooltip/collapse، زي CVE-2019-8331) — دوّر بالنسخة في CVE databases أو بـ Retire.js. (2) <b>الـ selectors بتسرّب أسماء</b>: <code>.admin-panel</code>، <code>a[href="/staff/…"]</code>، <code>.feature-beta</code> = صفحات وfeatures مخفية. (3) <code>/*# sourceMappingURL=app.css.map */</code> = ملفات الـ SCSS الأصلية بمساراتها وتعليقاتها (زي الـ JS في الدرس 15). (4) الـ <code>url(…)</code> جوه الـ CSS بتكشف مسارات assets وأحيانًا subdomains داخلية.</p></div></div>
+
+        <div class="exercises">
+          <div class="exercises-head"><h3><span class="bulb">✏️</span> تمارين الدرس 30</h3></div>
+          <quiz id="c30-q1" answer="2">
+            <q>`--brand` مش متعرّف في أي مكان. `color: var(--brand, blue)` هيدّي؟</q>
+            <o>أسود (الافتراضي)</o>
+            <o>الـ declaration هيتجاهل</o>
+            <o>أزرق</o>
+            <o>شفاف</o>
+            <good>الـ fallback بيُستخدم بالظبط في الحالة دي: المتغير مش متعرّف.</good>
+            <bad>`var(--x, fallback)`: لو `--x` مش متعرّف، القيمة = الـ fallback = blue.</bad>
+          </quiz>
+          <quiz id="c30-q2" answer="0">
+            <q>`width: calc(100%-20px);` إيه اللي هيحصل؟</q>
+            <o>الـ declaration غلط (لازم مسافات حوالين `-`) فبيتجاهل</o>
+            <o>العرض = 100% ناقص 20px</o>
+            <o>العرض = 80%</o>
+            <o>المتصفح بيصلّحها لوحده</o>
+            <good>`100%-20px` بيتقري كأنه رقم سالب ملزوق؛ لازم `calc(100% - 20px)`.</good>
+            <bad>في `calc` لازم مسافة قبل وبعد `+` و`-`. من غيرها القيمة invalid وبتتجاهل.</bad>
+          </quiz>
+          <quiz id="c30-q3" answer="3">
+            <q>في BEM، `.menu__item--active` معناها:</q>
+            <o>block = item، element = active</o>
+            <o>3 عناصر متداخلة</o>
+            <o>id اسمه menu</o>
+            <o>block = menu، element = item، modifier = active</o>
+            <good>`__` بيفصل الـ element، و`--` بيفصل الـ modifier.</good>
+            <bad>Block `menu` → Element `__item` → Modifier `--active`.</bad>
+          </quiz>
+          <quiz id="c30-q4" answer="1">
+            <q>متغير Sass `$accent` ومتغير CSS `--accent`. الفرق الأهم؟</q>
+            <o>مفيش فرق</o>
+            <o>`$accent` بيختفي بعد الـ compile، `--accent` موجود في المتصفح ويتغير وقت التشغيل (media queries / JS)</o>
+            <o>`--accent` أسرع في الـ compile</o>
+            <o>`$accent` بيتورّث للأبناء</o>
+            <good>Sass = وقت الـ build. Custom properties = وقت التشغيل وبتتورّث.</good>
+            <bad>Sass بيتحول لقيم ثابتة. الـ custom properties حيّة في المتصفح.</bad>
+          </quiz>
+          <quiz id="c30-q5" answer="2">
+            <q>أول سطر في `vendor.css` على موقع بتختبره: `/*! Bootstrap v3.3.7 */`. تعمل إيه بالمعلومة دي؟</q>
+            <o>ولا حاجة، مجرد comment</o>
+            <o>تحذفه من الـ response</o>
+            <o>تدوّر على الثغرات المعروفة للنسخة دي (وفيه XSS معروفة في الـ data attributes) وتختبرها</o>
+            <o>تعمل DoS على الموقع</o>
+            <good>النسخ القديمة من المكتبات = CVEs جاهزة. Retire.js وقواعد بيانات الـ CVE بتساعدك.</good>
+            <bad>النسخة = خيط recon: نسخ Bootstrap قبل 3.4.1 فيها XSS معروفة. اختبر وأكّد (مش مجرد ذكرها في التقرير).</bad>
+          </quiz>
+
+          <html-lab id="c30-lab1" title="Theme بمتغيرات" level="1">
+            <desc><ul>
+              <li>على <code>:root</code>: <code>--accent: #7c3aed</code> و<code>--radius: 12px</code>.</li>
+              <li><code>.btn</code>: <code>background: var(--accent)</code> و<code>border-radius: var(--radius)</code>.</li>
+              <li><code>.btn.danger</code>: <b>غيّر المتغير</b> بس: <code>--accent: #dc2626</code> (من غير ما تكتب background تاني).</li>
+            </ul></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Theme</title>
+                <style>
+                  .btn { color: #fff; border: 0; padding: 8px 14px; font: 600 14px system-ui; background: #7c3aed; border-radius: 12px; }
+                  .btn.danger { background: #dc2626; }
+                </style>
+              </head>
+              <body><button class="btn">Save</button> <button class="btn danger">Delete</button></body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Theme</title>
+                <style>
+                  :root { --accent: #7c3aed; --radius: 12px; }
+                  .btn { color: #fff; border: 0; padding: 8px 14px; font: 600 14px system-ui; background: var(--accent); border-radius: var(--radius); }
+                  .btn.danger { --accent: #dc2626; }
+                </style>
+              </head>
+              <body><button class="btn">Save</button> <button class="btn danger">Delete</button></body>
+              </html>
+            </solution>
+            <test label="المتغيرات على :root" live>(() => { const s = getComputedStyle(document.documentElement); return s.getPropertyValue("--accent").trim().toLowerCase() === "#7c3aed" && s.getPropertyValue("--radius").trim() === "12px"; })()</test>
+            <test label=".btn بيستخدم var(--accent) وvar(--radius)" live>[...document.styleSheets].flatMap(sh => [...sh.cssRules]).some(r => r.selectorText === ".btn" && /var\(\s*--accent/.test(r.style.background || r.style.backgroundColor || r.cssText) && /border-radius:\s*var\(\s*--radius/.test(r.cssText))</test>
+            <test label=".btn.danger بيغيّر المتغير بس (أحمر) ومن غير background" live>(() => { const r = [...document.styleSheets].flatMap(sh => [...sh.cssRules]).find(x => x.selectorText === ".btn.danger"); const b = document.querySelector(".btn.danger"); return !!r && r.style.getPropertyValue("--accent").trim().toLowerCase() === "#dc2626" && !/background/.test(r.cssText) && getComputedStyle(b).backgroundColor === "rgb(220, 38, 38)"; })()</test>
+            <test label="الزرار العادي لسه بنفسجي" live>getComputedStyle(document.querySelector(".btn:not(.danger)")).backgroundColor === "rgb(124, 58, 237)"</test>
+          </html-lab>
+
+          <html-lab id="c30-lab2" title="حوّل الـ CSS لـ nesting" level="2">
+            <desc><p>الكود شغال بس مكتوب «مفرود». اكتبه كله جوه قاعدة <code>.card</code> واحدة بالـ nesting (<code>&amp; .title</code>، <code>&amp;:hover</code>، <code>&amp;.featured</code>) — والنتيجة لازم تفضل زي ما هي.</p></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Nesting</title>
+                <style>
+                  .card { padding: 16px; border: 2px solid #e2e8f0; border-radius: 12px; font-family: system-ui; margin-bottom: 10px; }
+                  .card .title { color: #7c3aed; font-weight: 700; }
+                  .card:hover { border-color: #7c3aed; }
+                  .card.featured { border-color: #f59e0b; }
+                </style>
+              </head>
+              <body>
+                <div class="card"><div class="title">Recon notes</div></div>
+                <div class="card featured"><div class="title">Critical finding</div></div>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Nesting</title>
+                <style>
+                  .card {
+                    padding: 16px; border: 2px solid #e2e8f0; border-radius: 12px; font-family: system-ui; margin-bottom: 10px;
+                    & .title { color: #7c3aed; font-weight: 700; }
+                    &:hover { border-color: #7c3aed; }
+                    &.featured { border-color: #f59e0b; }
+                  }
+                </style>
+              </head>
+              <body>
+                <div class="card"><div class="title">Recon notes</div></div>
+                <div class="card featured"><div class="title">Critical finding</div></div>
+              </body>
+              </html>
+            </solution>
+            <test label="قاعدة top-level واحدة بس (.card) والباقي جواها" live>(() => { const top = [...document.styleSheets[0].cssRules]; return top.length === 1 && top[0].selectorText === ".card" && top[0].cssRules && top[0].cssRules.length >= 3; })()</test>
+            <test label="العنوان لسه بنفسجي وbold" live>(() => { const s = getComputedStyle(document.querySelector(".title")); return s.color === "rgb(124, 58, 237)" && Number(s.fontWeight) >= 700; })()</test>
+            <test label=".featured border برتقالي" live>getComputedStyle(document.querySelector(".card.featured")).borderTopColor === "rgb(245, 158, 11)"</test>
+            <test label="فيه &:hover جوه الـ nesting" live>[...document.styleSheets[0].cssRules[0].cssRules].some(r => /&:hover/.test(r.selectorText || ""))</test>
+          </html-lab>
+
+          <task id="c30-t1" title="الـ fallback اتستخدم؟" level="3" answer="300" norm="int" reject="50|10">
+            <desc><p>الـ <code>.box</code> جوه <code>.wrap</code>. عرض الـ <code>.box</code> بالـ px؟</p></desc>
+            <listing lang="css" file="vars.css">
+              :root { --size: 10px; }
+              .wrap { width: 300px; }
+              .box  { --size: red; width: var(--size, 50px); }
+            </listing>
+            <hint>المتغير <b>متعرّف</b> (حتى لو قيمته مش طول). الـ fallback بيشتغل إمتى بالظبط؟ ولما القيمة النهائية تطلع invalid، الخاصية بترجع لإيه؟</hint>
+            <explain>الـ fallback مش هيُستخدم لأن <code>--size</code> متعرّف (قيمته <code>red</code>). <code>width: red</code> = «invalid at computed-value time» فالخاصية بتتعامل كأنها <code>unset</code> ← <code>width</code> مش بيتورّث ← <code>auto</code> ← الـ div بياخد عرض الأب = <b>300</b>. (والـ 10px بتاع <code>:root</code> اتغطى بالـ override.)</explain>
+            <check expr="Math.round(document.querySelector('.box').getBoundingClientRect().width)"><style>:root { --size: 10px; } .wrap { width: 300px; } .box { --size: red; width: var(--size, 50px); height: 5px; }</style><div class="wrap"><div class="box"></div></div></check>
+          </task>
+
+          <task id="c30-t2" title="calc + box model" level="2" answer="592" norm="int" reject="560|800|528">
+            <desc><p>عرض الـ <code>.main</code> المرسوم (<code>getBoundingClientRect().width</code>) بالـ px؟ (الـ root font-size = 16px.)</p></desc>
+            <listing lang="css" file="layout.css">
+              .page { width: 800px; }
+              .main { width: calc(100% - 2 * 120px); padding: 0 1rem; }   /* box-sizing: content-box */
+            </listing>
+            <explain>800 − 240 = 560 (المحتوى) + 16 + 16 (padding) = <b>592</b>.</explain>
+            <check expr="Math.round(document.querySelector('.main').getBoundingClientRect().width)"><style>html { font-size: 16px; } .page { width: 800px; } .main { width: calc(100% - 2 * 120px); padding: 0 1rem; height: 5px; }</style><div class="page"><div class="main"></div></div></check>
+          </task>
+
+          <task id="c30-t3" title="Recon من ملف CSS" level="1" answer="/staff/impersonate" norm="text" reject="/staff|staff">
+            <desc><p>ده جزء من <code>app.css</code> على موقع بتختبره. إيه الـ path المخفي اللي ممكن يكون صفحة حساسة؟</p></desc>
+            <listing lang="css" file="app.css">
+              /*! Bootstrap v4.1.3 (https://getbootstrap.com/) */
+              .nav-link.active { color: #0d6efd; }
+              /* TODO: remove before launch, staff only */
+              .nav a[href="/staff/impersonate"] { display: none; }
+              .badge-beta::after { content: "beta"; }
+              /*# sourceMappingURL=app.css.map */
+            </listing>
+            <hint>الـ attribute selector فيه الـ href كامل.</hint>
+            <explain><code>/staff/impersonate</code> — اللينك مستخبي بـ CSS بس (الـ server ممكن ميكونش بيتحقق من الصلاحيات). وكمان: Bootstrap 4.1.3 (قبل 4.3.1 ⇒ XSS معروفة) و<code>app.css.map</code> يستاهل تجربه.</explain>
+          </task>
+        </div>
+      </section>

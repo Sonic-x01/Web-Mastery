@@ -27,6 +27,7 @@ example for console errors. Fix everything it reports before shipping.
   `live` tests run inside the sandbox after load (`document`, `getComputedStyle`, …).
 - `<task id title level answer="a|b" norm="text|exact|int" reject="x|y">` `<desc/> <listing lang file [detonate] [url]>RAW</listing> <hint/> <explain/>` — answers stored as SHA-256 of `id:norm(answer)`.
   `detonate` adds a button that runs the listing in the no-network analysis sandbox (sink logger).
+  `<check expr="JS">HTML</check>` (never shown): the self-test renders the HTML and requires `String(expr)` (lowercased) to equal the first answer — ALWAYS add one when the answer is computable (layout sizes, colors, selector counts).
 - `<xss-level id n title click="css selector" url>` `<desc/> <server>JS body using input, returns HTML</server> <solution>payload</solution> <blocked>payload the filter must stop</blocked>… <hint/> <explain/>`. Success = any alert/confirm/prompt/print.
 - `<scene id title><svg …> elements with data-s="1,3-4" (highlighted at those steps) or data-from="2" [data-to="4"] </svg><step>…</step>…</scene>`.
 - Widgets: `<div class="widget" data-widget="url|encoder|tokenizer|parser|smuggle" data-input="…" data-recipe="url-dec,b64-dec"></div>`.

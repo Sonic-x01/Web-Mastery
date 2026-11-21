@@ -1,0 +1,249 @@
+      <section class="section" id="c22" data-part="الجزء 2 · CSS" data-pk="css" data-nav="الـ Box Model والـ display" data-icon="📦" data-keywords="box model content padding border margin box-sizing border-box content-box display block inline inline-block none contents flow-root visibility hidden opacity margin collapse width height min max auto center overflow hidden scroll auto text-overflow ellipsis outline shorthand logical properties">
+        <div class="section-head">
+          <span class="section-index">22</span>
+          <div>
+            <p class="eyebrow">CSS · الدرس 22</p>
+            <h2>الـ Box Model: كل حاجة في الصفحة صندوق</h2>
+            <p class="lede">أي عنصر بيترسم كـ <b>صندوق</b>: محتوى، وحواليه padding، وحواليه border، وحواليه margin. لو فهمت الطبقات دي وإزاي الـ <code>display</code> بيغيّر سلوكها، 80% من مشاكل الـ layout هتتحل لوحدها — ومن ضمنها سؤال أمني مهم: «العنصر ده مخفي فعلًا… ولا لسه بيتداس عليه؟»</p>
+          </div>
+        </div>
+
+        <h3 class="sub">الطبقات الأربعة</h3>
+        <div class="widget" data-widget="box"></div>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>الطبقة</th><th>إيه هي</th><th>بتاخد لون الخلفية؟</th></tr></thead>
+          <tbody>
+            <tr><td><b>content</b></td><td>النص/الصورة نفسها (<code>width</code>/<code>height</code>)</td><td class="t-ok">أيوه</td></tr>
+            <tr><td><b>padding</b></td><td>مسافة جوه الحدود</td><td class="t-ok">أيوه</td></tr>
+            <tr><td><b>border</b></td><td>الحدود</td><td>لونها هي</td></tr>
+            <tr><td><b>margin</b></td><td>مسافة برا الحدود بين العنصر والباقي</td><td class="t-no">لأ (شفافة دايمًا)</td></tr>
+          </tbody>
+        </table></div>
+        <p><b>الاختصارات</b>: <code>margin: 10px</code> (الأربعة)، <code>margin: 10px 20px</code> (فوق/تحت، يمين/شمال)، <code>margin: 5px 10px 15px 20px</code> (فوق، يمين، تحت، شمال — مع عقارب الساعة). والـ <b>logical properties</b> بتمشي مع اتجاه الكتابة: <code>margin-inline-start</code> = «بداية السطر» (شمال في الإنجليزي، يمين في العربي)، و<code>padding-block</code> = فوق وتحت.</p>
+
+        <h3 class="sub">box-sizing: أهم سطر في أي مشروع</h3>
+        <p>الافتراضي <code>content-box</code>: الـ <code>width</code> للمحتوى بس، والـ padding والـ border بيتضافوا عليه — فـ <code>width: 300px</code> + <code>padding: 20px</code> = صندوق عرضه 340! الـ <code>border-box</code> بيخلي الـ width شامل كل حاجة، وده أسهل بكتير. كل المشاريع الحديثة بتبدأ بـ:</p>
+        <code-block lang="css" file="reset.css">
+          *, *::before, *::after { box-sizing: border-box; }
+        </code-block>
+
+        <h3 class="sub">الـ display: نوع الصندوق</h3>
+        <html-example file="display.html" auto max="420">
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <title>display</title>
+            <style>
+              body { font-family: system-ui, sans-serif; }
+              .box { background: #ffe4d6; border: 1px solid #ff7a45; width: 120px; height: 34px; margin: 6px; }
+              .inline { display: inline; }        /* width/height ignored, sits in the line */
+              .inline-block { display: inline-block; }
+            </style>
+          </head>
+          <body>
+            <div class="box">block 1</div><div class="box">block 2</div>
+            <p>text <span class="box inline">inline (no width)</span> more text <span class="box inline-block">inline-block</span> end.</p>
+          </body>
+          </html>
+        </html-example>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th><code>display</code></th><th>السلوك</th></tr></thead>
+          <tbody>
+            <tr><td><code>block</code></td><td>سطر كامل، الـ width/height/margins كلها شغّالة (div، p، h1، section…)</td></tr>
+            <tr><td><code>inline</code></td><td>جوه السطر؛ الـ width/height مالهمش تأثير، والـ margin الرأسي مش بيزق (span، a، strong…)</td></tr>
+            <tr><td><code>inline-block</code></td><td>جوه السطر، بس بيقبل width/height زي الـ block</td></tr>
+            <tr><td><code>flex</code> / <code>grid</code></td><td>layouts حديثة (الدرسين 26 و27)</td></tr>
+            <tr><td><code>none</code></td><td>العنصر مش موجود في الـ layout ولا في الـ accessibility tree (بس لسه في الـ DOM)</td></tr>
+            <tr><td><code>contents</code></td><td>الصندوق نفسه يختفي وولاده يتعاملوا كأنهم ولاد الأب</td></tr>
+            <tr><td><code>flow-root</code></td><td>block بيعمل «سياق» جديد (بيمنع margin collapse مع ولاده وبيحتوي الـ floats)</td></tr>
+          </tbody>
+        </table></div>
+
+        <h3 class="sub">«مخفي»… بأي معنى؟ <span class="tag">🎯 مهم أمنيًا</span></h3>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>الطريقة</th><th>بياخد مكان؟</th><th>بيتداس عليه؟</th><th>قارئ الشاشة؟</th><th>في الـ DOM؟</th></tr></thead>
+          <tbody>
+            <tr><td><code>display: none</code> / <code>hidden</code></td><td class="t-ok">لأ</td><td class="t-ok">لأ</td><td class="t-ok">لأ</td><td class="t-no">أيوه</td></tr>
+            <tr><td><code>visibility: hidden</code></td><td class="t-no">أيوه (فراغ)</td><td class="t-ok">لأ</td><td class="t-ok">لأ</td><td class="t-no">أيوه</td></tr>
+            <tr><td><code>opacity: 0</code></td><td class="t-no">أيوه</td><td class="t-no"><b>أيوه!</b></td><td class="t-no">أيوه</td><td class="t-no">أيوه</td></tr>
+            <tr><td>خارج الشاشة (<code>left: -9999px</code>)</td><td>لأ (positioned)</td><td>لأ عمليًا</td><td class="t-no">أيوه</td><td class="t-no">أيوه</td></tr>
+          </tbody>
+        </table></div>
+        <div class="callout pt reveal"><span class="ci">🎯</span><div><strong>opacity: 0 = فخ الـ clickjacking</strong><p>العنصر الشفاف <b>لسه بياخد الضغطات</b> — ده بالظبط اللي الـ clickjacking بيعتمد عليه (iframe شفاف فوق زرار). وفي التحليل: أي «مخفي» بـ CSS لسه موجود في الـ source والـ DOM — زي الـ SEO spam اللي شفناه بـ <code>left:-9999px</code>، وصفحات phishing بتخفي نصوص تخدع الفلاتر.</p></div></div>
+
+        <h3 class="sub">Margin collapse</h3>
+        <p>الـ margins <b>الرأسية</b> بين عنصرين block ورا بعض <b>بتنهار</b> لأكبر واحد بدل ما تتجمع: <code>margin-bottom: 30px</code> + <code>margin-top: 20px</code> = مسافة 30 مش 50. وكمان margin أول ابن ممكن «يخرج» من أبوه. مش بيحصل في flex/grid، ولا أفقيًا، ولا مع padding/border على الأب.</p>
+        <html-example file="collapse.html" auto>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <title>Margin collapse</title>
+            <style>
+              p { margin: 0; background: #e0f2fe; font-family: system-ui; }
+              .a { margin-bottom: 30px; }
+              .b { margin-top: 20px; }
+            </style>
+          </head>
+          <body>
+            <p class="a">margin-bottom: 30px</p>
+            <p class="b">margin-top: 20px</p>
+            <script>
+              const a = document.querySelector(".a").getBoundingClientRect(), b = document.querySelector(".b").getBoundingClientRect();
+              console.log("gap between the paragraphs =", Math.round(b.top - a.bottom) + "px (not 50!)");
+            </script>
+          </body>
+          </html>
+        </html-example>
+
+        <h3 class="sub">المقاسات والـ overflow</h3>
+        <ul>
+          <li><code>width</code>/<code>height</code> + <code>min-width</code>/<code>max-width</code> (الـ max بيمنع العنصر يبقى أعرض من كده على الشاشات الكبيرة). النسبة المئوية من عرض الأب.</li>
+          <li>توسيط block أفقيًا: <code>max-width: 700px; margin-inline: auto;</code> (أو <code>margin: 0 auto</code>).</li>
+          <li><code>overflow</code>: <code>visible</code> (الافتراضي — بيطلع برا)، <code>hidden</code> (يتقص)، <code>scroll</code>، <code>auto</code> (scroll لو محتاج)، <code>clip</code>. ونص طويل في سطر: <code>white-space: nowrap; overflow: hidden; text-overflow: ellipsis;</code>.</li>
+          <li><code>outline</code> زي الـ border بس <b>مش بياخد مكان</b> — عشان كده هو اللي بيستخدم لـ focus rings. متعملش <code>outline: none</code> من غير بديل (الدرس 31).</li>
+        </ul>
+
+        <div class="exercises">
+          <div class="exercises-head"><h3><span class="bulb">✏️</span> تمارين الدرس 22</h3></div>
+          <quiz id="c22-q1" answer="1">
+            <q>`width: 300px; padding: 20px; border: 5px solid` مع `box-sizing: content-box` (الافتراضي). العرض الظاهر؟</q>
+            <o>300px</o>
+            <o>350px</o>
+            <o>325px</o>
+            <o>340px</o>
+            <good>300 + 2×20 + 2×5 = 350. مع border-box كان هيبقى 300 بالظبط.</good>
+            <bad>في content-box الـ padding والـ border بيتضافوا من الناحيتين: 300 + 40 + 10.</bad>
+          </quiz>
+          <quiz id="c22-q2" answer="3">
+            <q>زرار عليه `opacity: 0` فوق زرار تاني. الضغطة هتروح لمين؟</q>
+            <o>للزرار اللي تحت لأن اللي فوق مش باين</o>
+            <o>للاتنين</o>
+            <o>لولا حد</o>
+            <o>للزرار الشفاف اللي فوق — الشفافية مبتمنعش الضغط</o>
+            <good>ده قلب الـ clickjacking. عشان العنصر ميستقبلش ضغطات: `pointer-events: none` أو `visibility: hidden` أو `display: none`.</good>
+            <bad>`opacity` بيأثر على الرسم بس. العنصر لسه موجود ومستقبل للأحداث.</bad>
+          </quiz>
+          <quiz id="c22-q3" answer="0">
+            <q>`<span style="width:200px; height:50px">` — هيبقى عرضه 200؟</q>
+            <o>لأ — الـ span inline، والـ width/height مالهمش تأثير على inline</o>
+            <o>أيوه</o>
+            <o>أيوه بس لو فيه نص</o>
+            <o>هيبقى 200 والـ height 0</o>
+            <good>حوّله `display: inline-block` أو `block` عشان المقاسات تشتغل.</good>
+            <bad>العناصر الـ inline حجمها من محتواها. محتاج `inline-block` أو `block`.</bad>
+          </quiz>
+          <quiz id="c22-q4" answer="2">
+            <q>فقرتين ورا بعض: الأولى `margin-bottom: 40px` والتانية `margin-top: 25px`. المسافة بينهم؟</q>
+            <o>65px</o>
+            <o>25px</o>
+            <o>40px</o>
+            <o>15px</o>
+            <good>Margin collapse: بيتاخد الأكبر بس بين الـ margins الرأسية المتجاورة.</good>
+            <bad>الـ margins الرأسية بين blocks متتاليين مش بتتجمع — بتنهار لأكبرهم.</bad>
+          </quiz>
+          <quiz id="c22-q5" answer="1">
+            <q>إيه الفرق بين `display: none` و`visibility: hidden`؟</q>
+            <o>مفيش فرق</o>
+            <o>`display: none` بيشيل العنصر من الـ layout (مفيش فراغ)، و`visibility: hidden` بيخفيه وبيسيب مكانه فاضي</o>
+            <o>`visibility: hidden` بيشيله من الـ DOM</o>
+            <o>`display: none` بيخليه شفاف بس</o>
+            <good>والاتنين بيخفوا العنصر عن قارئ الشاشة، ومش بيستقبلوا ضغطات، وبيفضلوا في الـ DOM.</good>
+            <bad>`visibility: hidden` بيحافظ على المساحة (فراغ)، و`display: none` بيلغي الصندوق خالص.</bad>
+          </quiz>
+
+          <html-lab id="c22-lab1" title="كارت بعرض ثابت حقيقي" level="1">
+            <desc><p>الـ <code>.card</code> لازم <b>عرضه الظاهر</b> يبقى <code>300px</code> بالظبط، ومعاه <code>padding: 20px</code> و<code>border: 2px solid #ff7a45</code>. (تلميح: غيّر الـ <code>box-sizing</code>.)</p></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Card</title>
+                <style>
+                  .card { width: 300px; padding: 20px; border: 2px solid #ff7a45; font-family: system-ui; }
+                </style>
+              </head>
+              <body>
+                <div class="card">Finding F-01: reflected XSS on /search.</div>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Card</title>
+                <style>
+                  *, *::before, *::after { box-sizing: border-box; }
+                  .card { width: 300px; padding: 20px; border: 2px solid #ff7a45; font-family: system-ui; }
+                </style>
+              </head>
+              <body>
+                <div class="card">Finding F-01: reflected XSS on /search.</div>
+              </body>
+              </html>
+            </solution>
+            <test label="العرض الظاهر 300px بالظبط" live>Math.round(document.querySelector(".card").getBoundingClientRect().width) === 300</test>
+            <test label="padding 20px و border 2px لسه موجودين" live>(() => { const s = getComputedStyle(document.querySelector(".card")); return s.paddingLeft === "20px" && s.borderLeftWidth === "2px"; })()</test>
+            <test label="box-sizing: border-box" live>getComputedStyle(document.querySelector(".card")).boxSizing === "border-box"</test>
+          </html-lab>
+
+          <html-lab id="c22-lab2" title="وسّط المحتوى" level="1">
+            <desc><p>الـ <code>.container</code> عرضه بحد أقصى <code>500px</code>، ومتوسّط أفقيًا في الصفحة (مسافة متساوية يمين وشمال)، وجواه <code>padding-inline: 16px</code>.</p></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Center</title>
+                <style>
+                  body { margin: 0; font-family: system-ui; }
+                  .container { background: #f1f5f9; }
+                </style>
+              </head>
+              <body>
+                <main class="container"><h1>Report</h1><p>Centered content.</p></main>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Center</title>
+                <style>
+                  body { margin: 0; font-family: system-ui; }
+                  .container { background: #f1f5f9; max-width: 500px; margin-inline: auto; padding-inline: 16px; }
+                </style>
+              </head>
+              <body>
+                <main class="container"><h1>Report</h1><p>Centered content.</p></main>
+              </body>
+              </html>
+            </solution>
+            <test label="max-width 500px" live>getComputedStyle(document.querySelector(".container")).maxWidth === "500px"</test>
+            <test label="متوسّط (المسافتين يمين وشمال متساويين)" live>(() => { const r = document.querySelector(".container").getBoundingClientRect(); return Math.abs(r.left - (document.documentElement.clientWidth - r.right)) < 1.5 && r.left >= 0; })()</test>
+            <test label="padding-inline 16px" live>(() => { const s = getComputedStyle(document.querySelector(".container")); return s.paddingLeft === "16px" && s.paddingRight === "16px"; })()</test>
+          </html-lab>
+
+          <task id="c22-t1" title="احسب العرض" level="2" answer="246" norm="int">
+            <desc><p>العرض الظاهر للعنصر (من border لـ border) بالـ pixels؟</p></desc>
+            <listing lang="css" file="style.css">
+              .tag {
+                display: inline-block;
+                box-sizing: content-box;
+                width: 200px;
+                padding: 10px 20px;
+                border: 3px solid;
+                margin: 5px;
+              }
+            </listing>
+            <explain>200 + 20×2 (padding يمين وشمال — القيمة التانية في الاختصار) + 3×2 = <b>246</b>. الـ margin مش جزء من العرض الظاهر.</explain>
+            <check expr="Math.round(document.querySelector(&quot;.tag&quot;).getBoundingClientRect().width)"><style>.tag { display: inline-block; box-sizing: content-box; width: 200px; padding: 10px 20px; border: 3px solid; margin: 5px; }</style><span class="tag">x</span></check>
+          </task>
+        </div>
+      </section>

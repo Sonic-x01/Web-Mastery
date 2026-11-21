@@ -1,0 +1,306 @@
+      <section class="section" id="p-css" data-part="الجزء 2 · CSS" data-pk="css" data-nav="مشاريع الجزء التاني" data-icon="🛠️" data-keywords="css projects portfolio dark mode responsive dashboard grid areas container queries design system components bem layer animation landing page performance accessibility audit recon css capstone">
+        <div class="section-head">
+          <span class="section-index">32</span>
+          <div>
+            <p class="eyebrow">CSS · مشاريع الجزء التاني</p>
+            <h2>المشاريع: صمّم زي المحترفين</h2>
+            <p class="lede">6 مشاريع بتجمع الجزء التاني كله، ومعظمها بيكمّل على مشاريع الجزء الأول: هتاخد صفحات HTML الصح وتديها شكل احترافي، responsive، accessible، وسريع. وفيه مشروع recon على ملفات CSS حقيقية الشكل. وفي الآخر capstone بيتصحح أوتوماتيك.</p>
+          </div>
+        </div>
+
+        <div class="project open" data-ex="p10">
+          <div class="project-head" role="button" tabindex="0" aria-expanded="true">
+            <span class="pnum">10</span><h4>البروفايل بتاعك… بقى شكله احترافي</h4><span class="lvl l1">أساسي</span><span class="arrow">▼</span>
+          </div>
+          <div class="project-body">
+            <p>خد بروفايل مشروع 01 (الجزء الأول) واكتبله ملف <code>style.css</code> منفصل من الصفر. الدروس: 19–24، 28، 30، 31.</p>
+            <ol class="milestones">
+              <li><b>Reset + tokens</b>: reset صغير (الدرس 30)، وعلى <code>:root</code> متغيرات للألوان والمسافات والـ radius والخطوط.</li>
+              <li><b>Typography</b>: <code>font-family</code> بـ fallbacks، <code>line-height</code> 1.6، عرض السطر <code>max-width: 70ch</code>، وعناوين بـ <code>clamp()</code>.</li>
+              <li><b>Layout</b>: الـ header بـ Flexbox (اللوجو يمين والـ nav شمال)، وقسم المهارات Grid بـ <code>auto-fit</code>.</li>
+              <li><b>Dark mode</b>: <code>prefers-color-scheme</code> بيغيّر المتغيرات بس، و<code>color-scheme: light dark</code>.</li>
+              <li><b>Accessibility</b>: <code>:focus-visible</code> واضح، skip link بيظهر مع الـ focus، وكل الألوان ≥ 4.5:1 (اختبرها بالـ Contrast Checker).</li>
+              <li><b>Stretch</b>: زرار يبدّل الثيم يدويًا (هتعمله بـ JS في الجزء الجاي) — جهّز له <code>[data-theme="dark"]</code> من دلوقتي.</li>
+            </ol>
+            <div class="deliver"><b>التسليم:</b> <code>index.html</code> + <code>style.css</code> من غير أي <code>style=""</code> inline، Lighthouse Accessibility ≥ 95، ومفيش scroll أفقي من 320px لـ 1920px.</div>
+            <button class="btn btn-sm btn-ghost btn-done" type="button">علّم المشروع كمكتمل</button>
+          </div>
+        </div>
+
+        <div class="project" data-ex="p11">
+          <div class="project-head" role="button" tabindex="0" aria-expanded="false">
+            <span class="pnum">11</span><h4>Dashboard لنتائج الـ pentest</h4><span class="lvl l2">متوسط</span><span class="arrow">▼</span>
+          </div>
+          <div class="project-body">
+            <p>لوحة متابعة engagement: sidebar، كروت أرقام (KPIs)، جدول findings، وكروت بتظبط نفسها حسب المكان. الدروس: 25–28، 31.</p>
+            <ol class="milestones">
+              <li><b>الهيكل</b>: <code>grid-template-areas</code> بـ head/side/main، والـ sidebar بيتحول لشريط فوق تحت 800px.</li>
+              <li><b>KPI cards</b>: Grid بـ <code>repeat(auto-fit, minmax(160px, 1fr))</code> وأرقام كبيرة بـ <code>font-variant-numeric: tabular-nums</code>.</li>
+              <li><b>Severity badges</b>: Critical/High/Medium/Low — كل واحدة لون <b>ونص</b> (مش لون بس)، وكل الألوان بتعدّي 4.5:1.</li>
+              <li><b>جدول الـ findings</b>: header ثابت بـ <code>position: sticky</code>، صفوف zebra، وعلى الموبايل الجدول جوه <code>overflow-x: auto</code>.</li>
+              <li><b>Container queries</b>: كارت «آخر finding» يبقى أفقي لما مكانه ≥ 360px ورأسي لما يكون أضيق.</li>
+              <li><b>الطباعة</b>: <code>@media print</code> يخفي الـ sidebar ويطبع الجدول من غير ما يقسم صف بين صفحتين.</li>
+            </ol>
+            <div class="deliver"><b>التسليم:</b> صفحة واحدة شغالة على موبايل وتابلت وdesktop (صوّر الـ 3 من DevTools)، ونسخة PDF من الطباعة.</div>
+            <html-example file="dashboard-skeleton.html" max="520">
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <title>Engagement dashboard</title>
+                <style>
+                  :root { --bg: #f1f5f9; --panel: #fff; --fg: #0f172a; --line: #e2e8f0; }
+                  * { box-sizing: border-box; }
+                  body { margin: 0; font: 14px/1.5 system-ui, sans-serif; background: var(--bg); color: var(--fg); }
+                  .app { display: grid; grid-template-columns: 180px 1fr; grid-template-areas: "head head" "side main"; min-height: 100vh; }
+                  header { grid-area: head; background: #0f172a; color: #fff; padding: 10px 16px; }
+                  aside { grid-area: side; background: var(--panel); border-right: 1px solid var(--line); padding: 12px; }
+                  main { grid-area: main; padding: 14px; display: grid; gap: 14px; align-content: start; }
+                  @media (width < 800px) { .app { grid-template-columns: 1fr; grid-template-areas: "head" "side" "main"; } }
+                  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+                  .kpi { background: var(--panel); border-radius: 12px; padding: 10px 12px; }
+                  .kpi b { display: block; font-size: 26px; font-variant-numeric: tabular-nums; }
+                  .badge { padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+                  .critical { background: #b91c1c; color: #fff; } .high { background: #c2410c; color: #fff; }
+                  .medium { background: #fde68a; color: #422006; } .low { background: #e2e8f0; color: #0f172a; }
+                </style>
+              </head>
+              <body>
+                <div class="app">
+                  <header>Engagement: shop.example · week 2</header>
+                  <aside>Overview<br>Findings<br>Scope<br>Notes</aside>
+                  <main>
+                    <div class="kpis">
+                      <div class="kpi">Critical<b>2</b></div><div class="kpi">High<b>5</b></div>
+                      <div class="kpi">Medium<b>9</b></div><div class="kpi">Retested<b>4</b></div>
+                    </div>
+                    <p><span class="badge critical">Critical</span> <span class="badge high">High</span> <span class="badge medium">Medium</span> <span class="badge low">Low</span></p>
+                  </main>
+                </div>
+              </body>
+              </html>
+            </html-example>
+            <button class="btn btn-sm btn-ghost btn-done" type="button">علّم المشروع كمكتمل</button>
+          </div>
+        </div>
+
+        <div class="project" data-ex="p12">
+          <div class="project-head" role="button" tabindex="0" aria-expanded="false">
+            <span class="pnum">12</span><h4>👨‍💻 Mini design system</h4><span class="lvl l2">متوسط</span><span class="arrow">▼</span>
+          </div>
+          <div class="project-body">
+            <p>مكتبة components صغيرة بتستخدمها في كل مشاريعك الجاية — نفس اللي بتعمله فرق الـ frontend في الشركات. الدروس: 21، 22، 25، 30، 31.</p>
+            <ol class="milestones">
+              <li><b>الطبقات</b>: <code>@layer reset, base, components, utilities;</code> وكل ملف في layer بتاعه.</li>
+              <li><b>Tokens</b>: ألوان (primary/danger/success/neutral)، مسافات (4/8/12/16/24/32)، radius، ظلال — كلها custom properties.</li>
+              <li><b>Components بـ BEM</b>: <code>.btn</code> (+ <code>--primary</code>، <code>--danger</code>، <code>--ghost</code>، <code>--sm</code>)، <code>.badge</code>، <code>.alert</code>، <code>.card</code>، <code>.field</code> (label + input + رسالة خطأ بـ <code>:user-invalid</code>).</li>
+              <li><b>الـ variants بالمتغيرات</b>: <code>.btn--danger { --btn-bg: var(--danger); }</code> بدل ما تعيد كتابة الـ background.</li>
+              <li><b>حالات كاملة</b>: hover، active، <code>:focus-visible</code>، <code>:disabled</code>، و<code>forced-colors</code>.</li>
+              <li><b>صفحة توثيق</b>: كل component بكل حالاته، والكود جنبه.</li>
+            </ol>
+            <div class="deliver"><b>التسليم:</b> <code>ds.css</code> + <code>docs.html</code>، الـ specificity لكل الـ components مش أكتر من <code>(0,2,0)</code> (اختبرها بالـ Specificity Calculator)، ومفيش <code>!important</code> برا الـ utilities.</div>
+            <html-example file="design-system.html" max="420">
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Mini design system</title>
+                <style>
+                  @layer reset, base, components, utilities;
+                  @layer reset { *, *::before, *::after { box-sizing: border-box; } button { font: inherit; } }
+                  @layer base {
+                    :root { --primary: #6d28d9; --danger: #b91c1c; --neutral: #334155; --radius: 10px; --s2: 8px; --s3: 12px; }
+                    body { font: 14px/1.5 system-ui, sans-serif; margin: 14px; }
+                  }
+                  @layer components {
+                    .btn { --btn-bg: var(--neutral); --btn-fg: #fff;
+                           background: var(--btn-bg); color: var(--btn-fg); border: 2px solid var(--btn-bg);
+                           border-radius: var(--radius); padding: var(--s2) var(--s3); cursor: pointer; transition: transform .15s; }
+                    .btn:hover { transform: translateY(-2px); }
+                    .btn:focus-visible { outline: 3px solid var(--btn-bg); outline-offset: 2px; }
+                    .btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+                    .btn--primary { --btn-bg: var(--primary); }
+                    .btn--danger { --btn-bg: var(--danger); }
+                    .btn--ghost { --btn-fg: var(--primary); background: transparent; border-color: currentColor; }
+                  }
+                  @layer utilities { .mt-3 { margin-top: var(--s3) !important; } }
+                </style>
+              </head>
+              <body>
+                <button class="btn">Default</button>
+                <button class="btn btn--primary">Primary</button>
+                <button class="btn btn--danger">Delete</button>
+                <button class="btn btn--ghost">Ghost</button>
+                <button class="btn btn--primary" disabled>Disabled</button>
+                <p class="mt-3">Tab through the buttons to see the focus rings.</p>
+              </body>
+              </html>
+            </html-example>
+            <button class="btn btn-sm btn-ghost btn-done" type="button">علّم المشروع كمكتمل</button>
+          </div>
+        </div>
+
+        <div class="project" data-ex="p13">
+          <div class="project-head" role="button" tabindex="0" aria-expanded="false">
+            <span class="pnum">13</span><h4>Landing page متحركة… وسريعة</h4><span class="lvl l2">متوسط</span><span class="arrow">▼</span>
+          </div>
+          <div class="project-body">
+            <p>طوّر الـ landing page بتاعة مشروع 09 بحركة محترمة من غير ما تخسر الأداء. الدروس: 24، 25، 29، 31.</p>
+            <ol class="milestones">
+              <li><b>Hero</b>: عنوان بـ <code>clamp()</code>، خلفية gradient، وelement واحد بيتحرك بـ <code>@keyframes</code> (transform/opacity بس).</li>
+              <li><b>Micro-interactions</b>: الأزرار والكروت بـ transitions (150–300ms) على خصائص محددة — مفيش <code>transition: all</code>.</li>
+              <li><b>Reduced motion</b>: <code>prefers-reduced-motion: reduce</code> يوقّف كل الحركة غير الضرورية.</li>
+              <li><b>الخطوط</b>: خط واحد بـ <code>woff2</code> و<code>font-display: swap</code> و<code>preload</code>، أو system fonts.</li>
+              <li><b>الأداء</b>: الصور بـ <code>width</code>/<code>height</code> (عشان CLS = 0)، critical CSS صغير، وراجع الـ Coverage tab.</li>
+            </ol>
+            <div class="deliver"><b>التسليم:</b> Lighthouse Performance ≥ 90 وCLS = 0، وتسجيل Performance من DevTools مفيهوش «Layout» أثناء الأنيميشن.</div>
+            <button class="btn btn-sm btn-ghost btn-done" type="button">علّم المشروع كمكتمل</button>
+          </div>
+        </div>
+
+        <div class="project" data-ex="p14">
+          <div class="project-head" role="button" tabindex="0" aria-expanded="false">
+            <span class="pnum">14</span><h4>Accessibility audit: لاقي المشاكل وصلّحها</h4><span class="lvl l3">متقدم</span><span class="arrow">▼</span>
+          </div>
+          <div class="project-body">
+            <p>زي الـ pentest بالظبط بس للـ accessibility: تفحص، توثّق بـ severity، تصلّح، وتعيد الاختبار. الدروس: 23، 28، 31.</p>
+            <ol class="milestones">
+              <li><b>الهدف</b>: صفحة الـ login بتاعة مشروع 03 (أو أي موقع قديم عندك).</li>
+              <li><b>الفحص اليدوي</b>: الصفحة كلها بالكيبورد بس، zoom 200%، عرض 320px، وdark mode، وWindows High Contrast لو متاح.</li>
+              <li><b>الفحص الأوتوماتيك</b>: Lighthouse وأداة زي axe DevTools — واعرف إن الأدوات بتمسك حوالي ثلث المشاكل بس.</li>
+              <li><b>التقرير</b>: جدول (المشكلة، المعيار في WCAG، المكان، الـ severity، الإصلاح) — نفس قالب تقرير الـ recon.</li>
+              <li><b>الإصلاح وإعادة الاختبار</b>: commit لكل مشكلة، وسكرين before/after.</li>
+            </ol>
+            <div class="deliver"><b>التسليم:</b> <code>a11y-report.html</code> (ويتطبع PDF نضيف) + النسخة المصلّحة، ومفيش ولا مشكلة contrast أو focus متبقية.</div>
+            <button class="btn btn-sm btn-ghost btn-done" type="button">علّم المشروع كمكتمل</button>
+          </div>
+        </div>
+
+        <div class="project" data-ex="p15">
+          <div class="project-head" role="button" tabindex="0" aria-expanded="false">
+            <span class="pnum">15</span><h4>🎯 Recon من ملفات الـ CSS</h4><span class="lvl l3">متقدم</span><span class="arrow">▼</span>
+          </div>
+          <div class="project-body">
+            <p>ملفات الـ CSS بتتنسي في الـ recon، مع إنها بتكشف نسخ مكتبات، مسارات، وhosts داخلية. ده جزء من <code>app.min.css</code> على <code>megacorp.example</code> (هدف تخيلي في نطاق اختبار مسموح). الدروس: 15، 30، 31.</p>
+            <ol class="milestones">
+              <li>نزّل كل ملفات الـ CSS (DevTools ← Sources أو Network ← filter CSS) وطلّع الـ banner comments.</li>
+              <li>طلّع كل الـ <code>url(…)</code> والـ hosts، وكل الـ attribute selectors اللي فيها <code>href</code> أو أسماء زي admin/beta/debug/internal.</li>
+              <li>جرّب الـ source maps (<code>.css.map</code>)، وطابق النسخ القديمة مع الـ CVEs (Retire.js، NVD).</li>
+              <li>اكتب كل نتيجة بـ severity مبدئية — الـ «path مخفي» لوحده Informational، لحد ما تختبر الـ endpoint وتثبت مشكلة صلاحيات.</li>
+            </ol>
+            <listing lang="css" file="app.min.css (excerpt, beautified)">
+              /*! normalize.css v8.0.1 | MIT License | github.com/necolas/normalize.css */
+              /*! Bootstrap v3.3.7 (http://getbootstrap.com) */
+              .hdr-logo { background: url(https://cdn-int.megacorp.example/brand/logo.svg) no-repeat; }
+              .nav a[href="/beta/exports"] { display: none; }
+              .debug-toolbar { position: fixed; bottom: 0; }
+              .avatar { background-image: url(/uploads/avatars/default.png); }
+              /*# sourceMappingURL=app.min.css.map */
+            </listing>
+            <task id="p15-t1" title="host داخلي" level="2" answer="cdn-int.megacorp.example" norm="text" reject="megacorp.example">
+              <desc><p>إيه الـ host اللي اسمه بيقول إنه داخلي (ويستاهل تضيفه لقايمة الـ subdomains)؟</p></desc>
+              <explain><code>cdn-int.megacorp.example</code> — الـ <code>int</code> غالبًا internal. ضيفه للـ recon (DNS، الـ certificate، هل متاح من برا؟).</explain>
+            </task>
+            <task id="p15-t2" title="نسخة المكتبة" level="2" answer="3.3.7|v3.3.7|bootstrap 3.3.7" norm="text" reject="8.0.1">
+              <desc><p>نسخة أنهي مكتبة UI ممكن يكون ليها XSS معروفة؟ اكتب رقم النسخة.</p></desc>
+              <explain>Bootstrap <b>3.3.7</b>: النسخ قبل 3.4.1 ليها CVEs معروفة (XSS في <code>data-*</code> attributes بتاعة tooltip وcollapse). اختبرها لو الموقع بيستخدم الـ JS بتاع Bootstrap مع input من المستخدم.</explain>
+            </task>
+            <task id="p15-t3" title="الـ source map" level="1" answer="/assets/css/app.min.css.map|app.min.css.map|https://megacorp.example/assets/css/app.min.css.map" norm="text">
+              <desc><p>الملف ده موجود على <code>https://megacorp.example/assets/css/app.min.css</code>. إيه الـ path اللي هتجربه عشان الـ source map؟</p></desc>
+              <explain>الـ <code>sourceMappingURL</code> بيتحسب relative لملف الـ CSS ⇒ <code>/assets/css/app.min.css.map</code>. لو رجع 200 هتشوف ملفات الـ SCSS الأصلية بمساراتها وتعليقاتها.</explain>
+            </task>
+            <div class="deliver"><b>التسليم:</b> قسم «CSS recon» في تقرير الـ recon بتاعك (مشروع 04)، فيه كل host وpath ونسخة لقيتها ومصدرها.</div>
+            <button class="btn btn-sm btn-ghost btn-done" type="button">علّم المشروع كمكتمل</button>
+          </div>
+        </div>
+
+        <h3 class="sub">🏁 Capstone: لوحة findings كاملة (بتتصحح أوتوماتيك)</h3>
+        <html-lab id="p-css-capstone" title="Findings board" level="3">
+          <desc><p>الـ HTML جاهز — اكتب الـ CSS كله. الاختبارات بتشيك على أهم قواعد الجزء التاني:</p><ul>
+          <li>على <code>:root</code>: <code>--accent</code> و<code>--bg</code> و<code>--fg</code>، وجوه <code>@media (prefers-color-scheme: dark)</code> قاعدة <code>:root</code> بتغيّر <code>--bg</code> و<code>--fg</code>.</li>
+          <li><code>.grid</code>: <code>display: grid</code> بـ <code>repeat(auto-fit, minmax(220px, 1fr))</code> (أو <code>auto-fill</code>) و<code>gap</code>.</li>
+          <li><code>.card</code>: الـ background من متغير (<code>var(…)</code>)، و<code>transition</code> على <code>transform</code> (مش <code>all</code>)، و<code>.card:hover</code> بـ <code>translateY(…)</code>.</li>
+          <li><code>:focus-visible</code> بـ outline عرضه 2px أو أكتر.</li>
+          <li><code>@media (prefers-reduced-motion: reduce)</code> بيلغي الـ transition أو الـ transform بتاع الكروت.</li>
+          <li><code>.badge.critical</code>: تباين النص مع خلفيته ≥ 4.5:1.</li>
+          <li>الصور: <code>max-width: 100%</code>، و<code>@media print</code> يخفي <code>.toolbar</code>.</li>
+          <li>ممنوع <code>!important</code> وممنوع أي id في الـ selectors.</li></ul></desc>
+          <starter>
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1">
+              <title>Findings board</title>
+              <style>
+                body { font-family: system-ui, sans-serif; margin: 16px; }
+              </style>
+            </head>
+            <body>
+              <div class="toolbar"><button>Export</button> <button>Filter</button></div>
+              <main class="grid">
+                <article class="card">
+                  <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='200'%3E%3Crect width='600' height='200' fill='%23ede9fe'/%3E%3C/svg%3E" alt="" width="600" height="200">
+                  <h2>Reflected XSS in search</h2><p>The <code>q</code> parameter is reflected without encoding.</p><span class="badge critical">Critical</span>
+                </article>
+                <article class="card"><h2>Missing CSP</h2><p>No Content-Security-Policy header on any page.</p><span class="badge">Medium</span></article>
+                <article class="card"><h2>Verbose errors</h2><p>Stack traces leak framework versions.</p><span class="badge">Low</span></article>
+              </main>
+            </body>
+            </html>
+          </starter>
+          <solution>
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1">
+              <title>Findings board</title>
+              <style>
+                :root { --accent: #6d28d9; --bg: #ffffff; --fg: #0f172a; --page: #f1f5f9; }
+                @media (prefers-color-scheme: dark) { :root { --bg: #111c31; --fg: #e2e8f0; --page: #0b1322; } }
+                body { font-family: system-ui, sans-serif; margin: 16px; background: var(--page); color: var(--fg); }
+                .toolbar { display: flex; gap: 8px; margin-bottom: 12px; }
+                .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+                .card { background: var(--bg); color: var(--fg); border-radius: 14px; padding: 14px; transition: transform .2s ease-out; }
+                .card:hover { transform: translateY(-4px); }
+                .card h2 { font-size: 1.1rem; margin: 8px 0; }
+                img { display: block; max-width: 100%; height: auto; border-radius: 10px; }
+                .badge { display: inline-block; padding: 2px 10px; border-radius: 999px; background: #e2e8f0; color: #0f172a; font-size: .8rem; font-weight: 600; }
+                .badge.critical { background: #b91c1c; color: #ffffff; }
+                :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+                @media (prefers-reduced-motion: reduce) { .card { transition: none; } .card:hover { transform: none; } }
+                @media print { .toolbar { display: none; } }
+              </style>
+            </head>
+            <body>
+              <div class="toolbar"><button>Export</button> <button>Filter</button></div>
+              <main class="grid">
+                <article class="card">
+                  <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='200'%3E%3Crect width='600' height='200' fill='%23ede9fe'/%3E%3C/svg%3E" alt="" width="600" height="200">
+                  <h2>Reflected XSS in search</h2><p>The <code>q</code> parameter is reflected without encoding.</p><span class="badge critical">Critical</span>
+                </article>
+                <article class="card"><h2>Missing CSP</h2><p>No Content-Security-Policy header on any page.</p><span class="badge">Medium</span></article>
+                <article class="card"><h2>Verbose errors</h2><p>Stack traces leak framework versions.</p><span class="badge">Low</span></article>
+              </main>
+            </body>
+            </html>
+          </solution>
+          <test label="متغيرات --accent و--bg و--fg على :root" live>(() => { const s = getComputedStyle(document.documentElement); return ["--accent", "--bg", "--fg"].every(v => s.getPropertyValue(v).trim() !== ""); })()</test>
+          <test label="dark mode بيغيّر --bg و--fg" live>[...document.styleSheets].flatMap(sh => [...sh.cssRules]).some(m => m instanceof CSSMediaRule && /prefers-color-scheme:\s*dark/.test(m.media.mediaText) && [...m.cssRules].some(r => r.selectorText === ":root" && r.style.getPropertyValue("--bg").trim() && r.style.getPropertyValue("--fg").trim()))</test>
+          <test label=".grid: auto-fit/auto-fill + minmax(220px, 1fr) + gap" live>(() => { const r = [...document.styleSheets].flatMap(sh => [...sh.cssRules]).find(x => x.selectorText === ".grid"); return !!r && r.style.display === "grid" && /repeat\(\s*auto-(fit|fill)\s*,\s*minmax\(\s*220px\s*,\s*1fr\s*\)\s*\)/.test(r.style.gridTemplateColumns) && parseFloat(getComputedStyle(document.querySelector(".grid")).columnGap) > 0; })()</test>
+          <test label=".card: background من var() وtransition على transform (مش all)" live>(() => { const r = [...document.styleSheets[0].cssRules].find(x => x.selectorText === ".card"); if (!r) return false; const tp = r.style.transitionProperty.split(",").map(x => x.trim()); return /background(-color)?:\s*var\(/.test(r.cssText) && tp.includes("transform") && !tp.includes("all"); })()</test>
+          <test label=".card:hover بيرفع الكارت بـ translateY" live>[...document.styleSheets[0].cssRules].some(r => r.selectorText === ".card:hover" && /translateY\(/.test(r.style.transform))</test>
+          <test label=":focus-visible outline ≥ 2px" live>[...document.styleSheets].flatMap(sh => [...sh.cssRules]).some(r => { if (!/:focus-visible/.test(r.selectorText || "")) return false; const t = r.style.outlineWidth || r.style.outline || ""; const m = t.match(/(\d*\.?\d+)px/); return !!m && parseFloat(m[1]) >= 2 && !/\bnone\b/.test(t + " " + r.style.outlineStyle); })</test>
+          <test label="reduced motion بيلغي حركة الكروت" live>[...document.styleSheets].flatMap(sh => [...sh.cssRules]).some(m => m instanceof CSSMediaRule && /prefers-reduced-motion:\s*reduce/.test(m.media.mediaText) && [...m.cssRules].some(r => /\.card/.test(r.selectorText || "") && (r.style.transitionProperty === "none" || r.style.transform === "none" || parseFloat(r.style.transitionDuration) <= 0.01)))</test>
+          <test label=".badge.critical: تباين ≥ 4.5:1" live>(() => { const L = c => { const a = c.match(/[\d.]+/g).slice(0, 3).map(Number); return a.reduce((s, v, i) => { v /= 255; return s + [0.2126, 0.7152, 0.0722][i] * (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4); }, 0); }; const s = getComputedStyle(document.querySelector(".badge.critical")); if (/rgba\(.*,\s*0\)/.test(s.backgroundColor) || s.backgroundColor === "transparent") return false; const x = L(s.color), y = L(s.backgroundColor); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05) >= 4.5; })()</test>
+          <test label="الصور max-width: 100%" live>getComputedStyle(document.querySelector("img")).maxWidth === "100%"</test>
+          <test label="الطباعة بتخفي .toolbar" live>[...document.styleSheets].flatMap(sh => [...sh.cssRules]).some(m => m instanceof CSSMediaRule && /print/.test(m.media.mediaText) && [...m.cssRules].some(r => (r.selectorText || "").split(",").map(x => x.trim()).includes(".toolbar") && r.style.display === "none"))</test>
+          <test label="مفيش !important">!/!\s*important/.test(S)</test>
+          <test label="مفيش id في أي selector (حتى جوه الـ media)" live>(() => { const walk = rs => [...rs].flatMap(r => [r, ...(r.cssRules ? walk(r.cssRules) : [])]); return ![...document.styleSheets].some(sh => walk(sh.cssRules).some(r => /#/.test(r.selectorText || ""))); })()</test>
+          <hint>ابدأ بالمتغيرات والـ dark mode، وبعدين الـ grid، وفي الآخر الـ states (hover/focus) والـ media queries. الـ badge محتاج background صريح — من غيره الاختبار مش هيعرف يحسب التباين.</hint>
+        </html-lab>
+
+        <div class="callout tip reveal"><span class="ci">🚀</span><div><strong>خلصت الجزء التاني؟</strong><p>دلوقتي تقدر تبني أي واجهة: layout بأي شكل، responsive، accessible، ومتحركة باحترام. الجزء الجاي <b>JavaScript</b>: اللغة نفسها، الـ DOM والـ events، الـ fetch والـ APIs، Node.js، وكمان قراية وفك الـ JavaScript المتلخبط (obfuscated) اللي بتلاقيه في الـ malware وصفحات الـ phishing. وبعده جزء الـ Web Security.</p></div></div>
+      </section>
