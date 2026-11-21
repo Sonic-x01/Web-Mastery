@@ -1,0 +1,321 @@
+      <section class="section" id="s11" data-part="الجزء 1 · HTML" data-pk="html" data-nav="الـ iframes والـ Embedding" data-icon="🪟" data-keywords="iframe src srcdoc sandbox allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation permissions policy allow loading lazy title name target browsing context parent top frames object embed clickjacking ui redressing x-frame-options frame-ancestors frame busting postmessage">
+        <div class="section-head">
+          <span class="section-index">11</span>
+          <div>
+            <p class="eyebrow">HTML · الدرس 11</p>
+            <h2>الـ iframes: صفحة جوه صفحة</h2>
+            <p class="lede"><code>&lt;iframe&gt;</code> بيحط <b>مستند كامل</b> (بـ window وDOM وscripts بتوعه) جوه صفحتك: خرايط، فيديوهات، أزرار دفع، widgets. وده بيفتح أسئلة أمنية مهمة: مين يقدر يوصل لمين؟ إزاي تعزل كود مش موثوق؟ وإزاي موقع يخدع المستخدم يدوس على زرار في موقع تاني من غير ما يعرف (<b>clickjacking</b>)؟ — بالمناسبة، كل المعاينات في الكورس ده iframes معزولة.</p>
+          </div>
+        </div>
+
+        <h3 class="sub">الأساسيات</h3>
+        <code-block lang="html" file="embed.html">
+          <iframe src="https://maps.example/embed?q=Cairo"
+                  title="Office location map"
+                  width="600" height="400"
+                  loading="lazy"
+                  referrerpolicy="no-referrer"
+                  allow="fullscreen; geolocation 'none'"></iframe>
+        </code-block>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>الـ attribute</th><th>وظيفته</th></tr></thead>
+          <tbody>
+            <tr><td><code>src</code></td><td>الـ URL اللي هيتحمّل جواه</td></tr>
+            <tr><td><code>srcdoc</code></td><td>HTML مباشرة كـ string (لو موجود بيكسب على <code>src</code>). المستند ده بياخد <b>نفس origin الصفحة الأب</b> (إلا لو sandboxed)</td></tr>
+            <tr><td><code>title</code></td><td>وصف للـ iframe لقارئ الشاشة — إجباري عمليًا للـ accessibility</td></tr>
+            <tr><td><code>name</code></td><td>اسم تقدر تستخدمه كـ <code>target</code> للينكات والفورمز</td></tr>
+            <tr><td><code>loading="lazy"</code></td><td>متحمّلوش غير لما يقرب من الشاشة</td></tr>
+            <tr><td><code>allow</code></td><td><b>Permissions Policy</b>: إيه الـ features المسموحة جواه (camera، microphone، geolocation، fullscreen، payment، clipboard-write…)</td></tr>
+            <tr><td><code>sandbox</code></td><td>قيود أمنية (تحت بالتفصيل)</td></tr>
+            <tr><td><code>referrerpolicy</code></td><td>الـ Referer اللي يتبعت لما يتحمّل</td></tr>
+          </tbody>
+        </table></div>
+
+        <h3 class="sub">مين يقدر يلمس مين؟ (Same-Origin Policy)</h3>
+        <p>كل iframe ليه <code>window</code> منفصل. الأب يقدر يوصل للـ iframe بـ <code>iframe.contentWindow</code>، والـ iframe يوصل لأبوه بـ <code>window.parent</code> وللأعلى بـ <code>window.top</code>. بس: <b>لو الاتنين من نفس الـ origin</b> بس يقدروا يقروا ويعدّلوا DOM بعض. لو من origins مختلفة، الـ <b>Same-Origin Policy</b> بتمنع القراية تمامًا، والمسموح بس حاجات محدودة: تغيير الـ <code>location</code> (navigation) وتبادل رسائل بـ <code>postMessage</code>.</p>
+        <figure class="diagram reveal">
+          <svg viewBox="0 0 1000 220" role="img" aria-label="الوصول بين الصفحة والـ iframes">
+            <rect x="20" y="20" width="960" height="185" rx="18" class="d-box"/>
+            <text x="40" y="48" class="d-tb d-acc">https://shop.example (top)</text>
+            <rect x="60" y="70" width="380" height="115" rx="14" class="d-box4"/>
+            <text x="80" y="98" class="d-tb d-grn">iframe: https://shop.example/widget</text>
+            <text x="80" y="124" class="d-ts">same origin ✓</text>
+            <text x="80" y="146" class="d-tx">parent.document → full read/write</text>
+            <text x="80" y="166" class="d-tx">iframe.contentDocument → full read/write</text>
+            <rect x="560" y="70" width="380" height="115" rx="14" class="d-box5"/>
+            <text x="580" y="98" class="d-tb d-red">iframe: https://ads.example/banner</text>
+            <text x="580" y="124" class="d-ts">cross origin ✗</text>
+            <text x="580" y="146" class="d-tx">contentDocument → null / SecurityError</text>
+            <text x="580" y="166" class="d-tx">only: postMessage · location navigation</text>
+          </svg>
+          <figcaption>الـ origin = scheme + host + port. الـ SOP هي أهم حماية في المتصفح كله، والجزء الرابع فيه درس كامل عنها.</figcaption>
+        </figure>
+
+        <h3 class="sub">الـ sandbox: عزل الكود اللي مش واثق فيه</h3>
+        <p><code>&lt;iframe sandbox&gt;</code> <b>فاضي</b> = أقصى تقييد: مفيش scripts، مفيش forms، مفيش popups، مفيش navigation للصفحة الأب، مفيش downloads، والمستند بياخد origin <b>«opaque»</b> (فريد، مش بيساوي حتى نفسه) فميقدرش يوصل لأي cookies أو storage. كل كلمة في الـ sandbox «بترفع» قيد واحد:</p>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>الـ flag</th><th>بيسمح بإيه</th></tr></thead>
+          <tbody>
+            <tr><td><code>allow-scripts</code></td><td>تشغيل JavaScript</td></tr>
+            <tr><td><code>allow-forms</code></td><td>إرسال الفورمز</td></tr>
+            <tr><td><code>allow-same-origin</code></td><td>يحتفظ بالـ origin الحقيقي بتاعه بدل الـ opaque</td></tr>
+            <tr><td><code>allow-popups</code> / <code>allow-popups-to-escape-sandbox</code></td><td>يفتح نوافذ (والتانية: النوافذ دي متبقاش sandboxed)</td></tr>
+            <tr><td><code>allow-modals</code></td><td><code>alert</code>/<code>confirm</code>/<code>prompt</code>/<code>print</code></td></tr>
+            <tr><td><code>allow-top-navigation</code> / <code>…-by-user-activation</code></td><td>يغيّر عنوان الصفحة الأب (التانية: بعد ضغطة من المستخدم بس)</td></tr>
+            <tr><td><code>allow-downloads</code></td><td>تنزيل ملفات</td></tr>
+          </tbody>
+        </table></div>
+        <html-example file="sandbox.html" auto max="300">
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>sandbox</title>
+          <style>iframe{width:100%;height:46px;border:1px solid #cbd5e1;border-radius:6px;margin:4px 0}</style></head>
+          <body>
+            <p>sandbox="" (scripts blocked):</p>
+            <iframe sandbox="" srcdoc="<p>static text</p><script>document.body.append('✅ script RAN')</script>"></iframe>
+            <p>sandbox="allow-scripts":</p>
+            <iframe sandbox="allow-scripts" srcdoc="<p>static text</p><script>document.body.append('✅ script RAN')</script>"></iframe>
+          </body>
+          </html>
+        </html-example>
+        <div class="callout danger reveal"><span class="ci">⚠️</span><div><strong>allow-scripts + allow-same-origin = sandbox ملوش لازمة</strong><p>لو المحتوى اللي جوه الـ iframe من <b>نفس الـ origin</b> بتاع الصفحة، والـ sandbox فيه الاتنين مع بعض، الـ script جواه يقدر يوصل لـ <code>parent.document</code>، يمسك عنصر الـ iframe نفسه، ويـ<b>شيل الـ sandbox attribute</b> ويعمل reload — هروب كامل. القاعدة: كود مش موثوق = <code>allow-scripts</code> من غير <code>allow-same-origin</code> (زي معاينات الكورس ده: <code>sandbox="allow-scripts allow-forms"</code>)، أو تخدمه من دومين منفصل خالص.</p></div></div>
+        <div class="callout pt reveal"><span class="ci">🎯</span><div><strong><code>srcdoc</code> = XSS بالـ entities</strong><p>قيمة <code>srcdoc</code> attribute، فالـ entities جواها بتتفك، وبعدين الناتج بيتقري كـ <b>HTML كامل</b>. يعني <code>&lt;iframe srcdoc="&amp;lt;script&amp;gt;alert(1)&amp;lt;/script&amp;gt;"&gt;</code> بيشغّل script — وبما إن الـ srcdoc من غير sandbox بياخد <b>origin الصفحة الأب</b>، الـ script يقدر يقرا <code>parent.document.cookie</code>. فلتر بيمنع <code>&lt;script</code> كنص بس، وبيسمح بـ iframe وsrcdoc، هيتخدع.</p></div></div>
+
+        <h3 class="sub">object وembed (للمعرفة)</h3>
+        <p><code>&lt;object data="file.pdf" type="application/pdf"&gt;</code> و<code>&lt;embed src="…"&gt;</code> كانوا للـ plugins (Flash، Java) اللي اختفت. لسه بيستخدموا لعرض PDF أحيانًا. 🎯 أمنيًا: <code>&lt;object data="…"&gt;</code> و<code>&lt;embed src="…"&gt;</code> ممكن يحمّلوا HTML أو SVG كمستند كامل (زي iframe) — فلو الفلتر بيمنع iframe ومبيمنعهمش، دول بدايل. والـ CSP بتتحكم فيهم بـ <code>object-src</code> (والأفضل <code>'none'</code>).</p>
+
+        <h3 class="sub">Clickjacking (UI redressing)</h3>
+        <scene id="sc-clickjack" title="إزاي الضحية بتدوس على زرار مش شايفاه">
+          <svg viewBox="0 0 1000 300" role="img" aria-label="طبقات هجوم clickjacking">
+            <g data-from="1">
+              <rect x="40" y="40" width="420" height="230" rx="16" class="d-box3"/>
+              <text x="60" y="70" class="d-tb d-amb">evil.example (what the victim sees)</text>
+              <text x="250" y="130" text-anchor="middle" class="d-t" font-size="18">🎁 You won an iPhone!</text>
+              <rect x="170" y="168" width="160" height="44" rx="10" class="d-box4"/>
+              <text x="250" y="196" text-anchor="middle" class="d-tb d-grn">Claim prize</text>
+            </g>
+            <g data-from="2">
+              <rect x="540" y="40" width="420" height="230" rx="16" class="d-box5" style="opacity:.9"/>
+              <text x="560" y="70" class="d-tb d-red">iframe: bank.example/settings</text>
+              <text x="750" y="130" text-anchor="middle" class="d-ts">logged in (victim's cookies)</text>
+              <rect x="670" y="168" width="160" height="44" rx="10" class="d-box5"/>
+              <text x="750" y="196" text-anchor="middle" class="d-tb d-red">Delete account</text>
+            </g>
+            <g data-from="3">
+              <path class="d-ar-red d-flow" d="M538,190 C500,190 470,190 334,190"/>
+              <text x="500" y="250" text-anchor="middle" class="d-tx d-red">opacity: 0 · position: absolute · z-index: 2</text>
+            </g>
+            <g data-from="4">
+              <rect x="170" y="168" width="160" height="44" rx="10" class="d-box5" style="fill:rgba(255,92,138,.18)" />
+              <text x="250" y="290" text-anchor="middle" class="d-ts d-red">click lands on the invisible bank button</text>
+            </g>
+          </svg>
+          <step>صفحة المهاجم فيها «طُعم»: زرار مغري زي «Claim prize».</step>
+          <step>الصفحة نفسها بتحمّل الموقع المستهدف (البنك) في iframe. الضحية عاملة login في البنك، فالـ iframe بيتحمّل <b>بالـ cookies بتاعتها</b> ومعروض فيه زرار حقيقي «Delete account».</step>
+          <step>بالـ CSS: الـ iframe بيتحط <b>فوق</b> الطُعم بالظبط، وشفاف تمامًا (<code>opacity: 0</code>). الضحية مش شايفاه خالص.</step>
+          <step>الضحية بتدوس «Claim prize»… والضغطة بتروح للزرار الحقيقي اللي في البنك. أي action بضغطة واحدة (حذف، تحويل، تغيير إعدادات، «Allow») ممكن يتعمل كده.</step>
+        </scene>
+        <p>جرّب بنفسك — الـ «بنك» هنا صفحة جوه <code>srcdoc</code>، وخليت الـ iframe شفاف بنسبة 25% بس عشان تشوفه. دوس «Claim prize»:</p>
+        <html-example file="clickjacking-poc.html" auto url="https://evil.example/win.html" max="300">
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>You won!</title>
+          <style>
+            body { font-family: system-ui, sans-serif; }
+            .stage { position: relative; width: 320px; height: 150px; }
+            .decoy { position: absolute; left: 80px; top: 90px; padding: 10px 18px; border: 0; border-radius: 8px;
+                     background: #16a34a; color: #fff; font-weight: 700; }
+            #target { position: absolute; left: 0; top: 0; width: 320px; height: 150px; border: 0;
+                      opacity: .25; z-index: 2; }
+          </style></head>
+          <body>
+            <div class="stage">
+              <h3>🎁 You won an iPhone!</h3>
+              <button class="decoy">Claim prize</button>
+              <iframe id="target" title="bank" srcdoc="
+                <body style='margin:0;font-family:system-ui'>
+                  <p style='margin:8px 10px'><b>Bank</b> · Settings (logged in)</p>
+                  <button style='position:absolute;left:80px;top:90px;padding:10px 18px;border:0;border-radius:8px;background:#e11d48;color:#fff;font-weight:700'
+                          onclick='document.body.innerHTML=&quot;<h3 style=color:#e11d48;padding:10px>⚠ Account deleted!</h3>&quot;'>Delete account</button>
+                </body>"></iframe>
+            </div>
+          </body>
+          </html>
+        </html-example>
+
+        <h3 class="sub">الدفاع ضد الـ framing</h3>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>الحماية</th><th>الشكل</th><th>ملاحظات</th></tr></thead>
+          <tbody>
+            <tr><td><code>Content-Security-Policy: frame-ancestors</code></td><td><code>frame-ancestors 'none'</code> أو <code>'self'</code> أو <code>'self' https://partner.example</code></td><td><b>الحديث والأقوى</b>. header بس (مش meta)</td></tr>
+            <tr><td><code>X-Frame-Options</code></td><td><code>DENY</code> أو <code>SAMEORIGIN</code></td><td>قديم بس مدعوم في كل حتة. لو الاتنين موجودين، <code>frame-ancestors</code> هو اللي بيتطبق في المتصفحات الحديثة</td></tr>
+            <tr><td>Frame-busting JS</td><td><code>if (top !== self) top.location = self.location</code></td><td><b>ضعيف</b>: المهاجم يحط الـ iframe بـ <code>sandbox="allow-forms"</code> (من غير allow-scripts أو top-navigation) فالـ JS يقف</td></tr>
+            <tr><td>SameSite cookies</td><td><code>SameSite=Lax/Strict</code></td><td>الـ iframe cross-site مش هيبعت الـ cookies → الضحية تظهر logged out جوه الـ iframe</td></tr>
+          </tbody>
+        </table></div>
+        <div class="callout pt reveal"><span class="ci">🎯</span><div><strong>إزاي تختبر الـ clickjacking في pentest</strong><p>(1) بص على الـ response headers للصفحات الحساسة (settings، payments، OAuth «Allow»): فيه <code>frame-ancestors</code> أو <code>X-Frame-Options</code>؟ (2) اعمل PoC صغير زي اللي فوق بـ <code>&lt;iframe src="https://target/…"&gt;</code> — لو الصفحة ظهرت جواه ومحمّلة الجلسة، فهي قابلة للـ framing. (3) الـ finding يبقى مهم لو فيه <b>action حساس بضغطة واحدة</b>؛ صفحة static قابلة للـ framing قيمتها ضعيفة.</p></div></div>
+
+        <h3 class="sub">postMessage: الكلام المسموح بين الـ origins</h3>
+        <code-block lang="js" file="postmessage.js">
+          // parent page (https://shop.example) → iframe (https://pay.example)
+          frame.contentWindow.postMessage({ amount: 499 }, "https://pay.example");   // ✅ exact target origin
+
+          // inside the iframe: ALWAYS check who is talking to you
+          window.addEventListener("message", (event) => {
+            if (event.origin !== "https://shop.example") return;   // ✅ ignore everyone else
+            charge(event.data.amount);
+          });
+        </code-block>
+        <p>الـ <code>postMessage</code> هو الطريقة الرسمية للكلام بين windows من origins مختلفة. الأخطاء الكلاسيكية: الإرسال بـ <code>"*"</code> (أي حد ممكن يستقبل الداتا)، والاستقبال من غير التحقق من <code>event.origin</code> (أي موقع يقدر يبعت أوامر). 🎯 ده مصدر ثغرات DOM XSS وتسريب tokens كتير — هنكسره في الجزء الرابع بعد ما نتعلم JavaScript.</p>
+
+        <div class="exercises">
+          <div class="exercises-head"><h3><span class="bulb">✏️</span> تمارين الدرس 11</h3></div>
+          <quiz id="s11-q1" answer="2">
+            <q>`<iframe sandbox src="https://ads.example/x">` (الـ sandbox فاضي). إيه اللي هيحصل للـ scripts جواه؟</q>
+            <o>هتشتغل عادي</o>
+            <o>هتشتغل بس من غير cookies</o>
+            <o>مش هتشتغل خالص — الـ sandbox الفاضي بيمنع الـ scripts وكل حاجة تقريبًا</o>
+            <o>هتشتغل بس من غير alert</o>
+            <good>الـ sandbox الفاضي = كل القيود. كل flag بيرفع قيد واحد.</good>
+            <bad>`sandbox` من غير قيم = scripts ممنوعة، forms ممنوعة، popups ممنوعة، والـ origin بقى opaque.</bad>
+          </quiz>
+          <quiz id="s11-q2" answer="0">
+            <q>ليه `sandbox="allow-scripts allow-same-origin"` على محتوى من <b>نفس الـ origin</b> خطير؟</q>
+            <o>الـ script جواه يقدر يوصل للـ parent ويشيل الـ sandbox attribute من الـ iframe نفسه ويهرب</o>
+            <o>مش خطير</o>
+            <o>بيعطّل الـ HTTPS</o>
+            <o>بيخلّي الصفحة بطيئة</o>
+            <good>same-origin + scripts = وصول كامل لـ DOM الأب، ومنه للـ iframe element نفسه. العزل الحقيقي محتاج origin مختلف أو منع allow-same-origin.</good>
+            <bad>المحتوى ده يقدر يقرا ويعدّل `parent.document` لأنه same-origin، بما فيه الـ iframe اللي هو جواه — فيشيل القيود.</bad>
+          </quiz>
+          <quiz id="s11-q3" answer="3">
+            <q>الصفحة `https://shop.example` فيها iframe من `https://ads.example`. الأب جرّب `frame.contentDocument.body.innerHTML`. النتيجة؟</q>
+            <o>بيرجع الـ HTML</o>
+            <o>بيرجع نص فاضي</o>
+            <o>بيرجع الـ HTML لو الإعلان HTTPS</o>
+            <o>`contentDocument` بيبقى `null` — الـ Same-Origin Policy بتمنع قراية مستند من origin تاني</o>
+            <good>الـ SOP بتمنع القراية في الاتجاهين. المسموح: postMessage وتغيير الـ location.</good>
+            <bad>origins مختلفة = مفيش وصول للـ DOM. `contentDocument` بيرجع `null`.</bad>
+          </quiz>
+          <quiz id="s11-q4" answer="1">
+            <q>أنهي حماية من الـ clickjacking بتشتغل لو اتحطت في `<meta http-equiv>`؟</q>
+            <o>`frame-ancestors`</o>
+            <o>ولا واحدة — `frame-ancestors` و`X-Frame-Options` لازم ييجوا كـ HTTP headers</o>
+            <o>`X-Frame-Options`</o>
+            <o>الاتنين</o>
+            <good>الحمايتين بيتجاهلوا لو في meta. لازم header من السيرفر.</good>
+            <bad>`X-Frame-Options` في meta متجاهل، و`frame-ancestors` مش مدعوم في meta CSP. الاتنين headers بس.</bad>
+          </quiz>
+          <quiz id="s11-q5" answer="2">
+            <q>موقع حمايته الوحيدة من الـ framing هي `if (top !== self) top.location = self.location;`. المهاجم يعمل إيه؟</q>
+            <o>مينفعش يعمل حاجة</o>
+            <o>يستخدم HTTP بدل HTTPS</o>
+            <o>يحط الـ iframe بـ `sandbox="allow-forms"` (من غير allow-scripts أو allow-top-navigation) فالكود ده ميشتغلش أو ميقدرش يغيّر الـ top</o>
+            <o>يعمل refresh</o>
+            <good>الـ frame busting بالـ JS سهل يتكسر. الحل الحقيقي `frame-ancestors`.</good>
+            <bad>الـ sandbox بيقدر يمنع الـ scripts أو الـ top navigation، فالـ frame-buster ميعرفش يهرب. الحماية لازم header.</bad>
+          </quiz>
+          <quiz id="s11-q6" answer="0">
+            <q>iframe في صفحة `https://shop.example` بالشكل ده: `<iframe srcdoc="&lt;script&gt;alert(document.domain)&lt;/script&gt;">`. هيحصل إيه؟</q>
+            <o>الـ script هيشتغل، وعلى origin `shop.example` (الـ srcdoc من غير sandbox بيورث origin الأب)</o>
+            <o>هيتعرض النص `<script>…` كنص</o>
+            <o>مش هيحصل حاجة لأن الـ entities بتمنع الـ XSS</o>
+            <o>هيشتغل على origin فاضي</o>
+            <good>الـ entities بتتفك في قيمة الـ attribute، والناتج بيتقري HTML جديد. ده vector مشهور لعبور الفلاتر.</good>
+            <bad>الـ `&lt;` جوه attribute بيبقى `<` بعد الـ decoding، والـ srcdoc بيتعامل مع الناتج كـ HTML — فالـ script بيتعمل ويشتغل بـ origin الأب.</bad>
+          </quiz>
+
+          <html-lab id="s11-lab1" title="ضمّن widget خارجي بأقل صلاحيات" level="1">
+            <desc><p>ضمّن chat widget من <code>https://widgets.example/chat</code> بالشروط:</p>
+            <ul><li><code>title</code> وصفي، و<code>width="300"</code> و<code>height="400"</code>، و<code>loading="lazy"</code>.</li>
+            <li><code>sandbox</code> بيسمح بـ <b>scripts وforms بس</b> (من غير same-origin ولا popups ولا top navigation).</li>
+            <li>من غير Referer (<code>referrerpolicy</code>).</li>
+            <li><code>allow</code> بيمنع الكاميرا والمايك صراحة: <code>camera 'none'; microphone 'none'</code>.</li></ul></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>Support</title></head>
+              <body>
+                <h2>Support</h2>
+                <iframe src="https://widgets.example/chat"></iframe>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>Support</title></head>
+              <body>
+                <h2>Support</h2>
+                <iframe src="https://widgets.example/chat"
+                        title="Live support chat"
+                        width="300" height="400" loading="lazy"
+                        sandbox="allow-scripts allow-forms"
+                        referrerpolicy="no-referrer"
+                        allow="camera 'none'; microphone 'none'"></iframe>
+              </body>
+              </html>
+            </solution>
+            <test label="title وwidth=300 وheight=400 وloading=lazy">(attr("iframe", "title") || "").trim().length > 3 && attr("iframe", "width") === "300" && attr("iframe", "height") === "400" && attr("iframe", "loading") === "lazy"</test>
+            <test label="sandbox = allow-scripts + allow-forms بس">$("iframe").hasAttribute("sandbox") && (attr("iframe", "sandbox") || "").trim().split(/\s+/).sort().join(" ") === "allow-forms allow-scripts"</test>
+            <test label="referrerpolicy = no-referrer">attr("iframe", "referrerpolicy") === "no-referrer"</test>
+            <test label="allow بيمنع camera وmicrophone">/camera\s+'none'/.test(attr("iframe", "allow") || "") && /microphone\s+'none'/.test(attr("iframe", "allow") || "")</test>
+          </html-lab>
+
+          <html-lab id="s11-lab2" title="Clickjacking PoC لتقرير" level="2" url="https://pentest-poc.example/cj.html">
+            <desc><p>العميل طلب PoC يثبت إن <code>https://bank.example/settings</code> قابلة للـ framing. ابني الصفحة:</p>
+            <ul><li>زرار طُعم مكتوب عليه كلمة <b>prize</b>.</li>
+            <li>iframe عليه <code>id="target"</code> بيحمّل <code>https://bank.example/settings</code>.</li>
+            <li>الـ iframe (بـ <code>style</code> inline) <code>position: absolute</code>، شفافيته <code>opacity</code> ≤ 0.1، و<code>z-index</code> أكبر من 0 (فوق الطُعم).</li></ul></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>PoC</title></head>
+              <body>
+                <h3>Clickjacking PoC — bank.example/settings</h3>
+                <!-- decoy + framed target here -->
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>PoC</title></head>
+              <body>
+                <h3>Clickjacking PoC — bank.example/settings</h3>
+                <div style="position: relative; width: 500px; height: 300px;">
+                  <button style="position: absolute; left: 200px; top: 180px;">Claim your prize</button>
+                  <iframe id="target" src="https://bank.example/settings" title="framed target"
+                          style="position: absolute; left: 0; top: 0; width: 500px; height: 300px; border: 0; opacity: 0.0001; z-index: 2;"></iframe>
+                </div>
+              </body>
+              </html>
+            </solution>
+            <test label="زرار طُعم فيه كلمة prize">$$("button").some(b => /prize/i.test(b.textContent))</test>
+            <test label="`iframe#target` بيحمّل bank.example/settings">attr("#target", "src") === "https://bank.example/settings"</test>
+            <test label="position absolute (أو fixed)">has("#target") && ["absolute", "fixed"].includes($("#target").style.position)</test>
+            <test label="opacity ≤ 0.1">has("#target") && $("#target").style.opacity !== "" && Number($("#target").style.opacity) <= 0.1</test>
+            <test label="z-index > 0">has("#target") && Number($("#target").style.zIndex) > 0</test>
+            <hint>`style="position:absolute; opacity:0.0001; z-index:2; …"` على الـ iframe، والطُعم تحته في نفس المكان. (في الـ PoC الحقيقي بتحط opacity صغيرة جدًا مش 0 عشان بعض المتصفحات.)</hint>
+          </html-lab>
+
+          <task id="s11-t1" title="مين مسموحله يعمل frame؟" level="1" answer="https://partner.example">
+            <desc><p>ده جزء من response صفحة الإعدادات. غير الموقع نفسه، <b>مين الـ origin التاني</b> اللي مسموحله يحط الصفحة دي في iframe؟</p></desc>
+            <listing lang="http" file="response.txt">
+              HTTP/1.1 200 OK
+              Content-Type: text/html; charset=utf-8
+              X-Frame-Options: SAMEORIGIN
+              Content-Security-Policy: default-src 'self'; frame-ancestors 'self' https://partner.example
+            </listing>
+            <hint>لو `frame-ancestors` و`X-Frame-Options` الاتنين موجودين، المتصفحات الحديثة بتمشي على مين؟</hint>
+            <explain>`https://partner.example` — `frame-ancestors` بيكسب على `X-Frame-Options` في المتصفحات الحديثة، وفيه `'self'` + `https://partner.example`. (المتصفحات القديمة جدًا اللي بتفهم XFO بس هتسمح بـ same origin بس.) لو الـ partner ده عنده XSS، المهاجم يقدر يعمل clickjacking من خلاله.</explain>
+          </task>
+          <task id="s11-t2" title="إيه اللي اتعمل جوه الـ srcdoc؟" level="2" answer="img" reject="iframe">
+            <desc><p>الفلتر بيمسح أي <code>&lt;script</code> و<code>&lt;img</code> مكتوبة كنص. المهاجم بعت ده واتقبل. جوه مستند الـ iframe، إيه <b>اسم الـ element</b> اللي اتعمل وعليه الـ <code>onerror</code>؟</p></desc>
+            <listing lang="html" file="comment.html">
+              <iframe srcdoc="&lt;img src=x onerror=alert(parent.document.cookie)&gt;"></iframe>
+            </listing>
+            <explain>`img`. الـ attribute value بيتفك لـ `<img src=x onerror=…>`، والـ srcdoc بيتـparse كـ HTML، فالـ img بيتعمل والـ onerror بيشتغل — وبما إن الـ srcdoc مش sandboxed، `parent.document.cookie` متاح (نفس الـ origin). الفلتر كان بيدوّر على النص الخام قبل الـ decoding.</explain>
+          </task>
+        </div>
+      </section>

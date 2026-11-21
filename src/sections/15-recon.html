@@ -1,0 +1,202 @@
+      <section class="section" id="s15" data-part="الجزء 1 · HTML" data-pk="html" data-nav="Recon من الـ Source" data-icon="🔎" data-keywords="recon reconnaissance source code review view-source comments hidden inputs endpoints javascript files source maps secrets api keys robots.txt sitemap security.txt wayback dorks linkfinder katana gau trufflehog gitleaks grep curl burp attack surface">
+        <div class="section-head">
+          <span class="section-index">15</span>
+          <div>
+            <p class="eyebrow">HTML · الدرس 15 · تطبيق</p>
+            <h2>Recon من الـ HTML والـ JavaScript</h2>
+            <p class="lede">قبل أي payload، الـ pentester المحترف بيرسم <b>خريطة سطح الهجوم</b>: كل صفحة، كل parameter، كل endpoint، كل host، وكل حاجة «مكنش المفروض تبقى هنا». وأغلب الخريطة دي موجودة في الكود اللي السيرفر <b>بيبعته لك بنفسه</b>. في الدرس ده هنحوّل كل اللي اتعلمته لمنهجية بتمشي عليها في أي target.</p>
+          </div>
+        </div>
+
+        <div class="callout danger reveal"><span class="ci">⚖️</span><div><strong>Scope أولًا</strong><p>الـ recon «السلبي» (قراية اللي السيرفر بيبعته، Wayback، البحث) مختلف عن الـ scanning النشط. حتى في الـ bug bounty، الـ subdomains والـ hosts اللي هتلاقيها <b>مش بالضرورة في الـ scope</b>. اقرا الـ policy واشتغل جواها بس.</p></div></div>
+
+        <h3 class="sub">المنهجية خطوة خطوة</h3>
+        <div class="steps">
+          <div class="step"><span class="n">01</span><div><h4>اتصفح كمستخدم وBurp شغّال</h4><p>اعمل حساب، جرّب كل feature (بحث، رفع، دفع، إعدادات). Burp بيبني <b>Site map</b> بكل request. ده أساس كل حاجة بعد كده.</p></div></div>
+          <div class="step"><span class="n">02</span><div><h4>اقرا الـ source لكل «نوع» صفحة</h4><p><code>view-source:</code> للـ HTML الخام، وتاب Elements للـ DOM بعد الـ JS. دوّر على: <code>&lt;!--</code>، <code>type="hidden"</code>، <code>hidden</code>/<code>disabled</code>، <code>data-*</code>.</p></div></div>
+          <div class="step"><span class="n">03</span><div><h4>الفورمز</h4><p>كل <code>action</code> و<code>method</code> وكل <code>name</code> (بما فيها الـ hidden). فيه CSRF token؟ فيه parameters بتتحكم في حاجة حساسة (<code>price</code>، <code>role</code>، <code>user_id</code>، <code>debug</code>، <code>return</code>)؟</p></div></div>
+          <div class="step"><span class="n">04</span><div><h4>كل URL في الصفحة</h4><p><code>href</code>، <code>src</code>، <code>action</code>، <code>formaction</code>، <code>srcset</code>، CSS <code>url()</code>: الـ paths بتكشف directories، والـ hosts بتكشف subdomains وخدمات خارجية، و<code>mailto:</code> بتكشف إيميلات.</p></div></div>
+          <div class="step"><span class="n">05</span><div><h4>ملفات الـ JavaScript</h4><p>أغنى مصدر: كل <code>fetch</code>/<code>axios</code>/<code>XMLHttpRequest</code> = endpoint، routes الـ SPA (حتى صفحات admin)، feature flags، شروط صلاحيات بتتعمل في المتصفح، وأحيانًا secrets. ودوّر على <code>//# sourceMappingURL=</code>.</p></div></div>
+          <div class="step"><span class="n">06</span><div><h4>البصمة التقنية</h4><p><code>meta generator</code>، أرقام الإصدارات في أسماء الملفات والـ query (<code>?ver=</code>)، الـ headers (<code>Server</code>، <code>X-Powered-By</code>)، الـ cookies (<code>PHPSESSID</code>، <code>JSESSIONID</code>، <code>ASP.NET_SessionId</code>).</p></div></div>
+          <div class="step"><span class="n">07</span><div><h4>الملفات المعروفة</h4><p><code>/robots.txt</code>، <code>/sitemap.xml</code>، <code>/.well-known/security.txt</code> (للتواصل الرسمي)، <code>/manifest.json</code>، <code>/crossdomain.xml</code>، وأحيانًا exposures زي <code>/.git/HEAD</code> أو <code>.env</code> أو <code>backup.zip</code> (اختبارها نشط — في الـ scope بس).</p></div></div>
+          <div class="step"><span class="n">08</span><div><h4>الماضي</h4><p>Wayback Machine (<code>web.archive.org</code>) فيه نسخ قديمة من الصفحات وملفات JS — endpoints اتشالت من الواجهة بس ممكن لسه شغّالة في السيرفر.</p></div></div>
+        </div>
+
+        <h3 class="sub">curl + grep: recon في سطر</h3>
+        <code-block lang="bash" file="terminal">
+          # every URL-ish attribute on a page
+          curl -s https://shop.example/ | grep -oiE '(href|src|action|formaction)="[^"]+"' | sort -u
+
+          # one-line HTML comments
+          curl -s https://shop.example/ | grep -oE '<!--.*-->'
+
+          # hidden inputs
+          curl -s https://shop.example/login | grep -oiE '<input[^>]+type="?hidden"?[^>]*>'
+
+          # API paths inside a JS bundle
+          curl -s https://shop.example/static/js/main.4f9c2a.js | grep -oE '"/(api|v[0-9]+|graphql|internal)[^"]*"' | sort -u
+
+          # does a source map exist?
+          curl -s -o /dev/null -w "%{http_code}\n" https://shop.example/static/js/main.4f9c2a.js.map
+
+          # secrets-looking strings in downloaded JS
+          grep -RniE 'api[_-]?key|secret|token|passw|bearer' ./js/
+        </code-block>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>الأداة</th><th>بتعمل إيه</th></tr></thead>
+          <tbody>
+            <tr><td><b>Burp Suite</b></td><td>Site map + «Engagement tools → Find comments / Find scripts / Discover content»، وSearch في كل الـ responses</td></tr>
+            <tr><td><b>DevTools → Sources</b></td><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd> بحث في كل ملفات الصفحة مرة واحدة، و«Pretty print» للـ JS المضغوط</td></tr>
+            <tr><td><b>katana</b> / <b>hakrawler</b></td><td>crawlers بتجمع الـ URLs (وkatana بتشغّل JS)</td></tr>
+            <tr><td><b>LinkFinder</b></td><td>بيستخرج endpoints من ملفات JS بالـ regex</td></tr>
+            <tr><td><b>waybackurls</b> / <b>gau</b></td><td>URLs قديمة من Wayback ومصادر أرشيف</td></tr>
+            <tr><td><b>trufflehog</b> / <b>gitleaks</b></td><td>بيدوّروا على secrets بـ patterns (وبعضها بيتحقق إذا كان الـ key شغّال)</td></tr>
+          </tbody>
+        </table></div>
+
+        <h3 class="sub">الـ Source maps: الكود الأصلي على طبق</h3>
+        <p>الـ JS في الإنتاج بيبقى <b>minified</b> (أسماء متغيرات حرف واحد، سطر واحد). الـ <b>source map</b> (<code>main.js.map</code>) ملف JSON بيربط الكود ده بالكود الأصلي — بتاعة الـ debugging. لو اترفعت على السيرفر، DevTools بيعرض <b>المشروع الأصلي كامل</b>: الملفات، الأسماء، الـ comments، وأحيانًا routes وendpoints مش مستخدمة. علامة وجودها: آخر سطر في الملف <code>//# sourceMappingURL=main.js.map</code> أو header <code>SourceMap</code>.</p>
+
+        <h3 class="sub">الـ Secrets: لقيت key… هل هي ثغرة؟</h3>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>النوع</th><th>شكله</th><th>عام ولا سري؟</th></tr></thead>
+          <tbody>
+            <tr><td>AWS access key ID</td><td><code>AKIA</code> + 16 حرف كابيتال/أرقام</td><td class="t-no">سري (خصوصًا لو جنبه secret key)</td></tr>
+            <tr><td>Stripe</td><td><code>pk_live_…</code> / <code>sk_live_…</code></td><td><code>pk_</code> <b>عام بالتصميم</b> · <code>sk_</code> <span class="t-no">سري جدًا</span></td></tr>
+            <tr><td>Google API key</td><td><code>AIza</code> + 35 حرف</td><td class="t-mid">غالبًا عام (Maps) — المهم إنه متقيّد بـ referrer/API؛ جرّب صلاحياته</td></tr>
+            <tr><td>Firebase config</td><td><code>apiKey</code>، <code>projectId</code>…</td><td class="t-mid">عام بالتصميم — الخطر في <b>قواعد الـ database</b> المفتوحة</td></tr>
+            <tr><td>Slack / GitHub tokens</td><td><code>xoxb-</code>، <code>ghp_</code></td><td class="t-no">سري</td></tr>
+            <tr><td>JWT</td><td><code>eyJ…</code>.<code>eyJ…</code>.<code>…</code></td><td class="t-no">token جلسة — لو متخزن في الكود فده غلط</td></tr>
+          </tbody>
+        </table></div>
+        <div class="callout pt reveal"><span class="ci">🎯</span><div><strong>Impact قبل الإبلاغ</strong><p>«لقيت API key في الـ JS» لوحدها مش finding. السؤال: <b>تقدر تعمل بيه إيه؟</b> اختبر بأقل استخدام ممكن ومن غير أي ضرر أو وصول لبيانات حد (مثلًا: endpoint بيرجّع اسم الحساب بس)، ووثّق. keys زي Stripe <code>pk_</code> أو Google Maps المتقيّد معمولة عشان تبقى عامة. وأي secret حقيقي لقيته: بلّغ بسرعة ومتستخدموش أكتر من اللازم لإثبات الـ impact.</p></div></div>
+
+        <h3 class="sub">الشروط اللي في المتصفح = خريطة للـ access control</h3>
+        <code-block lang="js" file="app.min.js (beautified)">
+          function renderMenu(user) {
+            const items = [{ label: "Orders", href: "/orders" }];
+            if (user.role === "admin") {                       // client-side check only!
+              items.push({ label: "Users", href: "/admin/users" });
+              items.push({ label: "Refunds", href: "/admin/refunds/approve" });
+            }
+            return items;
+          }
+          // later: fetch("/api/v2/admin/users?limit=100")
+        </code-block>
+        <p>الكود ده بيخفي القايمة عن المستخدم العادي — بس قالك بالظبط إيه الـ endpoints بتاعة الـ admin. الخطوة الجاية: تطلب <code>/admin/users</code> و<code>/api/v2/admin/users</code> بـ session مستخدم عادي. لو رجعت داتا = <b>Broken Access Control</b>. القاعدة: إخفاء حاجة في الـ UI ≠ حمايتها.</p>
+
+        <div class="exercises">
+          <div class="exercises-head"><h3><span class="bulb">✏️</span> تمارين الدرس 15 — Target: MegaCorp Partner Portal</h3></div>
+          <p>كل المهام دي على نفس الـ target. ده الـ HTML اللي رجع من <code>https://partners.megacorp.example/login</code>، وتحته ملف الـ JS:</p>
+          <code-block lang="html" file="view-source:partners.megacorp.example/login">
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+              <meta charset="UTF-8">
+              <meta name="generator" content="Joomla! 3.9.27 - Open Source Content Management">
+              <title>MegaCorp Partner Portal</title>
+              <link rel="stylesheet" href="/media/css/portal.css?v=3.9.27">
+              <link rel="preconnect" href="https://sso.megacorp.example">
+              <script src="https://cdn.megacorp.example/js/vendor/jquery-1.12.4.min.js"></script>
+              <script src="/js/portal.min.js"></script>
+            </head>
+            <body data-tenant="partner" data-api="https://api-dev.megacorp.example/v2">
+              <!-- legacy SOAP endpoint still used by the mobile app: /services/LegacyAuth.asmx -->
+              <form action="/login" method="post">
+                <input type="hidden" name="return" value="/dashboard">
+                <input type="hidden" name="debug" value="0">
+                <input name="username" autocomplete="username">
+                <input name="password" type="password" autocomplete="current-password">
+                <button>Sign in</button>
+              </form>
+              <div id="admin-tools" hidden>
+                <a href="/internal/reports/export?format=csv">Export all partners</a>
+              </div>
+              <footer>Need help? <a href="mailto:it-support@megacorp.example">IT support</a></footer>
+            </body>
+            </html>
+          </code-block>
+          <code-block lang="js" file="/js/portal.min.js (beautified)">
+            const API = document.body.dataset.api;
+            function loadPartners() {
+              return fetch(API + "/partners?limit=50", { credentials: "include" });
+            }
+            function isAdmin() {
+              return localStorage.getItem("portal_role") === "superuser";
+            }
+            if (isAdmin()) document.getElementById("admin-tools").hidden = false;
+            const AWS_ID = "AKIAIOSFODNN7EXAMPLE";   // TODO(sam): move to backend
+            //# sourceMappingURL=portal.min.js.map
+          </code-block>
+
+          <task id="s15-t1" title="الـ CMS وإصداره" level="1" answer="joomla 3.9.27|joomla! 3.9.27|3.9.27">
+            <desc><p>إيه الـ CMS وإصداره؟ (مثال للصيغة: <code>Drupal 9.4.2</code>)</p></desc>
+            <explain>`Joomla! 3.9.27` — من الـ generator ومن `?v=3.9.27` في الـ CSS. Joomla 3.x خرج من الدعم الرسمي (أغسطس 2023)، فأي CVE بعد كده مفيش ليه patch رسمي. ومعاه jQuery 1.12.4 قديم جدًا.</explain>
+          </task>
+          <task id="s15-t2" title="الـ API الخفي" level="1" answer="api-dev.megacorp.example|https://api-dev.megacorp.example/v2|https://api-dev.megacorp.example">
+            <desc><p>إيه الـ <b>host</b> بتاع الـ API اللي الصفحة بتكلمه؟</p></desc>
+            <explain>`api-dev.megacorp.example` (من `data-api`). كلمة «dev» على host بيكلمه الإنتاج = بيئة تطوير مكشوفة غالبًا أضعف حماية. ومعاه `sso.megacorp.example` من الـ preconnect و`cdn.megacorp.example`. (اتأكد إنهم في الـ scope قبل أي اختبار.)</explain>
+          </task>
+          <task id="s15-t3" title="parameter يستاهل يتجرب" level="1" answer="debug|debug=1|debug=true" reject="return|username">
+            <desc><p>في الفورم، إيه اسم الـ <b>hidden parameter</b> اللي أول حاجة هتجرّب تغيّر قيمته عشان ممكن يفتح سلوك مخفي؟</p></desc>
+            <explain>`debug` (من `0` لـ `1` أو `true`). parameters زي `debug` و`test` و`admin` و`dev` ممكن تفتح stack traces أو logs. وكمان `return=/dashboard` يستاهل اختبار open redirect (`return=//evil.example`).</explain>
+          </task>
+          <task id="s15-t4" title="الـ endpoint القديم" level="1" answer="/services/legacyauth.asmx|/services/LegacyAuth.asmx|services/legacyauth.asmx">
+            <desc><p>إيه الـ <b>path</b> بتاع الـ endpoint القديم اللي المطوّرين نسيوه في الصفحة؟</p></desc>
+            <explain>`/services/LegacyAuth.asmx` من الـ HTML comment — SOAP service (`.asmx` = ASP.NET قديم) لـ authentication. الـ endpoints القديمة اللي «المابايل بس بيستخدمها» غالبًا مفيهاش rate limiting أو MFA زي الواجهة الجديدة. وعادة `?wsdl` بيوصفها كاملة.</explain>
+          </task>
+          <task id="s15-t5" title="إزاي تظهر أدوات الـ admin؟" level="2" answer="superuser" reject="admin">
+            <desc><p>الـ <code>#admin-tools</code> مخفي. من الـ JS: لازم <code>localStorage.portal_role</code> يساوي إيه عشان يظهر؟ (وفكّر: ده يثبت ثغرة لوحده؟)</p></desc>
+            <explain>`superuser`. بس ده بيغيّر الـ UI في متصفحك وبس — ده مش ثغرة لوحده. الثغرة الحقيقية تتأكد لما تطلب `/internal/reports/export?format=csv` مباشرة بـ session عادي (أو من غير session) وترجع داتا. الـ JS ادّاك الـ endpoint؛ الـ access control على السيرفر هو اللي بيتختبر.</explain>
+          </task>
+          <task id="s15-t6" title="الكود الأصلي فين؟" level="1" answer="portal.min.js.map|/js/portal.min.js.map|https://partners.megacorp.example/js/portal.min.js.map">
+            <desc><p>إيه اسم الملف اللي ممكن يدّيك <b>الـ source code الأصلي</b> للـ JS؟</p></desc>
+            <explain>`portal.min.js.map` (بيتحسب relative لملف الـ JS: `/js/portal.min.js.map`). لو رجع 200، افتح DevTools → Sources وهتلاقي المشروع الأصلي. وكمان: الـ AWS key ID اللي في الكود — الـ ID لوحده من غير secret مش كفاية للوصول، بس وجوده (والـ TODO) بيقول إن فيه secrets في الـ frontend، فدوّر على باقيها في الـ source map.</explain>
+          </task>
+          <quiz id="s15-q1" answer="2">
+            <q>`robots.txt` فيه `Disallow: /backup-2024/`. ده معناه إيه بالنسبة لك؟</q>
+            <o>المسار محمي ومحدش يقدر يفتحه</o>
+            <o>المسار مش موجود</o>
+            <o>المطوّر مش عايز محركات البحث تفهرسه — يعني غالبًا موجود ويستاهل تبص عليه (في الـ scope)</o>
+            <o>لازم تتجاهله قانونيًا</o>
+            <good>robots.txt طلب لمحركات البحث مش access control، وكتير بيكشف paths حساسة.</good>
+            <bad>`Disallow` مبيمنعش حد. بيطلب من الـ crawlers المحترمة متدخلش — وده بيدّيك hint.</bad>
+          </quiz>
+          <quiz id="s15-q2" answer="0">
+            <q>لقيت `pk_live_51H…` في JS بتاع صفحة الدفع. ده finding خطير؟</q>
+            <o>غالبًا لأ — الـ Stripe publishable key معمول عشان يبقى في المتصفح؛ الخطير هو `sk_live_`</o>
+            <o>أيوه critical دايمًا</o>
+            <o>أيوه لأنه بيبدأ بـ live</o>
+            <o>لازم تجرّب تعمل بيه charges</o>
+            <good>اعرف نوع الـ key قبل ما تبلّغ. الـ publishable keys بتعمل tokenization بس.</good>
+            <bad>Stripe عنده نوعين: publishable (`pk_`، عام بالتصميم) وsecret (`sk_`، لازم يفضل في السيرفر). وعمرك ما تعمل عمليات مالية حقيقية بـ key لقيته.</bad>
+          </quiz>
+          <quiz id="s15-q3" answer="3">
+            <q>آخر سطر في `main.js`: `//# sourceMappingURL=main.js.map`. ليه ده مهم؟</q>
+            <o>ده comment ملوش لازمة</o>
+            <o>بيسرّع التحميل</o>
+            <o>معناه إن الموقع آمن</o>
+            <o>لو الملف `.map` متاح، بيكشف الـ source الأصلي قبل الـ minification (أسماء، comments، routes)</o>
+            <good>الـ source maps في الإنتاج = تسريب للكود الأصلي. نتيجة شائعة في التقارير (severity حسب اللي فيها).</good>
+            <bad>الـ source map ملف debugging بيرجّع الكود المضغوط لأصله. لو مرفوع، أي حد يشوف المشروع كامل.</bad>
+          </quiz>
+          <quiz id="s15-q4" answer="1">
+            <q>الـ JS بيخفي زرار «Delete user» لو `role !== "admin"`. إزاي تتأكد إن فيه ثغرة؟</q>
+            <o>تغيّر الـ role في localStorage وتشوف الزرار ظهر</o>
+            <o>تبعت الـ request بتاع الحذف مباشرة بـ session مستخدم عادي (على حساب تجريبي بتاعك) وتشوف السيرفر قبله ولا رفضه</o>
+            <o>تقرا الـ CSS</o>
+            <o>مفيش طريقة</o>
+            <good>الـ UI بيتغيّر في متصفحك بس. اللي يحدد الثغرة هو رد السيرفر على request مش مصرّح بيه — واختبره على resources بتاعتك أو تجريبية.</good>
+            <bad>ظهور الزرار مش دليل. الدليل إن السيرفر ينفّذ action مكنش المفروض يسمح بيه لصلاحياتك.</bad>
+          </quiz>
+          <quiz id="s15-q5" answer="2">
+            <q>endpoint اتشال من الواجهة الجديدة السنة اللي فاتت. فين ممكن تلاقيه؟</q>
+            <o>مستحيل</o>
+            <o>في الـ CSS</o>
+            <o>Wayback Machine (نسخ قديمة من الصفحات وملفات JS) وأدوات زي gau/waybackurls</o>
+            <o>في الـ favicon</o>
+            <good>الأرشيف بيفتكر اللي الموقع نسيه — وكتير الـ backend لسه بيرد على الـ endpoints القديمة.</good>
+            <bad>Wayback Machine وأدوات جمع الـ URLs التاريخية بترجّع endpoints قديمة ممكن لسه شغّالة.</bad>
+          </quiz>
+        </div>
+      </section>

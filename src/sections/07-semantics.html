@@ -1,0 +1,337 @@
+      <section class="section" id="s07" data-part="الجزء 1 · HTML" data-pk="html" data-nav="الـ Semantics والـ Global attributes" data-icon="🏗️" data-keywords="semantic div span block inline header nav main article section aside footer landmarks details summary dialog popover global attributes id class style title hidden tabindex contenteditable data-* dataset inert autofocus accesskey event handlers ontoggle dom clobbering">
+        <div class="section-head">
+          <span class="section-index">07</span>
+          <div>
+            <p class="eyebrow">HTML · الدرس 07</p>
+            <h2>هيكلة الصفحة بالمعنى، والـ Global attributes</h2>
+            <p class="lede">صفحة كلها <code>&lt;div&gt;</code> ممكن تبان حلوة، بس الآلة (قارئ الشاشة، محرك البحث، أداة الـ recon) مش فاهمة منها حاجة. في الدرس ده هتبني الهيكل بالعناصر اللي ليها معنى، وتتعرف على الـ attributes اللي ينفع تحطها على <b>أي</b> عنصر — ومنها حاجات «بريئة» زي <code>id</code> و<code>data-*</code> و<code>open</code> ليها استخدامات هجومية حقيقية.</p>
+          </div>
+        </div>
+
+        <h3 class="sub">div وspan: حاويات من غير معنى</h3>
+        <p><code>&lt;div&gt;</code> حاوية <b>block</b> (بتاخد سطر كامل، والعناصر بعدها تنزل تحت)، و<code>&lt;span&gt;</code> حاوية <b>inline</b> (بتقعد جوه السطر). الاتنين ملهمش أي معنى — بيستخدموا للتجميع والـ styling لما مفيش عنصر semantic مناسب. القاعدة: دوّر الأول على عنصر بمعنى، ولو مفيش، استخدم <code>div</code>/<code>span</code>.</p>
+        <html-example file="block-inline.html" auto>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>block vs inline</title>
+          <style>div{background:#fff1ea;border:1px dashed #ff7a45;margin:4px 0}span{background:#ede9fe;border:1px dashed #8b5cf6}</style></head>
+          <body>
+            <div>div 1 (block)</div><div>div 2 (block)</div>
+            <p>A paragraph with <span>span 1</span> and <span>span 2</span> inline.</p>
+          </body>
+          </html>
+        </html-example>
+
+        <h3 class="sub">الـ Landmarks: خريطة الصفحة</h3>
+        <figure class="diagram reveal">
+          <svg viewBox="0 0 1000 330" role="img" aria-label="هيكل صفحة بالعناصر الـ semantic">
+            <rect x="20" y="15" width="960" height="54" rx="12" class="d-box"/>
+            <text x="40" y="47" class="d-tb d-acc">&lt;header&gt;</text><text x="960" y="47" text-anchor="end" class="d-ts ar">اللوجو والعنوان — رأس الصفحة (أو رأس article)</text>
+            <rect x="20" y="78" width="960" height="40" rx="10" class="d-box2"/>
+            <text x="40" y="104" class="d-tb d-vio">&lt;nav&gt;</text><text x="960" y="104" text-anchor="end" class="d-ts ar">اللينكات الرئيسية</text>
+            <rect x="20" y="128" width="690" height="140" rx="12" class="d-box4"/>
+            <text x="40" y="154" class="d-tb d-grn">&lt;main&gt;</text><text x="690" y="154" text-anchor="end" class="d-ts ar">المحتوى الأساسي — واحد بس في الصفحة</text>
+            <rect x="40" y="166" width="650" height="90" rx="10" class="d-box3"/>
+            <text x="58" y="190" class="d-tb d-amb">&lt;article&gt;</text><text x="670" y="190" text-anchor="end" class="d-ts ar">محتوى مستقل ينفع يتنقل لوحده (بوست، تقرير، تعليق)</text>
+            <rect x="58" y="202" width="300" height="44" rx="8" class="d-dim"/><text x="72" y="229" class="d-ts">&lt;section&gt; + h2</text>
+            <rect x="372" y="202" width="300" height="44" rx="8" class="d-dim"/><text x="386" y="229" class="d-ts">&lt;section&gt; + h2</text>
+            <rect x="722" y="128" width="258" height="140" rx="12" class="d-box6"/>
+            <text x="740" y="154" class="d-tb d-tea">&lt;aside&gt;</text><text x="960" y="186" text-anchor="end" class="d-ts ar">محتوى جانبي مرتبط</text><text x="960" y="208" text-anchor="end" class="d-ts ar">(روابط، إعلانات، معلومات)</text>
+            <rect x="20" y="278" width="960" height="40" rx="10" class="d-dim"/>
+            <text x="40" y="304" class="d-tb">&lt;footer&gt;</text><text x="960" y="304" text-anchor="end" class="d-ts ar">الحقوق، التواصل، لينكات قانونية</text>
+          </svg>
+          <figcaption>قارئ الشاشة بيقدّم الـ landmarks دي كقايمة: «main»، «navigation»… والمستخدم ينط لأي واحدة. نفس العناصر بتسهّل على أي scraper أو أداة يفهم الصفحة.</figcaption>
+        </figure>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>العنصر</th><th>إمتى تستخدمه</th></tr></thead>
+          <tbody>
+            <tr><td><code>header</code></td><td>مقدمة: لوجو، عنوان، أحيانًا nav. ممكن يبقى جوه <code>article</code> كمان.</td></tr>
+            <tr><td><code>nav</code></td><td>مجموعة لينكات <b>رئيسية</b> للتنقل (مش كل لينكات الصفحة).</td></tr>
+            <tr><td><code>main</code></td><td>المحتوى الأساسي الفريد للصفحة. <b>واحد بس</b> ظاهر.</td></tr>
+            <tr><td><code>article</code></td><td>حاجة مستقلة تقدر تاخدها وتحطها في مكان تاني وتفضل مفهومة: مقال، بوست، تعليق، كارت منتج.</td></tr>
+            <tr><td><code>section</code></td><td>جزء من موضوع واحد <b>ليه عنوان</b>. لو مفيش عنوان غالبًا ده <code>div</code>.</td></tr>
+            <tr><td><code>aside</code></td><td>محتوى جانبي مرتبط بشكل غير مباشر.</td></tr>
+            <tr><td><code>footer</code></td><td>ذيل الصفحة أو الـ article.</td></tr>
+          </tbody>
+        </table></div>
+
+        <h3 class="sub">عناصر تفاعلية من غير JavaScript</h3>
+        <html-example file="interactive.html" auto max="520">
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>Native widgets</title></head>
+          <body>
+            <details>
+              <summary>Show raw request</summary>
+              <pre>GET /admin HTTP/1.1
+          Host: shop.example</pre>
+            </details>
+            <details open>
+              <summary>Already open (open attribute)</summary>
+              <p>Visible by default.</p>
+            </details>
+
+            <button popovertarget="tip">What is IDOR?</button>
+            <div id="tip" popover>Insecure Direct Object Reference — change an id, see someone else's data.</div>
+
+            <dialog id="dlg">
+              <form method="dialog">
+                <p>Delete all findings?</p>
+                <button value="no">Cancel</button> <button value="yes">Delete</button>
+              </form>
+            </dialog>
+            <button onclick="document.getElementById('dlg').showModal()">Open dialog</button>
+            <script>
+              document.getElementById("dlg").addEventListener("close", e => console.log("dialog returned:", e.target.returnValue));
+            </script>
+          </body>
+          </html>
+        </html-example>
+        <ul>
+          <li><code>&lt;details&gt;</code> + <code>&lt;summary&gt;</code>: محتوى بيتفتح ويتقفل. الـ attribute <code>open</code> بيخليه مفتوح، ولما الحالة تتغير بيطلع event اسمه <code>toggle</code>.</li>
+          <li><code>popover</code> + <code>popovertarget</code>: عنصر بيظهر فوق الصفحة (tooltip/menu) من غير سطر JavaScript.</li>
+          <li><code>&lt;dialog&gt;</code>: نافذة حوار حقيقية؛ <code>showModal()</code> بتعملها modal (الخلفية متقفلة)، والفورم اللي جواها بـ <code>method="dialog"</code> بتقفلها وترجع قيمة الزرار في <code>returnValue</code> — ولاحظ في الـ log إنها <b>مبتبعتش request</b>.</li>
+        </ul>
+        <div class="callout pt reveal"><span class="ci">🎯</span><div><strong>Event handlers بتشتغل لوحدها</strong><p>فلاتر XSS كتير بتمنع <code>onerror</code> و<code>onload</code>، وبتنسى إن فيه handlers بتشتغل <b>من غير أي تفاعل</b> لو العنصر اتظبط صح: <code>&lt;details open ontoggle=…&gt;</code> (الـ <code>open</code> وقت الـ parsing بيطلّع <code>toggle</code>)، و<code>&lt;input autofocus onfocus=…&gt;</code> (في صفحة عادية مش iframe)، و<code>&lt;svg&gt;&lt;animate onbegin=…&gt;</code>. هنستخدم ده في الـ XSS Range.</p></div></div>
+
+        <h3 class="sub">الـ Global attributes</h3>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>الـ attribute</th><th>وظيفته</th><th>🎯 ملاحظة</th></tr></thead>
+          <tbody>
+            <tr><td><code>id</code></td><td>معرّف <b>فريد</b> في الصفحة (للينكات <code>#id</code>، والـ CSS، والـ JS)</td><td>بيعمل متغير global في JS (DOM clobbering — تحت)</td></tr>
+            <tr><td><code>class</code></td><td>أسماء مجموعات (أكتر من واحد بمسافة) للـ CSS والـ JS</td><td>أسماء زي <code>admin-only</code> أو <code>debug</code> بتكشف features</td></tr>
+            <tr><td><code>style</code></td><td>CSS مباشرة على العنصر</td><td>CSS injection لو الـ input بيدخل هنا</td></tr>
+            <tr><td><code>title</code></td><td>tooltip بيظهر مع الـ hover</td><td>context للـ attribute injection (عادة معروضة)</td></tr>
+            <tr><td><code>lang</code> / <code>dir</code></td><td>لغة واتجاه المحتوى</td><td></td></tr>
+            <tr><td><code>hidden</code></td><td>العنصر مش بيتعرض (زي <code>display:none</code>). <code>hidden="until-found"</code>: بيظهر لو البحث في الصفحة لقاه</td><td><b>لسه في الـ DOM والـ source!</b></td></tr>
+            <tr><td><code>tabindex</code></td><td>ترتيب التنقل بالـ Tab: <code>0</code> (ادخل الترتيب الطبيعي)، <code>-1</code> (focusable بالكود بس)، موجب (متستخدموش)</td><td>عنصر focusable + <code>onfocus</code></td></tr>
+            <tr><td><code>contenteditable</code></td><td>العنصر بقى editor المستخدم يكتب فيه</td><td>الـ rich text editors = مصدر stored XSS</td></tr>
+            <tr><td><code>inert</code></td><td>العنصر وكل اللي جواه مش تفاعلي (مفيش click ولا focus)</td><td></td></tr>
+            <tr><td><code>autofocus</code></td><td>العنصر ياخد الـ focus أول ما الصفحة تفتح</td><td><code>autofocus onfocus=…</code></td></tr>
+            <tr><td><code>accesskey</code>، <code>draggable</code>، <code>spellcheck</code>، <code>translate</code></td><td>اختصار كيبورد، قابل للسحب، التدقيق الإملائي، الترجمة</td><td></td></tr>
+            <tr><td><code>data-*</code></td><td>بيانات custom بتاعتك (<code>data-user-id="7"</code>) بيقراها الـ JS بـ <code>el.dataset.userId</code></td><td>كنز recon: IDs، roles، feature flags، API URLs</td></tr>
+            <tr><td><code>on*</code> (<code>onclick</code>، <code>onerror</code>، …)</td><td>event handlers: JavaScript inline</td><td>أشهر vector في XSS</td></tr>
+          </tbody>
+        </table></div>
+        <html-example file="data-attrs.html" auto>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>data-*</title></head>
+          <body data-env="staging" data-build="2026.11.3-rc1">
+            <div id="profile" data-user-id="1337" data-role="viewer" data-is-beta="true">Omar</div>
+            <p hidden>Debug panel: /internal/debug?token=dev</p>
+            <script>
+              const p = document.getElementById("profile");
+              console.log("dataset:", JSON.stringify(p.dataset));          // data-user-id → userId
+              console.log("env:", document.body.dataset.env);
+              console.log("hidden text is still here:", document.querySelector("[hidden]").textContent);
+            </script>
+          </body>
+          </html>
+        </html-example>
+        <p>لاحظ التحويل: <code>data-user-id</code> بقى <code>dataset.userId</code> (الـ <code>-</code> + حرف = حرف كابيتال). وده بيوصّلك لحاجة مهمة: لو الـ JS بيقرا <code>data-role</code> ويقرر منه يعرض إيه، فإنت تقدر تغيّره من DevTools في ثانية. أي قرار أمني في المتصفح = ملوش قيمة.</p>
+
+        <h3 class="sub">DOM Clobbering: لما الـ id يبقى متغير</h3>
+        <p>لأسباب تاريخية، أي عنصر عليه <code>id</code> بيبقى متاح كـ property على <code>window</code> (لو مفيش متغير بنفس الاسم)، والفورمز والصور ليها أسماء على <code>document</code>. لو الـ JavaScript بتاع الموقع بيعتمد على متغير global ممكن «ميكونش متعرّف»، وإنت تقدر تحقن HTML (حتى من غير scripts) — تقدر <b>تلبّس</b> المتغير ده عنصر بتاعك:</p>
+        <html-example file="clobbering.html" auto url="https://shop.example/profile">
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>Clobbering</title></head>
+          <body>
+            <!-- attacker-controlled HTML (a "harmless" bio: no scripts, no on* handlers) -->
+            <a id="config" href="https://evil.example/payload.js">my site</a>
+
+            <script>
+              // the site's own code
+              const src = window.config ? String(window.config) : "/static/default-widget.js";
+              console.log("typeof window.config =", typeof window.config);
+              console.log("widget script would load from:", src);
+            </script>
+          </body>
+          </html>
+        </html-example>
+        <div class="callout pt reveal"><span class="ci">🎯</span><div><strong>ليه <code>&lt;a&gt;</code> بالذات؟</strong><p>لأن تحويل عنصر <code>&lt;a&gt;</code> لـ string بيرجّع الـ <code>href</code> بتاعه. فالكود اللي كان مستني URL من config خده من HTML المهاجم. الـ sanitizers اللي بتسمح بـ <code>id</code> و<code>name</code> من غير قيود بتسيب الباب ده مفتوح. (الجزء الرابع فيه DOM clobbering بالتفصيل.)</p></div></div>
+
+        <div class="exercises">
+          <div class="exercises-head"><h3><span class="bulb">✏️</span> تمارين الدرس 07</h3></div>
+          <quiz id="s07-q1" answer="2">
+            <q>كام `<main>` ظاهر ينفع يبقى في الصفحة؟</q>
+            <o>أي عدد</o>
+            <o>واحد لكل `section`</o>
+            <o>واحد بس</o>
+            <o>صفر — مش موجود في HTML</o>
+            <good>`main` = المحتوى الأساسي للصفحة، فهو واحد (اللي ظاهر). قارئ الشاشة بيستخدمه لـ «skip to main content».</good>
+            <bad>الـ spec بتسمح بـ `main` واحد ظاهر بس (أي `main` تاني لازم يبقى `hidden`).</bad>
+          </quiz>
+          <quiz id="s07-q2" answer="0">
+            <q>جزء في الصفحة مالوش عنوان، ومحتاجه بس عشان تعمل له خلفية بالـ CSS. أنهي عنصر؟</q>
+            <o>`div`</o>
+            <o>`section`</o>
+            <o>`article`</o>
+            <o>`main`</o>
+            <good>من غير معنى ومن غير عنوان = `div`. الـ `section` من غير heading غالبًا مكانه `div`.</good>
+            <bad>`section` و`article` ليهم معنى (جزء بعنوان / محتوى مستقل). للتجميع البحت: `div`.</bad>
+          </quiz>
+          <quiz id="s07-q3" answer="3">
+            <q>`<p hidden>API key: sk_test_51…</p>` — المستخدم العادي يقدر يوصل للمفتاح ده؟</q>
+            <o>لأ، `hidden` بيمسحه من الصفحة</o>
+            <o>لأ، إلا لو admin</o>
+            <o>بس من الموبايل</o>
+            <o>أيوه — موجود في الـ source والـ DOM، وأي حد يفتح view-source أو DevTools يقراه</o>
+            <good>`hidden` = مش معروض بس. أي secret بيوصل للمتصفح يعتبر مكشوف.</good>
+            <bad>`hidden` بيأثر على العرض بس. العنصر ونصه موجودين في الـ HTML اللي وصل للمتصفح.</bad>
+          </quiz>
+          <quiz id="s07-q4" answer="1">
+            <q>العنصر `<div data-user-id="42" data-role="admin">`. إزاي تقرا الـ user id في JavaScript؟</q>
+            <o>`el.dataset.user-id`</o>
+            <o>`el.dataset.userId`</o>
+            <o>`el.data.userId`</o>
+            <o>`el.userId`</o>
+            <good>`data-user-id` → `dataset.userId` (kebab-case → camelCase). أو `el.getAttribute("data-user-id")`.</good>
+            <bad>الـ `dataset` بيحوّل الاسم لـ camelCase: `user-id` → `userId`.</bad>
+          </quiz>
+          <quiz id="s07-q5" answer="2">
+            <q>فلتر بيمنع `onerror` و`onload` و`onclick`، والـ input بيدخل كـ HTML. أنهي payload هيشتغل <b>من غير أي تفاعل</b> من الضحية؟</q>
+            <o>`<button onclick=alert(1)>x</button>`</o>
+            <o>`<div onmouseover=alert(1)>x</div>`</o>
+            <o>`<details open ontoggle=alert(1)>`</o>
+            <o>`<img src=x>`</o>
+            <good>`open` وقت الـ parsing بيطلّع `toggle` event تلقائيًا، فالـ handler يشتغل لوحده. الـ blocklists دايمًا ناقصة.</good>
+            <bad>`onclick` اتمنع وكمان محتاج ضغطة، و`onmouseover` محتاج hover، و`img` من غير handler مش هيعمل حاجة. `details open ontoggle` بيشتغل لوحده.</bad>
+          </quiz>
+          <quiz id="s07-q6" answer="0">
+            <q>كود الموقع: `if (window.isAdmin) { showAdminTools(); }` والمهاجم يقدر يحقن HTML من غير scripts. يعمل إيه؟</q>
+            <o>يحقن `<img id="isAdmin">` — `window.isAdmin` بقى element (truthy) والشرط اتحقق</o>
+            <o>مينفعش من غير JavaScript</o>
+            <o>يحقن `<!-- isAdmin -->`</o>
+            <o>يغيّر الـ title</o>
+            <good>ده DOM clobbering. الـ element object دايمًا truthy، فأي check بيعتمد على وجود متغير global ممكن يتلبّس.</good>
+            <bad>العناصر اللي عليها `id` بتبقى properties على `window`. `<img id="isAdmin">` كفاية يخلّي الشرط true.</bad>
+          </quiz>
+
+          <html-lab id="s07-lab1" title="هيكل صفحة semantic كامل" level="1">
+            <desc><p>حوّل الصفحة اللي كلها <code>div</code> لهيكل semantic:</p>
+            <ul><li><code>header</code> فيه الـ <code>h1</code>.</li>
+            <li><code>nav</code> فيه <code>ul</code> وجواه لينكات.</li>
+            <li><code>main</code> <b>واحد</b>، جواه <code>article</code> فيه <code>h2</code> و<code>section</code> واحد على الأقل (بـ heading).</li>
+            <li><code>aside</code> و<code>footer</code>.</li>
+            <li>ومفيش <code>div</code> خالص.</li></ul></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>Blog</title></head>
+              <body>
+                <div class="header"><div class="title">Bug Hunter Blog</div></div>
+                <div class="menu"><a href="/">Home</a> <a href="/writeups">Writeups</a></div>
+                <div class="content">
+                  <div class="post">
+                    <div class="post-title">IDOR in order history</div>
+                    <div class="part"><b>Recon</b><p>Order ids were sequential.</p></div>
+                  </div>
+                </div>
+                <div class="side">Related: CSRF basics</div>
+                <div class="foot">© 2026</div>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>Blog</title></head>
+              <body>
+                <header><h1>Bug Hunter Blog</h1></header>
+                <nav>
+                  <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/writeups">Writeups</a></li>
+                  </ul>
+                </nav>
+                <main>
+                  <article>
+                    <h2>IDOR in order history</h2>
+                    <section>
+                      <h3>Recon</h3>
+                      <p>Order ids were sequential.</p>
+                    </section>
+                  </article>
+                </main>
+                <aside>Related: CSRF basics</aside>
+                <footer>© 2026</footer>
+              </body>
+              </html>
+            </solution>
+            <test label="`header` فيه `h1`">has("header h1")</test>
+            <test label="`nav` فيه `ul` بلينكات">has("nav ul li a")</test>
+            <test label="`main` واحد بس وجواه `article` فيه `h2`">count("main") === 1 && has("main article h2")</test>
+            <test label="`section` جوه الـ article وفيه heading">$$("article section").some(s => s.querySelector("h2,h3,h4,h5,h6"))</test>
+            <test label="فيه `aside` و`footer`">has("aside") && has("footer")</test>
+            <test label="مفيش ولا `div`">count("div") === 0</test>
+          </html-lab>
+
+          <html-lab id="s07-lab2" title="FAQ تفاعلي + بيانات للـ JS" level="2">
+            <desc><ul><li>اعمل <b>اتنين</b> <code>details</code>، كل واحد أول ابن ليه <code>summary</code>.</li>
+            <li>التاني يبقى <b>مفتوح</b> افتراضيًا.</li>
+            <li>عنصر عليه <code>id="session"</code> و<code>data-user-id="1337"</code> و<code>data-role="viewer"</code>.</li>
+            <li>فقرة نصها <b>debug mode</b> تكون <b>مخفية</b> بالـ attribute المناسب (مش CSS).</li></ul></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>FAQ</title></head>
+              <body>
+                <h2>FAQ</h2>
+
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>FAQ</title></head>
+              <body>
+                <h2>FAQ</h2>
+                <details>
+                  <summary>Is testing allowed?</summary>
+                  <p>Only inside the written scope.</p>
+                </details>
+                <details open>
+                  <summary>How do I report?</summary>
+                  <p>Email security@shop.example.</p>
+                </details>
+                <div id="session" data-user-id="1337" data-role="viewer">Logged in</div>
+                <p hidden>debug mode</p>
+              </body>
+              </html>
+            </solution>
+            <test label="2 `details` وكل واحد أول ابن ليه `summary`">count("details") === 2 && $$("details").every(d => d.firstElementChild && d.firstElementChild.localName === "summary")</test>
+            <test label="الـ details التاني مفتوح والأول لأ">!$$("details")[0].hasAttribute("open") && $$("details")[1].hasAttribute("open")</test>
+            <test label="`#session` عليه `data-user-id=&quot;1337&quot;` و`data-role=&quot;viewer&quot;`">has("#session") && $("#session").dataset.userId === "1337" && $("#session").dataset.role === "viewer"</test>
+            <test label="فقرة «debug mode» عليها `hidden`">$$("p").some(p => /debug mode/i.test(p.textContent) && p.hasAttribute("hidden"))</test>
+          </html-lab>
+
+          <task id="s07-t1" title="الـ API الداخلي" level="1" answer="https://api-internal.shop.example/v3/|https://api-internal.shop.example/v3">
+            <desc><p>من الـ source ده (صفحة بعد الـ login)، <b>إيه الـ base URL بتاع الـ API الداخلي</b>؟</p></desc>
+            <listing lang="html" file="app.html (view-source)">
+              <body class="theme-dark"
+                    data-env="staging"
+                    data-api-base="https://api-internal.shop.example/v3/"
+                    data-feature-flags="newCheckout,adminExport">
+                <div id="app" data-user-id="2291" data-role="customer"></div>
+                <script src="/static/js/main.4f9c2a.js"></script>
+              </body>
+            </listing>
+            <explain>`data-api-base` كشف `https://api-internal.shop.example/v3/` — subdomain «internal» غالبًا مش في أي wordlist، وbaseline لـ API recon. وكمان: `data-env="staging"`، والـ feature flag `adminExport` (جرّب endpoints بالاسم ده)، و`data-role` اللي ممكن يكون الـ frontend بيعتمد عليه.</explain>
+          </task>
+          <task id="s07-t2" title="typeof بعد الـ clobbering" level="2" answer="object">
+            <desc><p>المستخدم حط الـ bio ده (الموقع بيسمح بـ <code>a</code> و<code>id</code>):</p></desc>
+            <listing lang="html" file="bio.html">
+              <a id="analyticsConfig" href="https://evil.example/c">hi</a>
+              <script>
+                // later, in the site's own bundle:
+                console.log(typeof window.analyticsConfig);
+              </script>
+            </listing>
+            <hint>الـ id بقى property على window — قيمته element.</hint>
+            <explain>`"object"` — `window.analyticsConfig` هو الـ `HTMLAnchorElement`. أي كود بيقول `window.analyticsConfig || defaults` هيتلبّس بالعنصر ده، و`String(analyticsConfig)` = الـ href بتاع المهاجم.</explain>
+          </task>
+        </div>
+      </section>

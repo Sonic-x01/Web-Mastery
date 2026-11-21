@@ -1,0 +1,260 @@
+      <section class="section" id="s14" data-part="الجزء 1 · HTML" data-pk="html" data-nav="الـ Encoding والـ Contexts" data-icon="🔣" data-keywords="encoding charset utf-8 bom windows-1252 mojibake utf-7 iso-2022-jp encoding differential context output encoding html entity percent encoding url javascript escape css escape decoding order event handler javascript url double encoding unicode normalization nfkc homoglyph base64 fromcharcode unescape obfuscation encoder">
+        <div class="section-head">
+          <span class="section-index">14</span>
+          <div>
+            <p class="eyebrow">HTML · الدرس 14 · مستوى متقدم</p>
+            <h2>الـ Encoding والـ Contexts: نفس الحرف بخمس لغات</h2>
+            <p class="lede">الصفحة الواحدة فيها كذا «لغة» جوه بعض: HTML، وجواها URLs، وJavaScript، وCSS. كل لغة ليها حروفها الخطيرة وطريقة الـ escaping بتاعتها، والمتصفح بيفك الطبقات دي <b>بترتيب معين</b>. لو فهمت الترتيب ده، هتعرف ليه encoding معيّن بيحمي في مكان وبيفشل في مكان تاني — وهتعرف تفك أي obfuscation في sample خبيث.</p>
+          </div>
+        </div>
+
+        <h3 class="sub">من bytes لحروف: الـ charset</h3>
+        <p>الشبكة بتنقل <b>bytes</b>، والمتصفح لازم يعرف يحوّلها حروف إزاي. <b>UTF-8</b> هو المعيار: الحروف الإنجليزية byte واحد (متوافق مع ASCII)، والعربي 2 bytes، والـ emoji 4. المتصفح بيحدد الـ encoding بالأولوية دي:</p>
+        <div class="steps">
+          <div class="step"><span class="n">1</span><div><h4>الـ BOM</h4><p>bytes في أول الملف (<code>EF BB BF</code> لـ UTF-8) — لو موجودة بتكسب على كل حاجة.</p></div></div>
+          <div class="step"><span class="n">2</span><div><h4>الـ HTTP header</h4><p><code>Content-Type: text/html; charset=utf-8</code></p></div></div>
+          <div class="step"><span class="n">3</span><div><h4>الـ meta</h4><p><code>&lt;meta charset="UTF-8"&gt;</code> في أول 1024 byte.</p></div></div>
+          <div class="step"><span class="n">4</span><div><h4>التخمين</h4><p>لو مفيش أي حاجة: sniffing أو default حسب لغة النظام (غالبًا <code>windows-1252</code>).</p></div></div>
+        </div>
+        <p>لو الـ encoding غلط بيحصل «<b>mojibake</b>»: كلمة <b>السر</b> بـ UTF-8 هي الـ bytes <code>D8 A7 D9 84 D8 B3 D8 B1</code>، ولو اتقرت كـ windows-1252 تطلع <code>Ø§Ù„Ø³Ø±</code>. لما تشوف <code>Ø</code> و<code>Ù</code> كتير في نص = عربي UTF-8 اتقري غلط.</p>
+        <div class="callout pt reveal"><span class="ci">🎯</span><div><strong>الـ charset سلاح</strong><p>تاريخيًا: صفحات من غير charset كان ممكن تتقري <b>UTF-7</b> في Internet Explorer، والـ payload <code>+ADw-script+AD4-</code> (اللي مفيهوش أي <code>&lt;</code>!) يبقى <code>&lt;script&gt;</code>. حديثًا: بحث من SonarSource («Encoding Differentials») أثبت إن صفحات من غير charset معلن ممكن المتصفح يقراها <b>ISO-2022-JP</b> لو المهاجم حقن escape sequences معينة، وده بيبوّظ الـ escaping (مثلًا الـ backslash يتقري ¥) ويفتح XSS. الدفاع بسيط وإجباري: <code>Content-Type: text/html; charset=utf-8</code> في كل response.</p></div></div>
+
+        <h3 class="sub">نفس الحرف، بكل اللغات</h3>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>الـ context</th><th><code>&lt;</code></th><th><code>"</code></th><th><code>'</code></th><th>ملاحظات</th></tr></thead>
+          <tbody>
+            <tr><td><b>HTML</b> (text / attribute)</td><td><code>&amp;lt;</code> <code>&amp;#60;</code> <code>&amp;#x3c;</code></td><td><code>&amp;quot;</code> <code>&amp;#34;</code></td><td><code>&amp;#39;</code> <code>&amp;apos;</code></td><td>بتتفك في النص والـ attributes (مش في script/style)</td></tr>
+            <tr><td><b>URL</b> (percent)</td><td><code>%3C</code></td><td><code>%22</code></td><td><code>%27</code></td><td>UTF-8 bytes؛ <code>+</code> = مسافة في الـ forms بس</td></tr>
+            <tr><td><b>JavaScript</b> string</td><td><code>\x3c</code> <code><</code> <code>\u{3c}</code></td><td><code>\"</code> <code>\x22</code></td><td><code>\'</code> <code>\x27</code></td><td>كمان <code>\n</code>، <code>\\</code>، و(قديم) octal <code>\74</code></td></tr>
+            <tr><td><b>CSS</b></td><td><code>\3c </code> (hex + مسافة)</td><td><code>\22 </code></td><td><code>\27 </code></td><td>الـ escape جوه الـ identifiers والـ strings</td></tr>
+            <tr><td><b>Base64</b> (مش escaping)</td><td colspan="3"><code>PA==</code> = <code>&lt;</code></td><td>تحويل bytes لنص — منتشر جدًا في الـ malware</td></tr>
+          </tbody>
+        </table></div>
+        <p>جرّب بنفسك — الأداة دي «وصفة» خطوات زي CyberChef. الوصفة الجاهزة بتعمل encode بكذا طريقة؛ غيّر الـ input أو ضيف/شيل خطوات:</p>
+        <div class="widget" data-widget="encoder" data-recipe="html-enc,url-enc,b64-enc"></div>
+
+        <h3 class="sub">ترتيب فك الطبقات</h3>
+        <p>لما JavaScript أو URL يبقوا <b>جوه</b> attribute في HTML، المتصفح بيفك من برّا لجوّا: <b>HTML decoding الأول</b> (وقت الـ parsing)، وبعدين الطبقة اللي جوه. ده بيخلّي الـ HTML entities «شفافة» بالنسبة للمهاجم:</p>
+        <figure class="diagram reveal">
+          <svg viewBox="0 0 1000 220" role="img" aria-label="ترتيب فك الطبقات في attribute فيه JavaScript">
+            <text x="500" y="34" text-anchor="middle" class="d-t" font-size="15">&lt;a href="javascript:alert(&amp;#39;x&amp;#39;)%3B"&gt;</text>
+            <rect x="30" y="60" width="290" height="120" rx="14" class="d-box"/>
+            <text x="175" y="88" text-anchor="middle" class="d-tb d-acc">① HTML parser</text>
+            <text x="175" y="112" text-anchor="middle" class="d-ts">&amp;#39; → '</text>
+            <text x="175" y="150" text-anchor="middle" class="d-tx">javascript:alert('x')%3B</text>
+            <rect x="355" y="60" width="290" height="120" rx="14" class="d-box2"/>
+            <text x="500" y="88" text-anchor="middle" class="d-tb d-vio">② URL (javascript:)</text>
+            <text x="500" y="112" text-anchor="middle" class="d-ts">percent-decode: %3B → ;</text>
+            <text x="500" y="150" text-anchor="middle" class="d-tx">alert('x');</text>
+            <rect x="680" y="60" width="290" height="120" rx="14" class="d-box5"/>
+            <text x="825" y="88" text-anchor="middle" class="d-tb d-red">③ JavaScript engine</text>
+            <text x="825" y="112" text-anchor="middle" class="d-ts">parse + run</text>
+            <text x="825" y="150" text-anchor="middle" class="d-tx">alert('x') ✓ executes</text>
+            <path class="d-ar-acc" d="M322,120 L352,120"/><path class="d-ar-vio" d="M647,120 L677,120"/>
+            <text x="500" y="208" text-anchor="middle" class="d-ts ar">كل طبقة بتفك الـ encoding بتاعها قبل ما تسلّم للي بعدها</text>
+          </svg>
+          <figcaption>لو السيرفر عمل HTML-encode بس لـ input بيتحط جوه JavaScript جوه attribute، الـ HTML parser هيفك الـ encoding قبل ما الـ JS يشوفه — يعني الحماية «اتشالت» قبل ما توصل للمكان اللي محتاجها.</figcaption>
+        </figure>
+        <html-example file="decode-order.html" auto>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>Decode order</title></head>
+          <body>
+            <!-- the server HTML-encoded the name O'Neil → O&#39;Neil and put it inside JS inside an attribute -->
+            <button onclick="greet('O&#39;Neil')">Greet (broken)</button>
+            <!-- an attacker's "name": the encoding does not stop the breakout -->
+            <button onclick="greet('x&#39;);alert(&#39;XSS&#39;);//')">Greet (attack)</button>
+            <script>
+              function greet(n) { console.log("Hello " + n); }
+              console.log("button 1 handler JS =", document.querySelectorAll("button")[0].getAttribute("onclick"));
+            </script>
+          </body>
+          </html>
+        </html-example>
+        <p>شوف الـ console: الـ attribute بعد الـ parsing بقى <code>greet('O'Neil')</code> = <b>syntax error</b>. والزرار التاني بيعمل <code>alert</code> رغم إن كل الـ quotes كانت encoded. الصح هنا طبقتين: <b>JS-escape الأول</b> (<code>O\'Neil</code>) وبعدين <b>HTML-encode</b> للنتيجة — أو الأحسن: متحطش داتا في event handlers خالص.</p>
+        <div class="callout spec reveal"><span class="ci">📜</span><div><strong>الـ <code>javascript:</code> URLs بتتعمل percent-decode</strong><p>قبل ما الكود يتنفّذ، جزء ما بعد <code>javascript:</code> بيتعمله URL percent-decode. يعني <code>javascript:%61lert(1)</code> = <code>alert(1)</code>، و<code>javascript:alert%28document.domain%29</code> شغّال. والـ URL parser كمان بيشيل الـ tabs والـ newlines من الـ scheme: <code>java&amp;#x09;script:</code> → <code>java⇥script:</code> → <code>javascript:</code>.</p></div></div>
+
+        <h3 class="sub">مصفوفة الـ contexts: فين الـ input وإزاي تحميه</h3>
+        <div class="ctx-grid">
+          <div class="ctx reveal"><h5>1 · HTML body</h5><pre>&lt;p&gt;Hello <mark>INPUT</mark>&lt;/p&gt;</pre><p><b>الهجوم:</b> <code>&lt;img src=x onerror=…&gt;</code><br><b>الحماية:</b> HTML-encode لـ <code>&amp; &lt; &gt;</code> (و<code>" '</code>).</p></div>
+          <div class="ctx reveal"><h5>2 · Attribute بين quotes</h5><pre>&lt;input value="<mark>INPUT</mark>"&gt;</pre><p><b>الهجوم:</b> <code>" autofocus onfocus=…</code> أو <code>"&gt;&lt;script&gt;</code><br><b>الحماية:</b> encode لـ <code>"</code> و<code>'</code> و<code>&amp;</code> (و<code>&lt; &gt;</code>).</p></div>
+          <div class="ctx reveal"><h5>3 · Attribute من غير quotes</h5><pre>&lt;input value=<mark>INPUT</mark>&gt;</pre><p><b>الهجوم:</b> <code>x onmouseover=alert(1)</code> — مسافة كفاية<br><b>الحماية:</b> متعملش كده أبدًا: حط quotes دايمًا.</p></div>
+          <div class="ctx reveal"><h5>4 · URL attribute</h5><pre>&lt;a href="<mark>INPUT</mark>"&gt;</pre><p><b>الهجوم:</b> <code>javascript:alert(1)</code> (مفيش حرف خاص!)<br><b>الحماية:</b> parse الـ URL + allow-list للـ scheme (<code>https:</code>)، ثم attribute-encode.</p></div>
+          <div class="ctx reveal"><h5>5 · JS string في script</h5><pre>&lt;script&gt;var q='<mark>INPUT</mark>';&lt;/script&gt;</pre><p><b>الهجوم:</b> <code>';alert(1)//</code> أو <code>&lt;/script&gt;&lt;img …&gt;</code><br><b>الحماية:</b> JS-escape (<code>\xHH</code>) بما فيها <code>&lt;</code>، أو JSON في <code>&lt;script type="application/json"&gt;</code>.</p></div>
+          <div class="ctx reveal"><h5>6 · Event handler</h5><pre>onclick="go('<mark>INPUT</mark>')"</pre><p><b>الهجوم:</b> <code>&amp;#39;);alert(1)//</code> (الـ entities بتتفك الأول)<br><b>الحماية:</b> JS-escape ثم HTML-encode — أو شيل الـ inline handlers.</p></div>
+          <div class="ctx reveal"><h5>7 · RCDATA / RAWTEXT</h5><pre>&lt;textarea&gt;<mark>INPUT</mark>&lt;/textarea&gt;</pre><p><b>الهجوم:</b> <code>&lt;/textarea&gt;&lt;img …&gt;</code><br><b>الحماية:</b> HTML-encode (بيمنع <code>&lt;/</code>).</p></div>
+          <div class="ctx reveal"><h5>8 · CSS</h5><pre>&lt;div style="color: <mark>INPUT</mark>"&gt;</pre><p><b>الهجوم:</b> <code>red; background:url(//evil/x)</code> (تسريب/UI redress)<br><b>الحماية:</b> allow-list للقيم (<code>^#[0-9a-f]{6}$</code>).</p></div>
+          <div class="ctx reveal"><h5>9 · HTML comment</h5><pre>&lt;!-- user: <mark>INPUT</mark> --&gt;</pre><p><b>الهجوم:</b> <code>--&gt;&lt;img …&gt;</code> أو <code>--!&gt;</code><br><b>الحماية:</b> متحطش داتا مستخدمين في comments.</p></div>
+        </div>
+        <div class="callout def reveal"><span class="ci">🛡️</span><div><strong>القاعدة الذهبية: encode حسب الـ context، وفي اللحظة الأخيرة</strong><p>مفيش «escaping واحد يحمي من كل حاجة». الـ template engines الحديثة (React JSX، Jinja2، Go html/template، Razor) بتعمل HTML-encode أوتوماتيك للنص والـ attributes — والثغرات بتحصل لما المطوّر يكسر ده: <code>dangerouslySetInnerHTML</code>، <code>|safe</code>، <code>{!! !!}</code>، <code>v-html</code>، أو يحط داتا جوه script/URL/handler. لما تعمل code review دوّر على الكلمات دي بالظبط.</p></div></div>
+
+        <h3 class="sub">Double encoding والـ normalization</h3>
+        <ul>
+          <li><b>Double encoding</b>: <code>%253C</code> = <code>%3C</code> بعد decode واحد = <code>&lt;</code> بعد التاني. لو الفلتر بيفك مرة والتطبيق مرتين (أو proxy في النص بيفك) = bypass.</li>
+          <li><b>Decode بعد الـ validation</b>: أي تحويل بيحصل بعد الفحص (URL-decode، HTML-decode، Base64، lowercase) ممكن يرجّع الحرف الخطير. الترتيب الصح: <b>normalize/decode الأول، validate، وencode وقت الإخراج</b>.</li>
+          <li><b>Unicode normalization</b>: الـ NFKC بيحوّل <code>＜</code> (fullwidth U+FF1C) لـ <code>&lt;</code>. تطبيق بيفلتر وبعدين يعمل normalize = <code>＜script＞</code> بقت <code>&lt;script&gt;</code>. وكمان الـ case mapping: <code>"ſ".toUpperCase()</code> = <code>"S"</code>.</li>
+          <li><b>Homoglyphs</b>: <code>а</code> (سيريلي) شبه <code>a</code> — في الدومينات (IDN) وفي أسماء المستخدمين.</li>
+        </ul>
+
+        <h3 class="sub">🦠 الـ encoding كـ obfuscation في الـ malware</h3>
+        <p>صفحات الـ phishing والـ droppers بتخبّي الـ URLs والكود بطبقات encoding عشان الفلاتر والـ scanners متلاقيش كلمات واضحة. الأشكال اللي هتقابلها:</p>
+        <code-block lang="js" file="obfuscation-zoo.js">
+          // 1) percent / unescape
+          document.write(unescape("%3C%73%63%72%69%70%74%3E..."));
+          // 2) Base64
+          location.href = atob("aHR0cHM6Ly9ldmlsLmV4YW1wbGUv");
+          // 3) char codes
+          var u = String.fromCharCode(104, 116, 116, 112, 115, 58, 47, 47);
+          // 4) hex / unicode escapes inside strings
+          var s = "\x68\x74\x74\x70\x73://";
+          // 5) reversed / split-joined strings
+          var r = "elpmaxe.live//:sptth".split("").reverse().join("");
+          // 6) layers on layers: atob(unescape(...)) inside eval(...)
+        </code-block>
+        <p>الطريقة الآمنة للفك: <b>متشغّلش الكود على جهازك</b>. يا إما تفك الطبقات بأداة زي الـ Encoder اللي فوق (أو CyberChef)، يا إما «تفجّره» في sandbox بيسجّل الـ sinks بدل ما ينفّذها (هتلاقي زرار كده في مهام التحليل). جرّب فك دي:</p>
+        <div class="widget" data-widget="encoder" data-input="JTNDYSUyMGhyZWYlM0QlMjJodHRwcyUzQSUyRiUyRmV2aWwuZXhhbXBsZSUyRmxvZ2luJTIyJTNFU2lnbiUyMGluJTNDJTJGYSUzRQ==" data-recipe="b64-dec,url-dec"></div>
+
+        <div class="exercises">
+          <div class="exercises-head"><h3><span class="bulb">✏️</span> تمارين الدرس 14</h3></div>
+          <quiz id="s14-q1" answer="0">
+            <q>صفحة فيها BOM بتاع UTF-8، والـ header بيقول `charset=windows-1252`، والـ meta بيقول `UTF-16`. المتصفح هيستخدم إيه؟</q>
+            <o>UTF-8 (الـ BOM بيكسب)</o>
+            <o>windows-1252 (الـ header)</o>
+            <o>UTF-16 (الـ meta)</o>
+            <o>هيخمّن</o>
+            <good>الترتيب: BOM ← HTTP header ← meta ← sniffing/default.</good>
+            <bad>الـ BOM أعلى أولوية من أي header أو meta.</bad>
+          </quiz>
+          <quiz id="s14-q2" answer="2">
+            <q>السيرفر بيعمل HTML-encode للـ input ويحطه هنا: `<a onclick="track('INPUT')">`. المهاجم بعت `');alert(1);//`. هيحصل XSS؟</q>
+            <o>لأ — الـ `'` اتحولت لـ `&#39;`</o>
+            <o>لأ — الـ onclick مبيقبلش entities</o>
+            <o>أيوه — الـ HTML parser بيفك `&#39;` لـ `'` قبل ما الـ JavaScript يشوفه</o>
+            <o>بس في Internet Explorer</o>
+            <good>الـ attribute value بيتعمله HTML-decode وقت الـ parsing، والـ JS بيشوف الناتج. لازم JS-escape قبل الـ HTML-encode.</good>
+            <bad>الـ entities في الـ attributes بتتفك قبل أي حاجة تانية، فالـ JS بيستقبل `'` حقيقية.</bad>
+          </quiz>
+          <quiz id="s14-q3" answer="1">
+            <q>`<a href="javascript:%61lert(1)">` لما يتداس عليه:</q>
+            <o>مش هيحصل حاجة لأن `%61lert` مش function</o>
+            <o>هينفّذ `alert(1)` — جزء الـ javascript: URL بيتعمله percent-decode قبل التنفيذ</o>
+            <o>هيروح لصفحة اسمها `%61lert(1)`</o>
+            <o>syntax error</o>
+            <good>`%61` = `a`. الـ javascript: URLs بتتفك percent-encoding قبل ما الكود يتنفّذ.</good>
+            <bad>المتصفح بيعمل percent-decode لمحتوى الـ javascript: URL، فـ `%61lert` = `alert`.</bad>
+          </quiz>
+          <quiz id="s14-q4" answer="3">
+            <q>input بيتحط جوه `<script>var name = "INPUT";</script>` والسيرفر بيعمل escape لـ `"` و`\` بس. أنهي payload لسه شغال؟</q>
+            <o>`";alert(1)//`</o>
+            <o>`\";alert(1)//`</o>
+            <o>`&quot;;alert(1)//`</o>
+            <o>`</script><img src=x onerror=alert(1)>`</o>
+            <good>الـ HTML parser بيقفل الـ script عند أول `</script>` قبل ما الـ JS يتقري. الـ escaping لازم يشمل `<` (`<`).</good>
+            <bad>`"` و`\` متعمل لهم escape، والـ entities مش بتتفك جوه script. بس `</script>` بيكسر من مستوى الـ HTML نفسه.</bad>
+          </quiz>
+          <quiz id="s14-q5" answer="0">
+            <q>تطبيق بيفلتر `<` من الـ input، وبعدين يعمل Unicode NFKC normalization قبل ما يخزّن. المهاجم يبعت إيه؟</q>
+            <o>`＜script＞` (fullwidth) — الـ normalization بتحوّلها `<script>` بعد الفلتر</o>
+            <o>`&lt;script&gt;`</o>
+            <o>`%3Cscript%3E`</o>
+            <o>مفيش طريقة</o>
+            <good>أي تحويل بعد الـ validation ممكن يرجّع الحرف الممنوع. Normalize الأول، بعدين افحص.</good>
+            <bad>U+FF1C (＜) بيتحول لـ `<` بالـ NFKC. الفلتر عدّاه لأنه مش `<` وقت الفحص.</bad>
+          </quiz>
+          <quiz id="s14-q6" answer="2">
+            <q>نص فيه `Ø§Ù„Ø³Ø±`. إيه الحكاية غالبًا؟</q>
+            <o>نص مشفّر بـ AES</o>
+            <o>Base64</o>
+            <o>عربي بـ UTF-8 اتقري بـ windows-1252 (mojibake)</o>
+            <o>كود Assembly</o>
+            <good>`Ø` و`Ù` هما bytes الـ `D8`/`D9` اللي بتبدأ بيها أغلب الحروف العربية في UTF-8.</good>
+            <bad>ده mojibake: bytes الـ UTF-8 بتاعة العربي (D8 xx / D9 xx) اتعرضت بـ windows-1252.</bad>
+          </quiz>
+
+          <html-lab id="s14-lab1" title="نفس القيمة في 3 contexts" level="2">
+            <desc><p>القيمة <b><code>Tom &amp; &lt;Jerry&gt;'s</code></b> لازم تظهر <b>بالظبط</b> في 3 أماكن من غير ما تكسر أي حاجة:</p>
+            <ul><li>نص الـ <code>p#name</code>.</li>
+            <li>قيمة <code>title</code> attribute على نفس الـ p (بين double quotes).</li>
+            <li>متغير JavaScript اسمه <code>v</code> جوه الـ script، مكتوب بـ JS escapes (<code>\x3c</code> أو <code><</code>) للـ <code>&lt;</code>.</li></ul></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>Contexts</title></head>
+              <body>
+                <p id="name" title="Tom & <Jerry>'s">Tom & <Jerry>'s</p>
+                <script>
+                  var v = "Tom & <Jerry>'s";
+                </script>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>Contexts</title></head>
+              <body>
+                <p id="name" title="Tom &amp; &lt;Jerry&gt;'s">Tom &amp; &lt;Jerry&gt;'s</p>
+                <script>
+                  var v = "Tom \x26 \x3cJerry\x3e\x27s";
+                </script>
+              </body>
+              </html>
+            </solution>
+            <test label="نص الـ p بالظبط ومفيش عنصر jerry اتعمل">text("#name") === "Tom & <Jerry>'s" && !has("jerry")</test>
+            <test label="الـ title بالظبط">attr("#name", "title") === "Tom & <Jerry>'s"</test>
+            <test label="الـ `&` في الـ HTML مكتوبة `&amp;amp;`">!/Tom & /.test(src.split("<script")[0])</test>
+            <test label="`v` = القيمة بالظبط" live>window.v === "Tom & <Jerry>'s"</test>
+            <test label="الـ `&lt;` جوه الـ script مكتوبة كـ JS escape">/var v = "[^"]*\\(x3c|u003c)/i.test(src)</test>
+            <hint>في الـ HTML: `&amp;` و`&lt;` و`&gt;`. في الـ JS: `\x3c` بدل `<`، و`\x27` أو `\'` للـ quote لو حبيت.</hint>
+          </html-lab>
+
+          <html-lab id="s14-lab2" title="صلّح الـ event handler" level="2">
+            <desc><p>الزرار المفروض يستدعي <code>greet</code> بالاسم <b>O'Neil</b>. الكود الحالي (HTML-encode بس) بيعمل syntax error. صلّحه بحيث الضغط يبعت <code>O'Neil</code> بالظبط — من غير ما تشيل الـ <code>onclick</code>.</p></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>Greet</title></head>
+              <body>
+                <button onclick="greet('O&#39;Neil')">Greet</button>
+                <script>function greet(n) { console.log("Hello " + n); }</script>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>Greet</title></head>
+              <body>
+                <button onclick="greet('O\&#39;Neil')">Greet</button>
+                <script>function greet(n) { console.log("Hello " + n); }</script>
+              </body>
+              </html>
+            </solution>
+            <test label="الضغط بيبعت O'Neil بالظبط" live>(() => { window.__got = null; window.greet = n => { window.__got = n; }; document.querySelector("button").click(); return window.__got === "O'Neil"; })()</test>
+            <test label="لسه فيه `onclick` على الزرار">has("button[onclick]")</test>
+            <hint>الـ JS لازم يشوف `greet('O\'Neil')`. يعني اكتب `\` قبل الـ `&#39;` — أو استخدم double quotes جوه الـ JS: `greet(&quot;O'Neil&quot;)`.</hint>
+          </html-lab>
+
+          <task id="s14-t1" title="فك الطبقات" level="2" answer="<script>">
+            <desc><p>الـ WAF شاف الـ parameter ده وعدّاه. التطبيق بيعمل URL-decode وبعدين بيحطه في HTML. المتصفح في الآخر شاف إيه؟</p></desc>
+            <listing lang="text" file="request.txt">
+              GET /search?q=%26%2360%3Bscript%26%2362%3B HTTP/1.1
+            </listing>
+            <hint>URL-decode → هتلاقي HTML entities → HTML-decode.</hint>
+            <explain>`%26%2360%3Bscript%26%2362%3B` → URL-decode → `&#60;script&#62;` → المتصفح بيفك الـ entities → `<script>` كـ <b>نص</b> (الـ references بتطلع data مش markup، فده نفسه مش هيعمل tag). بس لو التطبيق عمل HTML-decode بنفسه قبل ما يحطه في الصفحة، أو حطه في context بيتفسّر تاني (attribute هيتقري JS مثلًا)، الطبقات دي بتعدّي الـ WAF.</explain>
+          </task>
+          <task id="s14-t2" title="mojibake" level="1" answer="السر">
+            <desc><p>log من سيرفر فيه الكلمة دي في parameter اسمه <code>q</code>: <code>Ø§Ù„Ø³Ø±</code>. الكلمة العربية الأصلية؟</p></desc>
+            <hint>UTF-8 bytes اتقرت windows-1252. اكتب الحروف في الـ Encoder وجرّب… أو فكّر: `D8 A7` = ا.</hint>
+            <explain>`السر` = `D8 A7 D9 84 D8 B3 D8 B1`، ولما كل byte يتقري حرف في windows-1252 يطلع `Ø§Ù„Ø³Ø±`.</explain>
+          </task>
+          <task id="s14-t3" title="مين هيتنادى؟" level="2" answer="alert">
+            <desc><p>لينك في تعليق: إيه اسم الـ function اللي هتتنفّذ لما حد يدوس؟</p></desc>
+            <listing lang="html" file="comment.html">
+              <a href="j&#x61;vascript&colon;%61%6c%65%72%74(document.domain)">see my portfolio</a>
+            </listing>
+            <hint>طبقة HTML (`&#x61;` و`&colon;`) ثم طبقة الـ percent-decoding بتاعة javascript: URLs.</hint>
+            <explain>HTML: `&#x61;` = `a` و`&colon;` = `:` → `javascript:%61%6c%65%72%74(document.domain)` → percent-decode: `%61%6c%65%72%74` = `alert` → `alert(document.domain)`. ولا كلمة «javascript» ولا «alert» كانت موجودة كنص خام.</explain>
+          </task>
+        </div>
+      </section>

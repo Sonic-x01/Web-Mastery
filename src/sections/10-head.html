@@ -1,0 +1,349 @@
+      <section class="section" id="s10" data-part="الجزء 1 · HTML" data-pk="html" data-nav="الـ head والـ Metadata" data-icon="🧠" data-keywords="head meta charset viewport description robots generator referrer refresh http-equiv content-security-policy open graph link rel stylesheet icon favicon canonical preload preconnect dns-prefetch manifest script async defer module nomodule integrity sri crossorigin nonce noscript style recon fingerprint polyfill supply chain">
+        <div class="section-head">
+          <span class="section-index">10</span>
+          <div>
+            <p class="eyebrow">HTML · الدرس 10</p>
+            <h2>الـ head: البيانات الوصفية وتحميل الموارد</h2>
+            <p class="lede">الـ <code>&lt;head&gt;</code> مش بيظهر، بس هو «لوحة التحكم» بتاعة الصفحة: الـ encoding، الـ redirect، سياسة الـ Referer، الـ CSP، وترتيب تشغيل الـ scripts. وبالنسبة للـ recon، هو بطاقة الهوية: الـ CMS وإصداره، الـ frameworks، الخدمات الخارجية، وأحيانًا subdomains داخلية.</p>
+          </div>
+        </div>
+
+        <h3 class="sub">head نموذجي</h3>
+        <code-block lang="html" file="head.html">
+          <head>
+            <meta charset="UTF-8">                                   <!-- first! within 1024 bytes -->
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <title>Orders — Shop</title>
+            <meta name="description" content="Track your orders.">
+            <meta name="robots" content="noindex, nofollow">
+            <meta name="referrer" content="strict-origin-when-cross-origin">
+            <meta name="theme-color" content="#ff7a45">
+
+            <meta property="og:title" content="Shop — Orders">         <!-- link previews -->
+            <meta property="og:image" content="https://shop.example/og.png">
+
+            <link rel="icon" href="/favicon.ico">
+            <link rel="canonical" href="https://shop.example/orders">
+            <link rel="preconnect" href="https://api.shop.example">
+            <link rel="stylesheet" href="/css/app.css">
+
+            <script src="/js/app.js" defer></script>
+          </head>
+        </code-block>
+
+        <h3 class="sub">الـ meta tags المهمة</h3>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>الـ meta</th><th>وظيفتها</th><th>🎯 ملاحظة</th></tr></thead>
+          <tbody>
+            <tr><td><code>charset</code></td><td>encoding الصفحة — أول حاجة في الـ head</td><td>غيابه/تأخيره = مشاكل encoding (الدرس 14)</td></tr>
+            <tr><td><code>name="viewport"</code></td><td>عرض الموبايل</td><td></td></tr>
+            <tr><td><code>name="description"</code></td><td>الوصف في نتايج البحث</td><td></td></tr>
+            <tr><td><code>name="robots"</code></td><td><code>noindex</code> / <code>nofollow</code>: طلب لمحركات البحث</td><td><b>مش حماية</b> — طلب مهذب بس. صفحات admin بـ noindex لسه مفتوحة</td></tr>
+            <tr><td><code>name="generator"</code></td><td>البرنامج اللي عمل الصفحة</td><td><code>WordPress 6.1.1</code> = version disclosure → دوّر على CVEs</td></tr>
+            <tr><td><code>name="referrer"</code></td><td>سياسة الـ Referer للصفحة كلها</td><td>تحت بالتفصيل</td></tr>
+            <tr><td><code>http-equiv="refresh"</code></td><td><code>content="5; url=/new"</code>: reload أو redirect بعد N ثانية</td><td>open redirect، وسلاسل redirect في الـ phishing</td></tr>
+            <tr><td><code>http-equiv="Content-Security-Policy"</code></td><td>CSP من غير header</td><td>مبيدعمش <code>frame-ancestors</code> ولا <code>report-uri</code> ولا <code>sandbox</code></td></tr>
+            <tr><td><code>property="og:*"</code> / <code>name="twitter:*"</code></td><td>شكل اللينك لما يتشير (عنوان، صورة)</td><td>الـ «link preview» بيخلّي سيرفرات تجيب URLs اللي انت بتحطها = سطح SSRF</td></tr>
+          </tbody>
+        </table></div>
+        <p>جرّب الـ meta refresh — المعاينة بتوقفه وتقولك كان هيروح فين:</p>
+        <html-example file="refresh.html" auto url="https://shop.example/old-login">
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta http-equiv="refresh" content="3; url=https://shop.example/account/login">
+            <title>Moved</title>
+          </head>
+          <body>
+            <p>This page moved. Redirecting in 3 seconds… <a href="/account/login">click here</a> if nothing happens.</p>
+          </body>
+          </html>
+        </html-example>
+        <div class="callout mal reveal"><span class="ci">🦠</span><div><strong>meta refresh في الـ phishing</strong><p>إيميلات phishing كتير فيها مرفق HTML صغير جدًا مفيهوش غير <code>&lt;meta http-equiv="refresh" content="0;url=…"&gt;</code> — مفيش JavaScript خالص، فبعض الفلاتر بتعدّيه، والضحية بتتحوّل فورًا لصفحة المهاجم. ولو موقع شرعي عنده صفحة «redirect» بتحط URL من الـ query في meta refresh = open redirect على دومين موثوق يستخدمه المهاجم.</p></div></div>
+
+        <h3 class="sub">الـ Referrer Policy</h3>
+        <p>لما المستخدم يروح من صفحة لصفحة (لينك، صورة، script)، المتصفح بيبعت <code>Referer</code> فيه عنوان الصفحة اللي جاي منها. لو الـ URL فيه حاجة حساسة (<code>?reset_token=…</code> أو <code>/invoice/8812</code>) ممكن تتسرّب لأي موقع خارجي. الـ policy بتتحكم في ده:</p>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>القيمة</th><th>نفس الـ origin</th><th>origin تاني (https→https)</th><th>https → http</th></tr></thead>
+          <tbody>
+            <tr><td><code>no-referrer</code></td><td>—</td><td>—</td><td>—</td></tr>
+            <tr><td><code>origin</code></td><td>origin</td><td>origin</td><td>origin</td></tr>
+            <tr><td><code>same-origin</code></td><td>كامل</td><td>—</td><td>—</td></tr>
+            <tr><td><code>strict-origin</code></td><td>origin</td><td>origin</td><td>—</td></tr>
+            <tr><td><code>strict-origin-when-cross-origin</code> <b>(الافتراضي)</b></td><td>كامل</td><td>origin</td><td>—</td></tr>
+            <tr><td><code>no-referrer-when-downgrade</code></td><td>كامل</td><td>كامل</td><td>—</td></tr>
+            <tr><td><code>unsafe-url</code></td><td>كامل</td><td>كامل</td><td>كامل ⚠️</td></tr>
+          </tbody>
+        </table></div>
+        <p>الـ policy بتتحط بـ header (<code>Referrer-Policy</code>)، أو <code>&lt;meta name="referrer"&gt;</code>، أو على عنصر واحد بـ <code>referrerpolicy</code>، أو <code>rel="noreferrer"</code>. جرّب اللينكات الأربعة من صفحة فيها token في الـ URL:</p>
+        <html-example file="referrer.html" auto url="https://shop.example/reset?token=9f8e7d6c">
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>Reset password</title></head>
+          <body>
+            <p>Reset page (URL contains a secret token).</p>
+            <p><a href="https://help.partner.example/faq">default policy</a></p>
+            <p><a href="https://help.partner.example/faq" referrerpolicy="unsafe-url">referrerpolicy="unsafe-url"</a></p>
+            <p><a href="/login">same-origin link</a></p>
+            <p><a href="https://help.partner.example/faq" rel="noreferrer">rel="noreferrer"</a></p>
+          </body>
+          </html>
+        </html-example>
+        <div class="callout pt reveal"><span class="ci">🎯</span><div><strong>تسريب الـ tokens في الـ Referer</strong><p>صفحة reset password فيها الـ token في الـ URL، وفيها لينك أو صورة أو script من موقع خارجي، والـ policy <code>unsafe-url</code> أو <code>no-referrer-when-downgrade</code> = الـ token بيوصل للطرف التالت. ده finding حقيقي بيتكتب كتير. الإصلاح: <code>Referrer-Policy: no-referrer</code> على الصفحات الحساسة، ومتحطش secrets في الـ URLs أصلًا.</p></div></div>
+
+        <h3 class="sub">الـ link</h3>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th><code>rel</code></th><th>وظيفته</th></tr></thead>
+          <tbody>
+            <tr><td><code>stylesheet</code></td><td>ملف CSS (مع <code>media</code> اختياري)</td></tr>
+            <tr><td><code>icon</code> / <code>apple-touch-icon</code></td><td>الـ favicon. 🎯 الـ <b>favicon hash</b> بيتستخدم في Shodan (<code>http.favicon.hash:</code>) لإيجاد كل السيرفرات اللي شغّالة نفس التطبيق — حتى اللي من غير دومين</td></tr>
+            <tr><td><code>canonical</code></td><td>«النسخة الأصلية» من الصفحة لمحركات البحث. 🎯 أحيانًا بيكشف hosts داخلية/staging</td></tr>
+            <tr><td><code>alternate</code></td><td>نسخ تانية (لغات <code>hreflang</code>، RSS)</td></tr>
+            <tr><td><code>manifest</code></td><td>ملف الـ PWA</td></tr>
+            <tr><td><code>preconnect</code> / <code>dns-prefetch</code></td><td>جهّز الاتصال بسيرفر هتحتاجه. 🎯 بيكشف الخدمات الخارجية (APIs، analytics، payment)</td></tr>
+            <tr><td><code>preload</code> / <code>prefetch</code> / <code>modulepreload</code></td><td>حمّل مورد مقدمًا (دلوقتي / للصفحة الجاية / JS module)</td></tr>
+          </tbody>
+        </table></div>
+
+        <h3 class="sub">تحميل الـ scripts: classic وasync وdefer وmodule</h3>
+        <figure class="diagram reveal">
+          <svg viewBox="0 0 1000 250" role="img" aria-label="مقارنة async و defer">
+            <text x="20" y="30" class="d-ts">HTML parsing</text><text x="20" y="44" class="d-tx">fetch</text><text x="20" y="58" class="d-tx">execute</text>
+            <text x="150" y="80" class="d-tb">&lt;script&gt;</text>
+            <rect x="260" y="68" width="170" height="14" rx="4" class="d-box"/><rect x="430" y="68" width="1" height="14" class="d-dim"/>
+            <rect x="430" y="68" width="110" height="14" rx="4" class="d-box3"/><rect x="540" y="68" width="110" height="14" rx="4" class="d-box5"/><rect x="650" y="68" width="320" height="14" rx="4" class="d-box"/>
+            <text x="595" y="100" text-anchor="middle" class="d-tx d-red">parsing STOPS: fetch + run</text>
+            <text x="150" y="140" class="d-tb">async</text>
+            <rect x="260" y="128" width="260" height="14" rx="4" class="d-box"/><rect x="520" y="128" width="80" height="14" rx="4" class="d-box5"/><rect x="600" y="128" width="370" height="14" rx="4" class="d-box"/>
+            <rect x="300" y="146" width="220" height="6" rx="3" class="d-box3"/>
+            <text x="560" y="168" text-anchor="middle" class="d-tx">runs as soon as it arrives (order not guaranteed)</text>
+            <text x="150" y="208" class="d-tb">defer / module</text>
+            <rect x="260" y="196" width="600" height="14" rx="4" class="d-box"/><rect x="860" y="196" width="110" height="14" rx="4" class="d-box5"/>
+            <rect x="300" y="214" width="220" height="6" rx="3" class="d-box3"/>
+            <text x="915" y="236" text-anchor="middle" class="d-tx">after parsing, in order</text>
+            <rect x="760" y="16" width="14" height="10" class="d-box"/><text x="780" y="25" class="d-tx">parse</text>
+            <rect x="830" y="16" width="14" height="10" class="d-box3"/><text x="850" y="25" class="d-tx">fetch</text>
+            <rect x="900" y="16" width="14" height="10" class="d-box5"/><text x="920" y="25" class="d-tx">execute</text>
+          </svg>
+          <figcaption>الـ script العادي بيوقف الـ parsing لحد ما يتحمّل ويشتغل. <code>async</code> بيتحمّل في الخلفية ويشتغل أول ما يوصل. <code>defer</code> و<code>type="module"</code> بيتحمّلوا في الخلفية ويشتغلوا <b>بعد</b> ما الـ parsing يخلص <b>وبالترتيب</b>.</figcaption>
+        </figure>
+        <html-example file="script-order.html" auto>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <title>Order</title>
+            <script>console.log("1. classic in head — the body doesn't exist yet:", document.body)</script>
+            <script type="module">console.log("4. module — runs after parsing, sees #late:", !!document.getElementById("late"))</script>
+          </head>
+          <body>
+            <p id="early">early</p>
+            <script>console.log("2. classic in body — sees #early:", !!document.getElementById("early"), "| #late:", !!document.getElementById("late"))</script>
+            <p id="late">late</p>
+            <script>
+              document.addEventListener("DOMContentLoaded", () => console.log("5. DOMContentLoaded"));
+              console.log("3. last classic script");
+            </script>
+          </body>
+          </html>
+        </html-example>
+        <ul>
+          <li><code>defer</code> و<code>async</code> ملهمش تأثير على الـ inline scripts (من غير <code>src</code>) العادية.</li>
+          <li><code>&lt;script type="module"&gt;</code> = deferred تلقائيًا، strict mode، و<code>import</code>/<code>export</code>. و<code>nomodule</code> للمتصفحات القديمة.</li>
+          <li><code>type</code> غير JavaScript (زي <code>application/json</code> أو <code>text/template</code>) = الـ script <b>مبيتنفّذش</b>، بيتستخدم كمخزن داتا. 🎯 دوّر عليهم في الـ recon: <code>__NEXT_DATA__</code> في Next.js بيبقى فيه state الصفحة كلها.</li>
+        </ul>
+
+        <h3 class="sub">Subresource Integrity (SRI): ثق في الملف مش في السيرفر</h3>
+        <code-block lang="html" file="sri.html">
+          <script src="https://cdn.example/lib/purify-3.1.6.min.js"
+                  integrity="sha384-+VfUPEb0PdtChMwmBcBmykRMDd+v6D/oFmB3rZM/puCMDYcIvF968OimRh4KQY9a"
+                  crossorigin="anonymous"></script>
+        </code-block>
+        <p>الـ <code>integrity</code> = hash للملف (الـ hash اللي فوق للتوضيح؛ بتحسبه بـ <code>openssl dgst -sha384 -binary file.js | openssl base64 -A</code> أو بتاخده من الـ CDN). المتصفح بيحسب الـ hash للي اتحمّل، ولو مختلف <b>مبيشغّلوش</b>. يعني لو الـ CDN اتخترق وغيّر الملف، صفحتك مش هتتأثر. الـ <code>crossorigin="anonymous"</code> لازم معاه للملفات من origin تاني.</p>
+        <div class="callout mal reveal"><span class="ci">🦠</span><div><strong>Supply chain: polyfill.io (2024)</strong><p>في 2024 دومين <code>polyfill.io</code> — اللي أكتر من 100 ألف موقع كانوا بيحمّلوا منه script — اتباع لجهة جديدة، وبدأ يبعت كود خبيث لبعض الزوار (redirects لمواقع مشبوهة، خصوصًا على الموبايل). المواقع اللي كانت حاطة SRI كانت هتبقى في أمان؛ لكن الخدمة دي بالذات كانت بترجع محتوى مختلف حسب المتصفح فمكنش ينفع يتعمله SRI أصلًا. الدرس: أي <code>&lt;script src&gt;</code> من دومين تالت = بتدّيه تحكم كامل في صفحتك. 🎯 في الـ recon: اعمل قايمة بكل الـ third-party scripts وشوف مين عليه SRI.</p></div></div>
+
+        <h3 class="sub">noscript وstyle</h3>
+        <p><code>&lt;noscript&gt;</code> محتواه بيظهر بس لو الـ JavaScript مقفول. 🎯 تفصيلة مهمة للأمن: الـ parser بيقرا محتوى <code>noscript</code> <b>بطريقتين مختلفتين</b>: لو الـ scripting شغّال = نص خام (RAWTEXT)، ولو مقفول = HTML عادي. الاختلاف ده استُخدم في bypasses حقيقية لـ sanitizers (الدرس 13). و<code>&lt;style&gt;</code> للـ CSS الـ inline، ومحتواه برضه RAWTEXT.</p>
+
+        <h3 class="sub">🎯 Recon من الـ head: checklist</h3>
+        <div class="steps">
+          <div class="step"><span class="n">01</span><div><h4>Versions</h4><p><code>meta generator</code>، وأرقام في الـ assets (<code>jquery-1.12.4.min.js</code>، <code>style.css?ver=5.8.1</code>)، و<code>ng-version</code>، والـ HTML comments.</p></div></div>
+          <div class="step"><span class="n">02</span><div><h4>Hosts</h4><p><code>preconnect</code> و<code>dns-prefetch</code> و<code>canonical</code> و<code>og:url</code> والـ CDNs: كل host جديد = target جديد (لو في الـ scope).</p></div></div>
+          <div class="step"><span class="n">03</span><div><h4>Frameworks والبيانات المدمجة</h4><p><code>&lt;script type="application/json"&gt;</code>، <code>__NEXT_DATA__</code>، <code>window.__INITIAL_STATE__</code>: state كامل فيه IDs وroles وأحيانًا tokens.</p></div></div>
+          <div class="step"><span class="n">04</span><div><h4>الحمايات</h4><p>فيه CSP في meta؟ ضعيفة؟ الـ scripts الخارجية عليها SRI؟ الـ Referrer-Policy إيه؟</p></div></div>
+        </div>
+
+        <div class="exercises">
+          <div class="exercises-head"><h3><span class="bulb">✏️</span> تمارين الدرس 10</h3></div>
+          <quiz id="s10-q1" answer="1">
+            <q>عندك 3 scripts عليهم `defer` بالترتيب a ثم b ثم c. هيشتغلوا إمتى وبأي ترتيب؟</q>
+            <o>أول ما كل واحد يتحمّل، بأي ترتيب</o>
+            <o>بعد ما الـ HTML parsing يخلص (وقبل DOMContentLoaded)، بالترتيب a ثم b ثم c</o>
+            <o>قبل الـ parsing</o>
+            <o>بعد كل الصور ما تتحمّل</o>
+            <good>defer = تحميل في الخلفية، وتنفيذ بعد الـ parsing بترتيب ظهورهم. ده الاختيار الأفضل لأغلب الـ scripts.</good>
+            <bad>ده سلوك `async`. الـ `defer` بيحافظ على الترتيب وبيستنى الـ parsing يخلص.</bad>
+          </quiz>
+          <quiz id="s10-q2" answer="3">
+            <q>صفحة admin عليها `<meta name="robots" content="noindex">`. ده بيحميها من إيه؟</q>
+            <o>من أي حد مش عامل login</o>
+            <o>من الـ scanners</o>
+            <o>من الـ XSS</o>
+            <o>ولا حاجة أمنيًا — بس بيطلب من محركات البحث المحترمة متفهرسهاش</o>
+            <good>robots (meta أو robots.txt) طلب مهذب، مش access control. وكمان robots.txt بيكشف paths مخفية للمهاجم.</good>
+            <bad>`noindex` مش حماية. أي حد يعرف الـ URL يقدر يفتحها، والـ scanners مش ملزمة تحترم robots.</bad>
+          </quiz>
+          <quiz id="s10-q3" answer="0">
+            <q>إيه فايدة `integrity="sha384-…"` على script من CDN؟</q>
+            <o>لو محتوى الملف اتغيّر (CDN اتخترق مثلًا) المتصفح يرفض يشغّله</o>
+            <o>بيشفّر الملف</o>
+            <o>بيخلّي التحميل أسرع</o>
+            <o>بيمنع الـ XSS في الصفحة</o>
+            <good>SRI بيضمن إن اللي بيتنفّذ هو بالظبط الملف اللي انت راجعته.</good>
+            <bad>SRI = تحقق من hash المحتوى. مش تشفير ومش بيمنع XSS في كودك.</bad>
+          </quiz>
+          <quiz id="s10-q4" answer="2">
+            <q>صفحة `https://shop.example/reset?token=abc` فيها لينك لـ `https://cdn.partner.example/help` والـ policy هي الافتراضي. الـ Referer اللي هيوصل للـ partner؟</q>
+            <o>`https://shop.example/reset?token=abc`</o>
+            <o>ولا حاجة</o>
+            <o>`https://shop.example/`</o>
+            <o>`/reset`</o>
+            <good>الافتراضي `strict-origin-when-cross-origin`: cross-origin = origin بس. الـ token مش هيتسرّب… إلا لو حد غيّر الـ policy.</good>
+            <bad>الـ policy الافتراضية بتبعت الـ URL الكامل لنفس الـ origin بس، وللـ origins التانية الـ origin لوحده.</bad>
+          </quiz>
+          <quiz id="s10-q5" answer="1">
+            <q>أنهي directive <b>مش</b> بيشتغل لو الـ CSP اتحط في `<meta http-equiv>` بدل header؟</q>
+            <o>`script-src`</o>
+            <o>`frame-ancestors`</o>
+            <o>`default-src`</o>
+            <o>`img-src`</o>
+            <good>`frame-ancestors` (وكمان `report-uri` و`sandbox`) لازم ييجوا من header. عشان كده حماية الـ clickjacking لازم header.</good>
+            <bad>الـ meta CSP بيدعم أغلب الـ directives، ماعدا `frame-ancestors` و`report-uri` و`sandbox`.</bad>
+          </quiz>
+          <quiz id="s10-q6" answer="2">
+            <q>`<script type="application/json" id="state">{"role":"user","id":91}</script>` — الكود ده بيعمل إيه؟</q>
+            <o>بيتنفّذ كـ JavaScript</o>
+            <o>بيعمل error</o>
+            <o>مبيتنفّذش — مخزن بيانات بيقراه الـ JS بـ `JSON.parse(state.textContent)`، ومكشوف لأي حد يقرا الـ source</o>
+            <o>بيتبعت للسيرفر</o>
+            <good>الـ type غير المعروف كـ JS = data block. ممتاز للـ recon: state كامل للتطبيق.</good>
+            <bad>المتصفح بينفّذ بس الـ scripts اللي نوعها JavaScript أو module. الباقي داتا.</bad>
+          </quiz>
+
+          <html-lab id="s10-lab1" title="head احترافي وآمن" level="1">
+            <desc><p>اكتب head فيه:</p>
+            <ul><li><code>meta charset="UTF-8"</code> <b>أول عنصر</b> في الـ head.</li>
+            <li><code>viewport</code>، و<code>title</code>، و<code>meta name="description"</code>.</li>
+            <li>الصفحة متتفهرسش: <code>robots</code> = <code>noindex, nofollow</code>.</li>
+            <li>مفيش Referer يتبعت خالص من الصفحة دي (<code>meta name="referrer"</code>).</li>
+            <li><code>link rel="canonical"</code> لـ <code>https://shop.example/account/reset</code>.</li></ul></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <title>Reset password</title>
+              </head>
+              <body>
+                <h1>Reset your password</h1>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <title>Reset password</title>
+                <meta name="description" content="Reset your Shop account password.">
+                <meta name="robots" content="noindex, nofollow">
+                <meta name="referrer" content="no-referrer">
+                <link rel="canonical" href="https://shop.example/account/reset">
+              </head>
+              <body>
+                <h1>Reset your password</h1>
+              </body>
+              </html>
+            </solution>
+            <test label="`meta charset` هو أول عنصر في الـ head">$("head").firstElementChild && $("head").firstElementChild.hasAttribute("charset") && /^utf-8$/i.test($("head").firstElementChild.getAttribute("charset"))</test>
+            <test label="viewport و title و description">has('meta[name="viewport"]') && text("title").length > 0 && (attr('meta[name="description"]', "content") || "").length > 5</test>
+            <test label="robots = noindex, nofollow">/noindex/i.test(attr('meta[name="robots"]', "content") || "") && /nofollow/i.test(attr('meta[name="robots"]', "content") || "")</test>
+            <test label="referrer = no-referrer">(attr('meta[name="referrer"]', "content") || "").trim().toLowerCase() === "no-referrer"</test>
+            <test label="canonical صح">attr('link[rel="canonical"]', "href") === "https://shop.example/account/reset"</test>
+          </html-lab>
+
+          <html-lab id="s10-lab2" title="تحميل scripts بأمان وبالترتيب الصح" level="2">
+            <desc><p>الصفحة بتحمّل 4 scripts بطريقة بطيئة وخطيرة. عدّلها:</p>
+            <ul><li>الـ script اللي من <code>cdn.example</code>: ضيف <code>integrity</code> (أي hash بصيغة <code>sha384-…</code> صحيحة الشكل) و<code>crossorigin="anonymous"</code>.</li>
+            <li><code>/js/app.js</code> و<code>/js/ui.js</code> يتحمّلوا في الخلفية ويشتغلوا <b>بعد</b> الـ parsing <b>وبالترتيب</b>.</li>
+            <li><code>analytics.js</code> مش مهم ترتيبه: يتحمّل ويشتغل في أي وقت.</li>
+            <li><code>/js/main.mjs</code> يبقى ES module.</li></ul></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>App</title>
+                <script src="https://cdn.example/lib/purify-3.1.6.min.js"></script>
+                <script src="/js/app.js"></script>
+                <script src="/js/ui.js"></script>
+                <script src="https://stats.example/analytics.js"></script>
+                <script src="/js/main.mjs"></script>
+              </head>
+              <body><div id="root"></div></body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>App</title>
+                <script src="https://cdn.example/lib/purify-3.1.6.min.js"
+                        integrity="sha384-+VfUPEb0PdtChMwmBcBmykRMDd+v6D/oFmB3rZM/puCMDYcIvF968OimRh4KQY9a"
+                        crossorigin="anonymous"></script>
+                <script src="/js/app.js" defer></script>
+                <script src="/js/ui.js" defer></script>
+                <script src="https://stats.example/analytics.js" async></script>
+                <script type="module" src="/js/main.mjs"></script>
+              </head>
+              <body><div id="root"></div></body>
+              </html>
+            </solution>
+            <test label="الـ CDN script عليه integrity بصيغة صحيحة">/^sha(256|384|512)-[A-Za-z0-9+/]{40,}={0,2}$/.test(attr('script[src*="cdn.example"]', "integrity") || "")</test>
+            <test label="الـ CDN script عليه `crossorigin=&quot;anonymous&quot;`">attr('script[src*="cdn.example"]', "crossorigin") === "anonymous"</test>
+            <test label="app.js و ui.js عليهم defer (ومش async) وبالترتيب ده">$$('script[src="/js/app.js"], script[src="/js/ui.js"]').map(s => s.getAttribute("src") + (s.defer && !s.async)).join() === "/js/app.jstrue,/js/ui.jstrue"</test>
+            <test label="analytics.js عليه async">$('script[src*="analytics.js"]').async</test>
+            <test label="main.mjs نوعه module">attr('script[src="/js/main.mjs"]', "type") === "module"</test>
+            <hint>`defer` = بالترتيب بعد الـ parsing. `async` = أول ما يوصل. `type="module"` = deferred تلقائيًا.</hint>
+          </html-lab>
+
+          <task id="s10-t1" title="بصمة الموقع من الـ head" level="1" answer="6.1.1|wordpress 6.1.1">
+            <desc><p>إيه إصدار الـ CMS اللي الموقع ده شغّال بيه؟</p></desc>
+            <listing lang="html" file="index.html (head)">
+              <head>
+                <meta charset="UTF-8">
+                <title>Shop Blog</title>
+                <meta name="generator" content="WordPress 6.1.1" />
+                <link rel="stylesheet" href="https://blog.shop.example/wp-includes/css/dist/block-library/style.min.css?ver=6.1.1">
+                <link rel="stylesheet" href="https://blog.shop.example/wp-content/plugins/contact-form-7/includes/css/styles.css?ver=5.6.4">
+                <link rel="preconnect" href="https://api.stripe.com">
+                <link rel="canonical" href="https://staging-blog.shop.example/">
+                <script src="https://blog.shop.example/wp-includes/js/jquery/jquery.min.js?ver=3.6.1"></script>
+              </head>
+            </listing>
+            <explain>`WordPress 6.1.1` (من الـ generator ومن `?ver=6.1.1`). وكمان: plugin اسمه contact-form-7 إصداره 5.6.4 (plugins = أغلب ثغرات WordPress)، وخدمة دفع Stripe، و<b>host staging</b> اتكشف من الـ canonical، وjQuery 3.6.1. كل سطر هنا معلومة recon.</explain>
+          </task>
+          <task id="s10-t2" title="الضحية رايحة فين؟" level="2" answer="evil.example">
+            <desc><p>مرفق إيميل اسمه <code>Statement_Nov.html</code>. الضحية هتتحوّل على أنهي <b>دومين مسجّل</b> (registrable domain — زي <code>example.com</code>، مش الـ subdomain)؟</p></desc>
+            <listing lang="html" file="Statement_Nov.html">
+              <html><head>
+              <meta http-equiv="refresh" content="0; URL='https://login.shop.example.evil.example/secure/statement'">
+              </head><body>Loading your statement…</body></html>
+            </listing>
+            <hint>اقرا الـ host من <b>اليمين للشمال</b>: آخر جزئين هما الدومين الحقيقي.</hint>
+            <explain>الـ host هو `login.shop.example.evil.example` — الدومين اللي بيتحكم فيه هو `evil.example`، و`login.shop.example` مجرد subdomain عند المهاجم عشان يبان شرعي. ده trick كلاسيكي، ومعاه redirect فوري (`0` ثانية) من غير JavaScript.</explain>
+          </task>
+        </div>
+      </section>

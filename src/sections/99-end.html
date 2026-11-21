@@ -1,0 +1,287 @@
+      <section class="section" id="cheat" data-part="المرجع" data-pk="end" data-nav="Cheat Sheet" data-icon="📇" data-keywords="cheat sheet reference tags attributes entities forms meta iframe sandbox contexts encoding xss vectors recon parser rawtext rcdata">
+        <div class="section-head">
+          <span class="section-index">98</span>
+          <div>
+            <p class="eyebrow">المرجع السريع</p>
+            <h2>Cheat Sheet — HTML للـ Pentester</h2>
+            <p class="lede">كل اللي محتاج ترجعله بسرعة في مكان واحد، وبيتحدّث مع كل جزء جديد من الكورس. اكتب في البحث أي كلمة (tag، attribute، context، حرف…).</p>
+          </div>
+        </div>
+
+        <div class="cheat-search">
+          <span class="ic">🔎</span>
+          <input type="search" id="cheatSearch" placeholder="ابحث… (sandbox, enctype, &amp;lt;, RCDATA, formaction, referrer)" autocomplete="off" aria-label="بحث في المرجع">
+        </div>
+
+        <div class="cheat-grid" id="cheatGrid">
+          <div class="cheat-card">
+            <h4>هيكل المستند</h4>
+            <ul>
+              <li><code>&lt;!DOCTYPE html&gt;</code><span>standards mode (من غيره quirks)</span></li>
+              <li><code>&lt;html lang="ar" dir="rtl"&gt;</code><span>اللغة والاتجاه</span></li>
+              <li><code>&lt;meta charset="UTF-8"&gt;</code><span>أول 1024 byte</span></li>
+              <li><code>&lt;meta name="viewport" …&gt;</code><span>الموبايل</span></li>
+              <li><code>&lt;title&gt;</code><span>إجباري · RCDATA</span></li>
+              <li>void: <code>area base br col embed hr img input link meta source track wbr</code><span></span></li>
+            </ul>
+          </div>
+          <div class="cheat-card">
+            <h4>النصوص والمعنى</h4>
+            <ul>
+              <li><code>h1–h6</code><span>هيكل، من غير قفز</span></li>
+              <li><code>strong</code> / <code>b</code><span>أهمية / لفت نظر</span></li>
+              <li><code>em</code> / <code>i</code><span>تأكيد / صوت مختلف</span></li>
+              <li><code>code kbd samp var</code><span>كود · مفاتيح · مخرجات · متغير</span></li>
+              <li><code>abbr title</code> · <code>time datetime</code><span></span></li>
+              <li><code>pre</code><span>بيحافظ على المسافات — مش raw text!</span></li>
+              <li><code>bdi</code> · <code>bdo dir</code> · <code>U+202E</code><span>RLO spoofing</span></li>
+            </ul>
+          </div>
+          <div class="cheat-card">
+            <h4>Entities</h4>
+            <ul>
+              <li><code>&amp;lt; &amp;gt; &amp;amp;</code><span>&lt; &gt; &amp;</span></li>
+              <li><code>&amp;quot; &amp;#39;</code><span>" '</span></li>
+              <li><code>&amp;#60; &amp;#x3C;</code><span>decimal / hex</span></li>
+              <li><code>&amp;nbsp; &amp;copy; &amp;colon;</code><span>  © :</span></li>
+              <li>بتتفك في: النص + الـ attributes<span>مش في script/style</span></li>
+              <li><code>&amp;amp</code> من غير <code>;</code><span>legacy: بتتفك (إلا قبل = أو حرف في attribute)</span></li>
+            </ul>
+          </div>
+          <div class="cheat-card">
+            <h4>الروابط والـ URLs</h4>
+            <ul>
+              <li><code>page.html</code><span>نفس الـ directory</span></li>
+              <li><code>../x</code> · <code>/x</code><span>لفوق · من الـ root</span></li>
+              <li><code>//host/x</code><span>protocol-relative = host تاني!</span></li>
+              <li><code>?q=1</code> · <code>#id</code><span>query جديدة · نفس الصفحة</span></li>
+              <li><code>#fragment</code><span>مبيتبعتش للسيرفر</span></li>
+              <li><code>rel="noopener noreferrer"</code><span>للينكات الخارجية</span></li>
+              <li><code>&lt;base href&gt;</code><span>أول واحد بس · CSP base-uri</span></li>
+              <li><code>download</code><span>same-origin / blob: / data: بس</span></li>
+            </ul>
+          </div>
+          <div class="cheat-card">
+            <h4>الفورمز: إيه اللي بيتبعت</h4>
+            <ul>
+              <li>من غير <code>name</code><span>مبيتبعتش</span></li>
+              <li><code>disabled</code><span>مبيتبعتش</span></li>
+              <li><code>readonly</code> · <code>hidden</code><span>بيتبعتوا</span></li>
+              <li>checkbox مش متعلّم<span>مبيتبعتش · من غير value = on</span></li>
+              <li><code>select</code><span>الـ value مش النص</span></li>
+              <li>الـ submitter<span>name=value بتاعه</span></li>
+              <li><code>type="image"</code><span>name.x · name.y</span></li>
+              <li><code>&lt;button&gt;</code> جوه form<span>submit افتراضيًا</span></li>
+            </ul>
+          </div>
+          <div class="cheat-card">
+            <h4>enctype والـ method</h4>
+            <ul>
+              <li><code>application/x-www-form-urlencoded</code><span>الافتراضي · space=+</span></li>
+              <li><code>multipart/form-data</code><span>للملفات · boundary</span></li>
+              <li><code>text/plain</code><span>من غير encoding · JSON CSRF</span></li>
+              <li>GET<span>بيستبدل query الـ action</span></li>
+              <li>الأسطر الجديدة<span>بتتبعت CRLF (%0D%0A)</span></li>
+              <li><code>formaction formmethod formenctype formtarget formnovalidate</code><span>على الزرار</span></li>
+              <li><code>form="id"</code><span>عنصر برا الفورم ينضم لها</span></li>
+            </ul>
+          </div>
+          <div class="cheat-card">
+            <h4>Validation (UX مش حماية)</h4>
+            <ul>
+              <li><code>required</code><span></span></li>
+              <li><code>minlength maxlength</code><span></span></li>
+              <li><code>min max step</code><span>أرقام وتواريخ</span></li>
+              <li><code>pattern</code><span>بيطابق القيمة كلها</span></li>
+              <li><code>type=email|url|number</code><span></span></li>
+              <li><code>novalidate</code> · <code>formnovalidate</code><span>اقفل</span></li>
+              <li>Bypass<span>DevTools · Burp · curl</span></li>
+            </ul>
+          </div>
+          <div class="cheat-card">
+            <h4>الـ head</h4>
+            <ul>
+              <li><code>meta http-equiv="refresh"</code><span>redirect · open redirect</span></li>
+              <li><code>meta name="referrer"</code><span>no-referrer · strict-origin-when-cross-origin (افتراضي)</span></li>
+              <li><code>meta name="robots"</code><span>طلب مش حماية</span></li>
+              <li><code>meta name="generator"</code><span>version disclosure</span></li>
+              <li><code>script defer</code><span>بعد الـ parsing بالترتيب</span></li>
+              <li><code>script async</code><span>أول ما يوصل</span></li>
+              <li><code>type="module"</code><span>deferred · strict</span></li>
+              <li><code>integrity + crossorigin</code><span>SRI</span></li>
+            </ul>
+          </div>
+          <div class="cheat-card">
+            <h4>iframe sandbox</h4>
+            <ul>
+              <li><code>sandbox</code> فاضي<span>كل القيود · origin opaque</span></li>
+              <li><code>allow-scripts</code><span>JS</span></li>
+              <li><code>allow-forms</code><span>إرسال فورمز</span></li>
+              <li><code>allow-same-origin</code><span>⚠ مع allow-scripts على نفس الـ origin = هروب</span></li>
+              <li><code>allow-popups</code> · <code>allow-modals</code><span></span></li>
+              <li><code>allow-top-navigation</code><span></span></li>
+              <li><code>srcdoc</code><span>origin الأب (لو مش sandbox) · entities بتتفك</span></li>
+              <li><code>frame-ancestors</code> / <code>X-Frame-Options</code><span>ضد clickjacking (header بس)</span></li>
+            </ul>
+          </div>
+          <div class="cheat-card">
+            <h4>Global attributes للـ recon</h4>
+            <ul>
+              <li><code>hidden</code><span>لسه في الـ DOM</span></li>
+              <li><code>data-*</code><span>dataset.camelCase</span></li>
+              <li><code>id</code><span>window[id] · DOM clobbering</span></li>
+              <li><code>contenteditable</code><span>rich text = XSS source</span></li>
+              <li><code>tabindex</code><span>0 · -1 · (موجب لأ)</span></li>
+              <li><code>inert</code> · <code>autofocus</code> · <code>popover</code><span></span></li>
+            </ul>
+          </div>
+          <div class="cheat-card">
+            <h4>الـ Parser: عناصر خاصة</h4>
+            <ul>
+              <li>RCDATA<span><code>textarea title</code> · entities أيوه، tags لأ</span></li>
+              <li>RAWTEXT<span><code>style xmp iframe noembed noframes noscript*</code></span></li>
+              <li>Script data<span><code>script</code> · أول &lt;/script&gt; بيقفل</span></li>
+              <li>PLAINTEXT<span><code>plaintext</code> لآخر الملف</span></li>
+              <li>Comments<span><code>--&gt;</code> أو <code>--!&gt;</code> · <code>&lt;!--&gt;</code></span></li>
+              <li>Bogus comment<span><code>&lt;/ x&gt;</code> · <code>&lt;?…&gt;</code></span></li>
+              <li>Foreign<span>svg/math: self-closing · CDATA · breakout (p div img b br table…)</span></li>
+              <li>innerHTML<span>script لأ · onerror أيوه</span></li>
+            </ul>
+          </div>
+          <div class="cheat-card">
+            <h4>Contexts → encoding</h4>
+            <ul>
+              <li>HTML body<span>&amp; &lt; &gt; → entities</span></li>
+              <li>Attribute بـ quotes<span>+ " ' → entities</span></li>
+              <li>Attribute من غير quotes<span>❌ متعملش كده</span></li>
+              <li>URL (href/src)<span>allow-list للـ scheme</span></li>
+              <li>JS string<span>\xHH · &lt; → < · أو JSON</span></li>
+              <li>Event handler<span>JS-escape ثم HTML-encode</span></li>
+              <li>CSS<span>allow-list</span></li>
+              <li>Comment<span>متحطش داتا مستخدمين</span></li>
+            </ul>
+          </div>
+          <div class="cheat-card">
+            <h4>طبقات الـ decoding</h4>
+            <ul>
+              <li>attribute<span>HTML-decode الأول</span></li>
+              <li><code>javascript:</code> URL<span>ثم percent-decode ثم JS</span></li>
+              <li>URL parser<span>بيشيل tab/LF · \ = / في http(s)</span></li>
+              <li><code>%253C</code><span>double encoding → &lt;</span></li>
+              <li>NFKC<span>＜ → &lt;</span></li>
+              <li>charset<span>BOM ← header ← meta ← تخمين</span></li>
+            </ul>
+          </div>
+          <div class="cheat-card">
+            <h4>Handlers بتشتغل لوحدها (للاختبار المصرّح)</h4>
+            <ul>
+              <li><code>&lt;img src=x onerror=…&gt;</code><span>الكلاسيكي</span></li>
+              <li><code>&lt;svg onload=…&gt;</code> · <code>&lt;svg/onload=…&gt;</code><span>/ كفاصل</span></li>
+              <li><code>&lt;details open ontoggle=…&gt;</code><span></span></li>
+              <li><code>&lt;audio src=x onerror=…&gt;</code><span></span></li>
+              <li><code>&lt;input autofocus onfocus=…&gt;</code><span>مش في iframe cross-origin</span></li>
+              <li><code>alert&#96;1&#96;</code><span>من غير أقواس</span></li>
+              <li><code>&lt;a href="javascript:…"&gt;</code><span>محتاج ضغطة</span></li>
+            </ul>
+          </div>
+          <div class="cheat-card">
+            <h4>Recon checklist</h4>
+            <ul>
+              <li><code>&lt;!--</code> comments<span></span></li>
+              <li>hidden inputs · disabled<span></span></li>
+              <li>data-* · JSON scripts<span>__NEXT_DATA__</span></li>
+              <li>href/src/action hosts<span>subdomains</span></li>
+              <li>ملفات JS<span>fetch · routes · flags · secrets</span></li>
+              <li><code>sourceMappingURL</code><span>.map</span></li>
+              <li><code>robots.txt sitemap.xml security.txt</code><span></span></li>
+              <li>Wayback · gau<span>endpoints قديمة</span></li>
+            </ul>
+          </div>
+          <div class="cheat-card">
+            <h4>HTML injection من غير JS</h4>
+            <ul>
+              <li>Dangling markup<span><code>&lt;a href='https://atk/?</code></span></li>
+              <li>Form hijack<span><code>formaction</code> · <code>&lt;form&gt;</code> قبل الفورم</span></li>
+              <li>Base hijack<span><code>&lt;base href&gt;</code> قبل scripts</span></li>
+              <li>meta refresh<span>redirect</span></li>
+              <li>DOM clobbering<span><code>id/name</code></span></li>
+              <li>Content spoofing<span>رسائل مزيفة</span></li>
+            </ul>
+          </div>
+          <div class="cheat-card">
+            <h4>👨‍💻 للمطوّر</h4>
+            <ul>
+              <li><code>!</code> + Tab<span>Emmet: هيكل HTML5</span></li>
+              <li><code>ul>li*3</code> · <code>.card>h2+p</code><span>Emmet</span></li>
+              <li>أسماء الملفات<span>small · kebab-case · من غير مسافات</span></li>
+              <li><code>css/</code> · <code>js/</code> · <code>img/</code><span>فصل المسؤوليات</span></li>
+              <li>مفيش inline style/on*<span>عشان CSP صارمة</span></li>
+              <li><code>.gitignore</code> → <code>.env</code><span>secret اتعمله commit = rotate</span></li>
+              <li><code>style.css?v=2</code><span>cache busting</span></li>
+              <li><code>dir="auto"</code> · <code>hreflang</code><span>مواقع عربي</span></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="sources" data-part="المرجع" data-pk="end" data-nav="المصادر وخريطة الطريق" data-icon="📚" data-keywords="sources references mdn whatwg owasp portswigger web security academy cheat sheet live dom viewer validator cyberchef dompurify books bug bounty roadmap next steps">
+        <div class="section-head">
+          <span class="section-index">99</span>
+          <div>
+            <p class="eyebrow">المرجع</p>
+            <h2>المصادر وخريطة الطريق</h2>
+            <p class="lede">المصادر اللي الكورس اعتمد عليها، وأماكن التدريب القانوني، والخطوة الجاية.</p>
+          </div>
+        </div>
+
+        <h3 class="sub">المراجع الأساسية</h3>
+        <div class="sources">
+          <a class="source" href="https://html.spec.whatwg.org/" target="_blank" rel="noopener noreferrer"><span class="sico">📜</span><span><b>HTML Living Standard (WHATWG)</b><span>المرجع الرسمي — قسم «Parsing HTML documents» هو أساس الدرس 13.</span><span class="url">html.spec.whatwg.org</span></span></a>
+          <a class="source" href="https://developer.mozilla.org/en-US/docs/Web/HTML" target="_blank" rel="noopener noreferrer"><span class="sico">📘</span><span><b>MDN Web Docs — HTML</b><span>أوضح توثيق عملي لكل عنصر وattribute، مع جداول دعم المتصفحات.</span><span class="url">developer.mozilla.org</span></span></a>
+          <a class="source" href="https://url.spec.whatwg.org/" target="_blank" rel="noopener noreferrer"><span class="sico">🔗</span><span><b>URL Standard</b><span>إزاي المتصفح بيـ parse الـ URLs بالظبط (الدرس 04 و14).</span><span class="url">url.spec.whatwg.org</span></span></a>
+          <a class="source" href="https://web.dev/learn/html" target="_blank" rel="noopener noreferrer"><span class="sico">🎓</span><span><b>web.dev — Learn HTML</b><span>كورس Google المجاني: كويس للمراجعة.</span><span class="url">web.dev/learn/html</span></span></a>
+          <a class="source" href="https://validator.w3.org/" target="_blank" rel="noopener noreferrer"><span class="sico">✅</span><span><b>W3C Markup Validator</b><span>اتأكد إن الـ HTML بتاعك سليم.</span><span class="url">validator.w3.org</span></span></a>
+          <a class="source" href="https://software.hixie.ch/utilities/js/live-dom-viewer/" target="_blank" rel="noopener noreferrer"><span class="sico">🌳</span><span><b>Live DOM Viewer</b><span>أداة كاتب الـ spec نفسه: اكتب HTML وشوف الـ DOM.</span><span class="url">software.hixie.ch</span></span></a>
+        </div>
+
+        <h3 class="sub">الأمن والـ Pentest</h3>
+        <div class="sources">
+          <a class="source" href="https://portswigger.net/web-security" target="_blank" rel="noopener noreferrer"><span class="sico">🧪</span><span><b>PortSwigger Web Security Academy</b><span>أحسن معامل مجانية: XSS، CSRF، clickjacking… كمّل بيها بعد كل جزء.</span><span class="url">portswigger.net/web-security</span></span></a>
+          <a class="source" href="https://portswigger.net/web-security/cross-site-scripting/cheat-sheet" target="_blank" rel="noopener noreferrer"><span class="sico">📋</span><span><b>PortSwigger XSS Cheat Sheet</b><span>كل الـ vectors والـ events مع المتصفحات اللي بتدعمها.</span><span class="url">portswigger.net · xss cheat sheet</span></span></a>
+          <a class="source" href="https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html" target="_blank" rel="noopener noreferrer"><span class="sico">🛡️</span><span><b>OWASP XSS Prevention Cheat Sheet</b><span>الـ encoding لكل context — من وجهة نظر المطوّر.</span><span class="url">cheatsheetseries.owasp.org</span></span></a>
+          <a class="source" href="https://owasp.org/www-project-web-security-testing-guide/" target="_blank" rel="noopener noreferrer"><span class="sico">🗺️</span><span><b>OWASP Web Security Testing Guide</b><span>منهجية الـ pentest الكاملة للويب.</span><span class="url">owasp.org · WSTG</span></span></a>
+          <a class="source" href="https://github.com/cure53/DOMPurify" target="_blank" rel="noopener noreferrer"><span class="sico">🧼</span><span><b>DOMPurify</b><span>الـ sanitizer المرجعي — وتاريخ الـ bypasses بتاعه درس في الـ mXSS.</span><span class="url">github.com/cure53/DOMPurify</span></span></a>
+          <a class="source" href="https://gchq.github.io/CyberChef/" target="_blank" rel="noopener noreferrer"><span class="sico">🍳</span><span><b>CyberChef</b><span>فك أي encoding — النسخة الكاملة من أداة الدرس 14.</span><span class="url">gchq.github.io/CyberChef</span></span></a>
+        </div>
+
+        <h3 class="sub">كتب تستاهل</h3>
+        <div class="grid-2">
+          <div class="card reveal"><div class="ico">📕</div><h4>The Tangled Web</h4><p>Michal Zalewski — أعمق شرح لأمان المتصفحات: الـ parsing، الـ origins، الـ encodings. قديم شوية بس أفكاره أساس.</p></div>
+          <div class="card reveal"><div class="ico">📗</div><h4>The Web Application Hacker's Handbook (2nd ed.)</h4><p>Stuttard &amp; Pinto — المنهجية الكلاسيكية للـ web pentesting (من صنّاع Burp).</p></div>
+          <div class="card reveal"><div class="ico">📙</div><h4>Real-World Bug Hunting</h4><p>Peter Yaworski — ثغرات حقيقية من bug bounty مشروحة: XSS، open redirect، HTML injection…</p></div>
+          <div class="card reveal"><div class="ico">📘</div><h4>Bug Bounty Bootcamp</h4><p>Vickie Li — منهجية حديثة من الـ recon لكتابة التقرير.</p></div>
+        </div>
+
+        <h3 class="sub">التدريب القانوني</h3>
+        <ul>
+          <li><b>PortSwigger Academy</b> و<b>HackTheBox</b> و<b>TryHackMe</b>: معامل مصرّح بيها.</li>
+          <li><b>OWASP Juice Shop</b>: تطبيق مليان ثغرات تشغّله على جهازك.</li>
+          <li><b>Google XSS Game</b> و<b>alf.nu/alert1</b>: ألغاز XSS.</li>
+          <li><b>HackerOne Hacktivity</b> و<b>Bugcrowd</b>: اقرا تقارير حقيقية متنشرة — أحسن طريقة تتعلم بيها إزاي الناس بتكتب الـ findings.</li>
+        </ul>
+
+        <div class="final-cta">
+          <h3>خلصت الجزء الأول: HTML 🎯</h3>
+          <p>دلوقتي إنت بتكتب HTML نضيف ومنظّم وقابل للنشر زي أي مطوّر محترف، وبتقراه زي المتصفح: عارف إيه اللي بيتبعت، وفين الـ input بيقع، وإزاي الـ parser بيفكر. الجزء الجاي <b>CSS</b> ثم <b>JavaScript</b> ثم <b>Web Security</b> — ونفس المعمل هيكبر معاك.</p>
+          <div class="final-stats">
+            <div><b id="finalSolved">0</b> تمرين محلول</div>
+            <div><b id="finalTotal">0</b> إجمالي التمارين</div>
+            <div><b id="finalSections">0</b> درس مكتمل</div>
+          </div>
+          <div style="margin-top:22px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+            <a href="#xss-1" class="btn btn-primary">🏴 الـ XSS Range</a>
+            <a href="#p-html" class="btn btn-ghost">🛠️ المشاريع</a>
+            <button type="button" class="btn btn-ghost" data-pg-open>🧪 المعمل الحر</button>
+          </div>
+        </div>
+      </section>

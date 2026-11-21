@@ -1,0 +1,301 @@
+      <section class="section" id="s03" data-part="الجزء 1 · HTML" data-pk="html" data-nav="النصوص والـ Entities" data-icon="✍️" data-keywords="headings h1 h2 paragraph p br hr strong b em i mark small del ins sub sup code kbd samp var abbr dfn cite q blockquote pre time address bdi bdo dir rtl unicode rlo bidi entities character references nbsp amp lt gt quot escaping">
+        <div class="section-head">
+          <span class="section-index">03</span>
+          <div>
+            <p class="eyebrow">HTML · الدرس 03</p>
+            <h2>النصوص والمعنى والـ Entities</h2>
+            <p class="lede">HTML مش بتقول «خلّي ده bold»؛ بتقول «ده <b>مهم</b>» أو «ده <b>كود</b>» أو «ده <b>اختصار</b>». المعنى ده (الـ <b>semantics</b>) بيقرا منه قارئ الشاشة ومحرك البحث والـ scrapers. وفي آخر الدرس أهم موضوع أمني فيه: الـ <b>character references</b> — إزاي تكتب <code>&lt;</code> كنص من غير ما المتصفح يفتح tag، وده أساس الحماية من XSS.</p>
+          </div>
+        </div>
+
+        <h3 class="sub">العناوين: h1 → h6</h3>
+        <p>ستة مستويات، والرقم = <b>الترتيب في الهيكل</b> مش الحجم (الحجم بيتعمل بالـ CSS). القواعد العملية: <code>h1</code> واحد للموضوع الرئيسي، وبعده <code>h2</code> للأقسام، و<code>h3</code> جوه الـ <code>h2</code>… ومتنطّش مستوى (من <code>h2</code> لـ <code>h4</code>). مستخدمين قارئات الشاشة بيتنقلوا في الصفحة بالعناوين زي فهرس.</p>
+        <html-example file="headings.html" auto>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>Pentest Report</title></head>
+          <body>
+            <h1>Pentest Report — shop.example</h1>
+            <h2>1. Executive summary</h2>
+            <p>Two high-risk issues were found.</p>
+            <h2>2. Findings</h2>
+            <h3>2.1 Reflected XSS in /search</h3>
+            <p>The <code>q</code> parameter is echoed without encoding.</p>
+            <h3>2.2 Missing <code>HttpOnly</code> on session cookie</h3>
+            <p>Session cookie is readable from JavaScript.</p>
+          </body>
+          </html>
+        </html-example>
+
+        <h3 class="sub">الفقرات والفواصل</h3>
+        <p><code>&lt;p&gt;</code> فقرة (المتصفح بيحط مسافة قبلها وبعدها). <code>&lt;br&gt;</code> سطر جديد <b>جوه</b> نفس الفقرة (عناوين، شعر) — مش لعمل مسافات بين الفقرات. <code>&lt;hr&gt;</code> = «فاصل موضوعي» (تغيير موضوع)، شكله خط بس معناه أهم من شكله.</p>
+
+        <h3 class="sub">الـ Inline semantics: كل tag ليه معنى</h3>
+        <html-example file="inline.html" auto max="620">
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>Inline</title></head>
+          <body>
+            <p><strong>Warning:</strong> never reuse passwords. <em>Ever.</em></p>
+            <p><b>CVE-2021-44228</b> (Log4Shell) — the name <i lang="la">ad hoc</i> stays italic.</p>
+            <p>Search results for <mark>admin</mark>.</p>
+            <p>Price: <del>$99</del> <ins>$49</ins> <small>(tax included)</small></p>
+            <p>H<sub>2</sub>O and 2<sup>10</sup> = 1024</p>
+            <p>Press <kbd>Ctrl</kbd> + <kbd>U</kbd> to view source.</p>
+            <p>Run <code>nmap -sV target</code>, output: <samp>80/tcp open http</samp></p>
+            <p>Set <var>n</var> to the number of retries.</p>
+            <p><abbr title="Cross-Site Scripting">XSS</abbr> and <dfn>CSRF</dfn> are web bugs.</p>
+            <p>Found on <time datetime="2026-11-20T10:15">Nov 20, 10:15</time>.</p>
+            <p>The book <cite>The Web Application Hacker's Handbook</cite> says
+               <q>never trust the client</q>.</p>
+          </body>
+          </html>
+        </html-example>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>الـ tag</th><th>المعنى</th><th>ملاحظة</th></tr></thead>
+          <tbody>
+            <tr><td><code>strong</code> / <code>b</code></td><td><code>strong</code> = <b>أهمية</b>. <code>b</code> = لفت نظر من غير أهمية زيادة (كلمات مفتاحية، اسم منتج)</td><td>الاتنين bold افتراضيًا، بس قارئ الشاشة والـ SEO بيفرقوا</td></tr>
+            <tr><td><code>em</code> / <code>i</code></td><td><code>em</code> = <b>تأكيد</b> بيغيّر معنى الجملة. <code>i</code> = صوت مختلف (مصطلح أجنبي، اسم سفينة)</td><td>الاتنين italic افتراضيًا</td></tr>
+            <tr><td><code>mark</code></td><td>تمييز (زي الـ highlighter) — نتائج بحث مثلًا</td><td>🎯 صفحات البحث اللي بتعمل highlight للكلمة = مكان input بيتعكس في الـ HTML</td></tr>
+            <tr><td><code>del</code> / <code>ins</code> / <code>s</code></td><td>اتشال / اتضاف (تعديلات، مع <code>datetime</code> و<code>cite</code>) / مبقاش صحيح</td><td></td></tr>
+            <tr><td><code>small</code></td><td>«الكلام الصغير»: حقوق، تنويهات قانونية</td><td></td></tr>
+            <tr><td><code>sub</code> / <code>sup</code></td><td>تحت / فوق السطر</td><td></td></tr>
+            <tr><td><code>code</code> / <code>kbd</code> / <code>samp</code> / <code>var</code></td><td>كود / مفاتيح يدوسها المستخدم / مخرجات برنامج / متغير</td><td>هتستخدمهم كتير في التقارير</td></tr>
+            <tr><td><code>abbr title</code> / <code>dfn</code></td><td>اختصار (والـ title فيه الاسم الكامل) / تعريف مصطلح لأول مرة</td><td></td></tr>
+            <tr><td><code>time datetime</code></td><td>وقت/تاريخ بصيغة الآلة تقراها</td><td><code>datetime</code> بصيغة ISO</td></tr>
+            <tr><td><code>cite</code> / <code>q</code> / <code>blockquote</code></td><td>اسم عمل / اقتباس قصير inline (المتصفح بيحط علامات التنصيص) / اقتباس طويل block</td><td><code>blockquote cite="URL"</code> للمصدر</td></tr>
+          </tbody>
+        </table></div>
+        <p>و<code>&lt;address&gt;</code> لبيانات التواصل الخاصة بالصفحة أو المقال، و<code>&lt;span&gt;</code> (inline) و<code>&lt;div&gt;</code> (block) للتجميع من غير أي معنى — هنرجعلهم في درس الـ semantics.</p>
+
+        <h3 class="sub">الكود والنص المنسّق: pre + code</h3>
+        <p><code>&lt;pre&gt;</code> بيحافظ على المسافات والأسطر، و<code>&lt;code&gt;</code> جواه بيقول «ده كود». بس خلّي بالك: <code>pre</code> <b>مش raw text</b> — الـ tags جواه بتتفسّر عادي! عشان تعرض كود HTML كنص لازم تعمل <b>escape</b> للـ <code>&lt;</code> و<code>&amp;</code>:</p>
+        <html-example file="pre.html" auto>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>pre</title></head>
+          <body>
+            <p>Wrong — the tag is parsed, not shown:</p>
+            <pre><code><b>bold?</b></code></pre>
+            <p>Right — escaped, shown as text:</p>
+            <pre><code>&lt;b&gt;bold?&lt;/b&gt;
+          &lt;img src=x onerror=alert(1)&gt;</code></pre>
+          </body>
+          </html>
+        </html-example>
+
+        <h3 class="sub">الـ Character references (Entities) <span class="tag">أهم جزء أمني في الدرس</span></h3>
+        <p>فيه حروف ليها معنى خاص في HTML: <code>&lt;</code> بتبدأ tag، و<code>&amp;</code> بتبدأ reference، و<code>"</code> أو <code>'</code> بتقفل قيمة attribute. عشان تكتبهم <b>كنص</b>، بتستخدم <b>character reference</b>: بيبدأ بـ <code>&amp;</code> وبيخلص بـ <code>;</code>. فيه 3 أشكال:</p>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>الحرف</th><th>Named</th><th>Decimal</th><th>Hex</th><th>لازم تعمله encode لما…</th></tr></thead>
+          <tbody>
+            <tr><td><code>&lt;</code></td><td><code>&amp;lt;</code></td><td><code>&amp;#60;</code></td><td><code>&amp;#x3C;</code></td><td>دايمًا في النص (عشان ميفتحش tag)</td></tr>
+            <tr><td><code>&amp;</code></td><td><code>&amp;amp;</code></td><td><code>&amp;#38;</code></td><td><code>&amp;#x26;</code></td><td>دايمًا (عشان ميتقريش كبداية reference)</td></tr>
+            <tr><td><code>&gt;</code></td><td><code>&amp;gt;</code></td><td><code>&amp;#62;</code></td><td><code>&amp;#x3E;</code></td><td>مش إجباري تقنيًا، بس encode دايمًا (أأمن)</td></tr>
+            <tr><td><code>"</code></td><td><code>&amp;quot;</code></td><td><code>&amp;#34;</code></td><td><code>&amp;#x22;</code></td><td>جوه attribute محطوط بين <code>"…"</code></td></tr>
+            <tr><td><code>'</code></td><td><code>&amp;apos;</code></td><td><code>&amp;#39;</code></td><td><code>&amp;#x27;</code></td><td>جوه attribute محطوط بين <code>'…'</code></td></tr>
+            <tr><td>مسافة مبتتكسرش</td><td><code>&amp;nbsp;</code></td><td><code>&amp;#160;</code></td><td><code>&amp;#xA0;</code></td><td>عايز كلمتين ميتفصلوش على سطرين</td></tr>
+            <tr><td><code>©</code> <code>→</code> <code>…</code></td><td><code>&amp;copy;</code> <code>&amp;rarr;</code> <code>&amp;hellip;</code></td><td colspan="3">مع UTF-8 تقدر تكتبهم مباشرة — الـ references هنا اختيارية</td></tr>
+          </tbody>
+        </table></div>
+        <html-example file="entities.html" auto>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>Entities</title></head>
+          <body>
+            <p>Raw:     <b>Tom &amp; Jerry</b></p>
+            <p>Encoded: &lt;b&gt;Tom &amp;amp; Jerry&lt;/b&gt;</p>
+            <p>Decimal &#60;&#98;&#62; and hex &#x3C;&#x62;&#x3E; are the same as &lt;b&gt;</p>
+            <p title="He said &quot;hi&quot; &amp; left">hover me (title attribute)</p>
+            <p>Copyright &copy; 2026 &mdash; no semicolon: &copy 2026</p>
+          </body>
+          </html>
+        </html-example>
+        <ul>
+          <li>الأسماء <b>case-sensitive</b>: <code>&amp;lt;</code> صح، و<code>&amp;LT;</code> بالصدفة شغالة لأنها موجودة في الجدول كـ legacy، لكن <code>&amp;Copy;</code> مثلًا مش هي <code>&amp;copy;</code>.</li>
+          <li>الـ <code>;</code> في الآخر: إجبارية في الكتابة الصحيحة. بعض الأسماء القديمة (زي <code>&amp;amp</code> و<code>&amp;lt</code> و<code>&amp;copy</code>) المتصفح بيفكها حتى من غير <code>;</code> (parse error بس شغالة). الـ numeric (<code>&amp;#60</code>) كمان بتتفك من غير <code>;</code>.</li>
+          <li>جوه <b>attribute</b> فيه قاعدة تاريخية: reference قديمة من غير <code>;</code> وبعدها <code>=</code> أو حرف/رقم <b>متتفكش</b>. عشان كده <code>href="?a=1&amp;copy=2"</code> بتفضل زي ما هي في الـ URL، بينما نفس النص في الـ body بيبقى <code>?a=1©=2</code>.</li>
+        </ul>
+        <html-example file="ampersands.html" auto>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>Ampersands</title></head>
+          <body>
+            <p id="txt">text: ?a=1&copy=2</p>
+            <a id="lnk" href="/x?a=1&copy=2">link</a>
+            <script>
+              console.log(document.getElementById("txt").textContent);
+              console.log("href attr:", document.getElementById("lnk").getAttribute("href"));
+            </script>
+          </body>
+          </html>
+        </html-example>
+
+        <div class="callout def reveal"><span class="ci">🛡️</span><div><strong>Output encoding = أول خط دفاع ضد XSS</strong><p>لو السيرفر بيحط اسم المستخدم في الصفحة، والاسم كان <code>&lt;script&gt;…</code>: من غير encoding المتصفح هيفتح tag ويشغّل الكود. مع encoding السيرفر يبعت <code>&amp;lt;script&amp;gt;…</code> والمتصفح يعرضه <b>كنص</b> وخلاص. القاعدة: أي داتا جاية من برا بتتحط في HTML لازم يتعملها <b>HTML-encode</b> لـ <code>&amp; &lt; &gt; " '</code> على الأقل — والقواعد بتختلف حسب الـ <b>context</b> (جوه attribute؟ جوه JavaScript؟ جوه URL؟) وده هنقفله في الدرسين 14 و16.</p></div></div>
+        <div class="callout spec reveal"><span class="ci">📜</span><div><strong>تفصيلة هتفرق معاك في الـ XSS</strong><p>الـ references بتتفك في <b>النص العادي</b> وفي <b>قيم الـ attributes</b>. لكن <b>مش</b> جوه <code>&lt;script&gt;</code> و<code>&lt;style&gt;</code> (raw text): هناك <code>&amp;lt;</code> بتفضل 4 حروف زي ما هي. يعني encoding الـ HTML ملوش لازمة لو الـ input واقع جوه JavaScript — محتاج encoding تاني خالص.</p></div></div>
+
+        <h3 class="sub">الاتجاه: dir وbdi وbdo — وخدعة الـ RLO</h3>
+        <p>لصفحة عربي: <code>&lt;html lang="ar" dir="rtl"&gt;</code>. لو جوه النص العربي فيه حاجة اتجاهها مجهول (اسم مستخدم ممكن يبقى عربي أو إنجليزي) استخدم <code>&lt;bdi&gt;</code> عشان يتعزل ومايلخبطش الجملة. و<code>&lt;bdo dir="rtl"&gt;</code> بيـ<b>جبر</b> الاتجاه حرف حرف.</p>
+        <html-example file="bidi.html" auto>
+          <!DOCTYPE html>
+          <html lang="ar" dir="rtl">
+          <head><meta charset="UTF-8"><title>Bidi</title></head>
+          <body>
+            <p>المستخدم <bdi>admin_01</bdi> كتب 3 تعليقات.</p>
+            <p dir="ltr"><bdo dir="rtl">hello world</bdo></p>
+            <p dir="ltr">Attachment: <b>Invoice_2026&#x202E;fdp.scr</b></p>
+          </body>
+          </html>
+        </html-example>
+        <div class="callout mal reveal"><span class="ci">🦠</span><div><strong>RLO spoofing: ملف «PDF» هو في الحقيقة برنامج</strong><p>الحرف <code>U+202E</code> (RIGHT-TO-LEFT OVERRIDE) بيعكس اتجاه عرض كل اللي بعده. الاسم الحقيقي في المثال <code>Invoice_2026[RLO]fdp.scr</code> — امتداده <b>.scr</b> (screensaver = برنامج تنفيذي على Windows) — بس بيتعرض <code>Invoice_2026rcs.pdf</code>. الأسلوب ده اتستخدم في حملات malware كتير لإخفاء الامتداد، ونفس الفكرة في الكود اسمها <b>Trojan Source</b> (CVE-2021-42574). 🛡️ الأدوات الأمنية بتعرض الـ bidi characters كـ <code>&lt;U+202E&gt;</code> عشان تبان.</p></div></div>
+
+        <div class="exercises">
+          <div class="exercises-head"><h3><span class="bulb">✏️</span> تمارين الدرس 03</h3></div>
+          <quiz id="s03-q1" answer="1">
+            <q>عايز تقول إن كلمة «Warning» <b>مهمة جدًا</b> (مش مجرد شكل bold). تستخدم إيه؟</q>
+            <o>`<b>`</o>
+            <o>`<strong>`</o>
+            <o>`<mark>`</o>
+            <o>`<h1>`</o>
+            <good>`strong` = أهمية حقيقية، وقارئ الشاشة ممكن ينطقها بتأكيد. `b` شكل من غير زيادة في الأهمية.</good>
+            <bad>`b` و`mark` ليهم معاني تانية (لفت نظر / تمييز)، و`h1` عنوان. الأهمية = `strong`.</bad>
+          </quiz>
+          <quiz id="s03-q2" answer="3">
+            <q>عايز تعرض الكود ده كنص في صفحة: `<script>alert(1)</script>`. أنهي طريقة صح؟</q>
+            <o>تحطه جوه `<pre>` زي ما هو</o>
+            <o>تحطه جوه `<code>` زي ما هو</o>
+            <o>تحطه جوه comment</o>
+            <o>تكتب `&lt;` بدل `<` (و`&amp;` بدل `&` لو فيه)</o>
+            <good>`pre` و`code` مش raw text: أي tag جواهم بيتفسّر. لازم escape.</good>
+            <bad>`pre` بيحافظ على المسافات بس، مش بيمنع الـ parsing. `<script>` جوه `pre` هيتنفّذ. الحل: `&lt;script&gt;`.</bad>
+          </quiz>
+          <quiz id="s03-q3" answer="0">
+            <q>إيه نتيجة الـ references دي في النص: `&#60;b&#62;hi&#x3C;/b&#x3E;`؟</q>
+            <o>بيتعرض حرفيًا `<b>hi</b>` كنص، ومفيش bold</o>
+            <o>كلمة hi بخط bold</o>
+            <o>الحروف زي ما هي `&#60;…`</o>
+            <o>parse error والسطر بيختفي</o>
+            <good>الـ references بتطلع <b>حروف</b> (data)، مش markup. الـ parser بيعتبر الناتج نص، فمفيش tag بيتفتح — وده بالظبط سبب إن الـ encoding بيحمي.</good>
+            <bad>الـ character reference بتتفك لحرف كـ <b>نص</b>. الـ tokenizer مش بيرجع يقرا الحرف ده كـ `<` بتاع tag.</bad>
+          </quiz>
+          <quiz id="s03-q4" answer="1">
+            <q>السيرفر بيعمل HTML-encode لـ `& < > " '` وبيحط الـ input هنا: `<script>var q = 'INPUT';</script>`. المستخدم كتب `O'Neil`. الـ JavaScript هيشوف قيمة `q` إيه؟</q>
+            <o>`O'Neil`</o>
+            <o>`O&#39;Neil` حرفيًا (الـ entity زي ما هي)</o>
+            <o>syntax error</o>
+            <o>`ONeil`</o>
+            <good>جوه `<script>` (raw text) الـ HTML references مش بتتفك، فالـ JS شايف 10 حروف فيهم `&#39;`. يعني الـ HTML encoding هنا <b>أداة غلط</b>: بيبوّظ الداتا، ومبيعملش escape لـ `\` ولا لأسطر جديدة. الـ context ده محتاج JavaScript escaping (أو JSON) — الدرس 14.</good>
+            <bad>الـ parser مش بيفك الـ entities جوه `<script>`. فـ `'` بقت `&#39;` واتسابت كده جوه الـ string — مفيش syntax error ومفيش decode.</bad>
+          </quiz>
+          <quiz id="s03-q5" answer="1">
+            <q>إيه الفرق بين `<q>` و`<blockquote>`؟</q>
+            <o>مفيش فرق</o>
+            <o>`q` اقتباس قصير جوه السطر والمتصفح بيضيف علامات التنصيص، و`blockquote` اقتباس طويل كـ block</o>
+            <o>`blockquote` للكود و`q` للأسئلة</o>
+            <o>`q` deprecated</o>
+            <good>صح، والاتنين بيقبلوا `cite="URL"` للمصدر.</good>
+            <bad>`q` inline وبيضيف علامات تنصيص لوحده، `blockquote` block لفقرة مقتبسة كاملة.</bad>
+          </quiz>
+          <quiz id="s03-q6" answer="3">
+            <q>اسم ملف ظاهر للمستخدم: `report_2026cod.exe`… بس الأداة الأمنية بتقول الاسم الحقيقي فيه `U+202E`. ده معناه إيه غالبًا؟</q>
+            <o>الملف سليم وده bug في الأداة</o>
+            <o>الملف مضغوط</o>
+            <o>الاسم مكتوب بالعربي</o>
+            <o>حرف RLO بيعكس عرض الجزء الأخير من الاسم عشان يخفي الامتداد الحقيقي</o>
+            <good>ده RLO spoofing. اقرا الاسم الحقيقي حرف حرف (أو في hex) قبل ما تحكم على نوع الملف.</good>
+            <bad>`U+202E` = RIGHT-TO-LEFT OVERRIDE: حرف مخفي بيعكس اتجاه العرض. بيُستخدم عشان امتداد زي `.exe` يبان كأنه جزء من الاسم.</bad>
+          </quiz>
+          <quiz id="s03-q7" answer="2">
+            <q>`<a href="/x?a=1&copy=2">` — قيمة الـ `href` اللي المتصفح هيستخدمها؟</q>
+            <o>`/x?a=1©=2`</o>
+            <o>`/x?a=1`</o>
+            <o>`/x?a=1&copy=2` زي ما هي</o>
+            <o>الرابط هيتشال</o>
+            <good>القاعدة التاريخية في الـ attributes: reference من غير `;` وبعدها `=` أو حرف/رقم بتفضل نص عادي. (بس الصح إنك تكتب `&amp;` في الـ URLs جوه HTML.)</good>
+            <bad>جوه attribute، `&copy` من غير `;` ومتبوعة بـ `=` مش بتتفك — عشان الـ URLs القديمة متبوظش. في النص العادي كانت هتبقى ©.</bad>
+          </quiz>
+
+          <html-lab id="s03-lab1" title="صفحة شرح ثغرة بـ semantics صح" level="1">
+            <desc><p>اكتب صفحة صغيرة بتشرح ثغرة، بالشروط دي:</p>
+            <ul><li><code>h1</code> واحد، وبعده <b>على الأقل</b> اتنين <code>h2</code>.</li>
+            <li>فقرة فيها <code>strong</code> و<code>em</code>.</li>
+            <li>اختصار <code>abbr</code> نصه <b>XSS</b> وفي الـ <code>title</code> بتاعه <b>Cross-Site Scripting</b>.</li>
+            <li>اكتب للمستخدم يدوس <kbd>Ctrl</kbd>+<kbd>U</kbd> باستخدام <code>kbd</code> (اتنين <code>kbd</code> على الأقل).</li>
+            <li>عنصر <code>code</code> بيعرض النص <b><code>&lt;script&gt;</code></b> كنص (من غير ما يتنفّذ أو يتفتح tag).</li></ul></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>Bug writeup</title></head>
+              <body>
+
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>Bug writeup</title></head>
+              <body>
+                <h1>Reflected XSS in search</h1>
+                <h2>Summary</h2>
+                <p><strong>High risk:</strong> the <abbr title="Cross-Site Scripting">XSS</abbr> lets an attacker run <em>any</em> script.</p>
+                <h2>Steps</h2>
+                <p>Press <kbd>Ctrl</kbd> + <kbd>U</kbd> and find the <code>&lt;script&gt;</code> tag.</p>
+              </body>
+              </html>
+            </solution>
+            <test label="`h1` واحد و2 `h2` على الأقل، والـ `h1` قبلهم">count("h1") === 1 && count("h2") >= 2 && !!($("h1").compareDocumentPosition($("h2")) & 4)</test>
+            <test label="فقرة فيها `strong` و`em`">$$("p").some(p => p.querySelector("strong") && p.querySelector("em"))</test>
+            <test label="`abbr` نصه XSS والـ title بتاعه Cross-Site Scripting">$$("abbr").some(a => a.textContent.trim() === "XSS" && /cross-site scripting/i.test(a.title))</test>
+            <test label="2 `kbd` على الأقل (Ctrl و U)">count("kbd") >= 2 && $$("kbd").map(k => k.textContent.trim().toLowerCase()).join(",").includes("ctrl")</test>
+            <test label="`code` بيعرض `&lt;script&gt;` كنص (ومفيش script حقيقي جواه)">$$("code").some(c => c.textContent.includes("<script>")) && !has("code script") && count("script") === 0</test>
+            <hint>عشان `code` يعرض `<script>` كنص اكتب جواه `&lt;script&gt;`. وصحّح ترتيب العناوين: `h1` الأول.</hint>
+          </html-lab>
+
+          <html-lab id="s03-lab2" title="اعرض الـ payload… ومتشغّلوش" level="2">
+            <desc><p>بتكتب تقرير، ولازم تعرض الـ payload ده <b>حرفيًا</b> جوه <code>pre</code> عشان العميل يشوفه:</p>
+            <p dir="ltr"><code>&lt;img src=x onerror="alert('XSS')"&gt; &amp; more</code></p>
+            <p>المحاولة اللي في المحرر غلط: الصورة بتتعمل فعلًا (شغّل المعاينة وشوف الـ alert). صلّحها بالـ entities بحيث النص اللي بيظهر يطابق الـ payload بالظبط، ومفيش أي <code>img</code> يتعمل.</p></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>Report</title></head>
+              <body>
+                <p>Proof of concept payload:</p>
+                <pre><img src=x onerror="alert('XSS')"> & more</pre>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>Report</title></head>
+              <body>
+                <p>Proof of concept payload:</p>
+                <pre>&lt;img src=x onerror="alert('XSS')"&gt; &amp; more</pre>
+              </body>
+              </html>
+            </solution>
+            <test label="مفيش ولا `img` في الـ DOM">count("img") === 0</test>
+            <test label="نص الـ `pre` = الـ payload بالظبط">has("pre") && $("pre").textContent.trim() === "<img src=x onerror=\"alert('XSS')\"> & more"</test>
+            <test label="الـ `&` اتكتبت `&amp;amp;` (كتابة صحيحة)">/&amp;\s*more/.test(src)</test>
+            <hint>بدّل `<` بـ `&lt;` و`>` بـ `&gt;` و`&` بـ `&amp;`. الـ quotes جوه النص العادي (مش attribute) مش محتاجة encoding.</hint>
+          </html-lab>
+
+          <task id="s03-t1" title="href متشفّر" level="2" answer="javascript:alert(1)">
+            <desc><p>الفلتر بيدوّر على كلمة <code>javascript</code> في الـ input ومش لاقيها. بس المتصفح هيشوف إيه في الـ <code>href</code> بعد ما يفك الـ references؟ (اكتب القيمة كاملة)</p></desc>
+            <listing lang="html" file="comment.html">
+              <a href="&#106;&#97;&#118;&#97;&#115;&#99;&#114;&#105;&#112;&#116;&#58;alert(1)">my website</a>
+            </listing>
+            <hint>كل `&#NN;` حرف ASCII: 106=j، 97=a… استخدم الـ Encoder في الدرس 14 أو اعمل decode بإيدك.</hint>
+            <explain>`javascript:alert(1)`. الـ parser بيفك الـ references في قيمة الـ attribute <b>قبل</b> ما المتصفح يتعامل معاها كـ URL — فلما المستخدم يدوس، الـ script يشتغل. الفلتر اللي بيدوّر على النص الخام اتخدع. الدفاع الصح: allow-list للـ schemes (`https:`، `mailto:`) <b>بعد</b> الـ decoding.</explain>
+          </task>
+          <task id="s03-t2" title="الامتداد الحقيقي" level="1" answer="scr|.scr">
+            <desc><p>مرفق في إيميل بيبان للضحية كـ <b>Invoice_2026rcs.pdf</b>. ده الـ HTML بتاع صفحة التحميل. <b>إيه الامتداد الحقيقي</b> للملف؟</p></desc>
+            <listing lang="html" file="download.html">
+              <a href="/files/inv" download="Invoice_2026&#x202E;fdp.scr">Invoice_2026&#x202E;fdp.scr</a>
+            </listing>
+            <explain>الامتداد الحقيقي `.scr` (برنامج تنفيذي على Windows). `&#x202E;` = RLO بيعكس عرض `fdp.scr` لـ `rcs.pdf`. ده من أشهر حيل إخفاء الامتدادات في الـ malware delivery.</explain>
+          </task>
+        </div>
+      </section>

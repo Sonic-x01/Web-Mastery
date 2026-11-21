@@ -1,0 +1,154 @@
+      <section class="section" id="roadmap" data-part="ابدأ من هنا" data-pk="start" data-nav="خريطة الطريق" data-icon="🗺️" data-keywords="roadmap start plan pentest bug bounty web html css javascript tools lab playground ethics legal law">
+        <div class="section-head">
+          <span class="section-index">00</span>
+          <div>
+            <p class="eyebrow">ابدأ من هنا</p>
+            <h2>ليه الويب؟ ومن زاويتين: المطوّر والـ Pentester</h2>
+            <p class="lede">أي web application — بنك، متجر، لوحة admin، حتى تطبيقات الـ desktop المبنية بـ Electron — بتوصل للمستخدم في الآخر على شكل <b>HTML</b> و<b>CSS</b> و<b>JavaScript</b> بيشغّلهم المتصفح. الكورس ده هيخليك <b>مطوّر ويب محترف</b> يبني مواقع وبرامج حقيقية — وفي نفس الوقت <b>Pentester</b> بيشوف حاجات الناس مش شايفاها: input بيتحط في مكان غلط، فورم بتبعت أكتر من اللي باين، comment نسيه المطوّر، أو صفحة phishing بتبني ملف malware جوه المتصفح نفسه.</p>
+          </div>
+        </div>
+
+        <h3 class="sub">👨‍💻 كمطوّر <span class="tag">تطوير الويب والبرمجيات</span></h3>
+        <div class="grid-3">
+          <div class="card reveal"><div class="ico">🧱</div><h4>تبني أي واجهة</h4><p>مواقع، dashboards، صفحات هبوط، تطبيقات ويب كاملة — بـ HTML نضيف وsemantic، CSS بيعمل أي layout، وJavaScript بيكلم APIs.</p></div>
+          <div class="card reveal"><div class="ico">⚙️</div><h4>أساس أي software حديث</h4><p>نفس الـ HTML/CSS/JS بيبني تطبيقات desktop (Electron)، وموبايل (WebViews وReact Native)، وextensions، وأدوات داخلية. والـ JavaScript نفسها بتشتغل backend بـ Node.js.</p></div>
+          <div class="card reveal"><div class="ico">🏆</div><h4>شغل باحتراف</h4><p>Accessibility، أداء، SEO، تنظيم مشروع، Git، نشر — والكود الآمن من الأول: المطوّر اللي فاهم الهجمات بيكتب كود محدش يقدر يكسره بسهولة.</p></div>
+        </div>
+        <h3 class="sub">🎯 كـ Pentester <span class="tag">الأمن وتحليل الـ Malware</span></h3>
+        <div class="grid-3">
+          <div class="card reveal"><div class="ico">🎯</div><h4>أكبر سطح هجوم</h4><p>أغلب الـ targets في الـ pentest والـ bug bounty هي web apps. كل صفحة، كل فورم، كل parameter في الـ URL هو باب محتمل — والـ HTML هو الخريطة بتاعة الأبواب دي.</p></div>
+          <div class="card reveal"><div class="ico">💉</div><h4>الثغرات = فهم المتصفح</h4><p>XSS وHTML injection وCSRF وclickjacking مش «payloads بتتحفظ». دي نتيجة مباشرة لطريقة الـ <b>parsing</b> والـ <b>encoding</b> والـ <b>origins</b>. اللي فاهم القواعد بيكتب الـ payload بنفسه لأي فلتر.</p></div>
+          <div class="card reveal"><div class="ico">🔍</div><h4>الـ Recon بيبدأ من الـ source</h4><p>comments منسية، <code>hidden</code> inputs، endpoints مستخبية في ملفات JS، API keys، أرقام إصدارات… كل ده بيتقري من الـ source قبل ما تبعت request واحد «هجومي».</p></div>
+          <div class="card reveal"><div class="ico">🦠</div><h4>الـ Malware بيتكلم HTML</h4><p>HTML smuggling، مرفقات phishing بامتداد <code>.html</code> و<code>.svg</code>، ملفات <code>.hta</code>، وJavaScript متشوّش (obfuscated). محلل الـ malware لازم يقراهم ويفكّهم من غير ما يشغّلهم على جهازه.</p></div>
+          <div class="card reveal"><div class="ico">🛠️</div><h4>هتكتب PoCs وأدوات</h4><p>CSRF PoC، صفحة clickjacking، تقرير فيه proof بيشتغل، bookmarklet، وscripts بـ Node.js تأتمت شغلك. ده كله HTML وCSS وJS.</p></div>
+          <div class="card reveal"><div class="ico">🧠</div><h4>أساس لكل اللي جاي</h4><p>Burp Suite، اختبار الـ APIs، الـ browser exploitation، تحليل تطبيقات Electron… كلها بتفترض إنك فاهم الويب من جوه. الكورس ده هو الأساس ده.</p></div>
+        </div>
+
+        <h3 class="sub">خريطة الكورس <span class="tag">4 أجزاء · بتنزل جزء ورا جزء</span></h3>
+        <figure class="diagram reveal">
+          <svg viewBox="0 0 1000 250" role="img" aria-label="الأجزاء الأربعة للكورس">
+            <defs><linearGradient id="rmG" x1="0" x2="1"><stop offset="0" stop-color="#ff7a45"/><stop offset=".35" stop-color="#38bdf8"/><stop offset=".68" stop-color="#facc15"/><stop offset="1" stop-color="#ff5c8a"/></linearGradient></defs>
+            <path d="M120,110 C230,30 300,190 390,110 S560,30 640,110 S800,190 880,110" fill="none" stroke="url(#rmG)" stroke-width="3" opacity=".3"/>
+            <path class="d-flow" d="M120,110 C230,30 300,190 390,110 S560,30 640,110 S800,190 880,110" fill="none" stroke="url(#rmG)" stroke-width="3"/>
+            <circle cx="120" cy="110" r="46" style="fill:rgba(255,122,69,.12);stroke:#ff7a45;stroke-width:2" class="d-pulse"/>
+            <text x="120" y="106" text-anchor="middle" class="d-tb" style="fill:#ff9a6c">&lt;HTML/&gt;</text>
+            <text x="120" y="126" text-anchor="middle" class="d-tx">Part 1</text>
+            <circle cx="390" cy="110" r="46" style="fill:rgba(56,189,248,.1);stroke:#38bdf8;stroke-width:2"/>
+            <text x="390" y="106" text-anchor="middle" class="d-tb" style="fill:#7dd3fc">{ CSS }</text>
+            <text x="390" y="126" text-anchor="middle" class="d-tx">Part 2</text>
+            <circle cx="640" cy="110" r="46" style="fill:rgba(250,204,21,.09);stroke:#facc15;stroke-width:2"/>
+            <text x="640" y="106" text-anchor="middle" class="d-tb" style="fill:#fde68a">JS ( )</text>
+            <text x="640" y="126" text-anchor="middle" class="d-tx">Part 3</text>
+            <circle cx="880" cy="110" r="46" style="fill:rgba(255,92,138,.1);stroke:#ff5c8a;stroke-width:2"/>
+            <text x="880" y="106" text-anchor="middle" class="d-tb" style="fill:#ff9cb8">🛡 Security</text>
+            <text x="880" y="126" text-anchor="middle" class="d-tx">Part 4</text>
+            <text x="120" y="190" text-anchor="middle" class="d-ts ar">الهيكل والـ parser والـ forms</text>
+            <text x="120" y="210" text-anchor="middle" class="d-tx ar">✅ متاح دلوقتي</text>
+            <text x="390" y="190" text-anchor="middle" class="d-ts ar">الشكل والـ layout وCSS injection</text>
+            <text x="390" y="210" text-anchor="middle" class="d-tx ar">⏳ الجزء الجاي</text>
+            <text x="640" y="190" text-anchor="middle" class="d-ts ar">اللغة والـ DOM وNode وفك الـ obfuscation</text>
+            <text x="640" y="210" text-anchor="middle" class="d-tx ar">⏳ قريبًا</text>
+            <text x="880" y="190" text-anchor="middle" class="d-ts ar">XSS عميق، CSRF، SOP/CSP، smuggling</text>
+            <text x="880" y="210" text-anchor="middle" class="d-tx ar">⏳ قريبًا</text>
+          </svg>
+          <figcaption>كل جزء مبني على اللي قبله. الأمن مش «جزء آخر» بس — كل درس فيه <b>🎯 عين الـ Pentester</b>، والجزء الرابع بيجمّع كل ده في هجمات ودفاعات كاملة.</figcaption>
+        </figure>
+
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>الجزء</th><th>هتتعلم إيه (المطوّر)</th><th>الزاوية الأمنية (الـ Pentester)</th></tr></thead>
+          <tbody>
+            <tr><td><b>1 · HTML</b></td><td>الويب والـ HTTP، هيكل الصفحة، النصوص والـ entities، الروابط والـ URLs، الجداول، الوسائط، الـ semantics، الـ forms بالتفصيل، الـ head، الـ iframes، الجودة والـ accessibility، <b>الـ parser من جوه</b>، الـ encoding، الـ recon، أساسيات الـ injection وXSS، و<b>أدوات المطوّر</b> (تنظيم المشروع، Git، النشر، الـ components)</td><td>إيه اللي بيتبعت فعلًا، فين الـ input بيقع، إزاي المتصفح بيفهم الكود الغلط، وليه الفلاتر بتتخدع</td></tr>
+            <tr><td><b>2 · CSS</b></td><td>الـ selectors والـ cascade، الـ box model، الـ layout (Flexbox وGrid)، الـ responsive، الـ animations، الـ variables والـ CSS الحديثة</td><td>clickjacking overlays، إخفاء المحتوى في صفحات الـ phishing، CSS injection وسرقة البيانات بالـ selectors</td></tr>
+            <tr><td><b>3 · JavaScript</b></td><td>اللغة كاملة (types، functions، closures، prototypes، async)، الـ DOM والـ events والـ browser APIs، الـ modules، وأساسيات Node.js لكتابة أدواتك</td><td>DOM XSS والـ sinks، prototype pollution، postMessage، وقراية وفك الـ JS المتشوّش في الـ malware</td></tr>
+            <tr><td><b>4 · Web Security</b></td><td>نموذج أمان المتصفح (SOP، CORS، cookies، CSP)، XSS متقدم، CSRF، clickjacking، DOM clobbering، HTML smuggling، تحليل phishing kits، الدفاع وكتابة التقارير</td><td>هجمات كاملة من الـ recon للـ PoC للتقرير، ومشاريع CTF</td></tr>
+          </tbody>
+        </table></div>
+
+        <h3 class="sub">إزاي تذاكر الكورس ده صح <span class="tag">متقفزش</span></h3>
+        <div class="steps">
+          <div class="step"><span class="n">01</span><div><h4>اقرا الفكرة</h4><p>كل درس بيبدأ بالـ «ليه» قبل الـ «إزاي». لو فهمت السبب، الـ syntax هيتحفظ لوحده.</p></div></div>
+          <div class="step"><span class="n">02</span><div><h4>شغّل المثال وغيّر فيه</h4><p>كل مثال عليه <b>▶ شغّل</b>. متكتفيش بالتشغيل: غيّر قيمة، امسح tag، اكسر الكود — وشوف المتصفح عمل إيه. الـ <b>🌳 DOM</b> بيوريك المتصفح «فهم» إيه.</p></div></div>
+          <div class="step"><span class="n">03</span><div><h4>جاوب الأسئلة</h4><p>الأسئلة مصممة عشان تمسك الغلطات الشائعة. لو غلطت، اقرا الشرح — هو جزء من الدرس.</p></div></div>
+          <div class="step"><span class="n">04</span><div><h4>حل المعامل بإيدك</h4><p>كل معمل بيتصحح أوتوماتيك باختبارات. اكتب الكود بنفسك؛ زرار الحل موجود بس للمراجعة بعد ما تحاول.</p></div></div>
+          <div class="step"><span class="n">05</span><div><h4>مهام التحليل والـ XSS Range</h4><p>هنا بتلبس قبعة الـ pentester: تقرا source وتطلّع منه معلومة، أو تكسر صفحة ضعيفة جوه sandbox.</p></div></div>
+          <div class="step"><span class="n">06</span><div><h4>المشاريع</h4><p>آخر كل جزء فيه مشاريع بتجمّع كل حاجة. دي اللي بتحوّل المعلومة لمهارة.</p></div></div>
+        </div>
+
+        <h3 class="sub">أدواتك جوه الصفحة <span class="tag">كله شغّال offline في متصفحك</span></h3>
+        <div class="grid-2">
+          <div class="card reveal"><div class="ico">▶</div><h4>الأمثلة الحية</h4><p>كل مثال بيتعرض في «متصفح صغير» تحته. الضغط على لينك أو إرسال فورم <b>مبيسيبش الصفحة</b>؛ بدل كده بيتسجل تحت المعاينة: رايح فين، والـ HTTP request بالظبط اللي كان هيتبعت.</p></div>
+          <div class="card reveal"><div class="ico">🧪</div><h4>المعمل الحر (Playground)</h4><p>من الزرار <b>🧪 المعمل</b> فوق: محرر لـ HTML وCSS وJS، معاينة لحظية، شجرة الـ DOM الحية، Console، وتاب <b>Requests</b> لكل link وform. تقدر تغيّر «عنوان الصفحة» عشان تجرّب الـ relative URLs.</p></div>
+          <div class="card reveal"><div class="ico">✔</div><h4>معامل بتتصحح</h4><p>مطلوب منك تبني حاجة؛ زرار <b>تحقق</b> بيشغّل اختبارات على الـ DOM بتاعك ويقولك إيه اللي ناقص بالظبط.</p></div>
+          <div class="card reveal"><div class="ico">🏴</div><h4>XSS Range ومهام التحليل</h4><p>صفحات «ضعيفة» بكود سيرفر مكشوف (white-box) بتكسرها جوه <b>sandboxed iframe</b>، ومهام تقرا فيها source أو sample وتطلّع الإجابة.</p></div>
+        </div>
+
+        <p>جرّب دلوقتي: المثال ده صفحة login صغيرة. دوس <b>Forgot password?</b>، وبعدين اكتب أي username وpassword ودوس <b>Login</b> — وبص تحت المعاينة.</p>
+        <html-example file="login.html" auto url="https://shop.example/account/login.html">
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <title>Shop — Login</title>
+          </head>
+          <body>
+            <h2>Sign in</h2>
+            <form action="/account/session" method="post">
+              <input name="user" placeholder="username" required>
+              <input name="pass" type="password" placeholder="password" required>
+              <input type="hidden" name="csrf_token" value="a91f3c">
+              <button>Login</button>
+            </form>
+            <p><a href="reset.html?from=login">Forgot password?</a></p>
+          </body>
+          </html>
+        </html-example>
+        <div class="callout pt reveal"><span class="ci">🎯</span><div><strong>لاحظ أول حاجة «Pentester-ish»</strong><p>الفورم بعتت <code>csrf_token=a91f3c</code> مع إن مفيش خانة باينة اسمها كده — ده <code>input type="hidden"</code>. المستخدم مش شايفه، بس أنت شايفه في الـ source وفي الـ request، وتقدر تغيّره. القاعدة الذهبية: <b>أي حاجة في المتصفح تحت سيطرة المستخدم</b>.</p></div></div>
+
+        <h3 class="sub">أدواتك برا الصفحة</h3>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>الأداة</th><th>هتستخدمها في إيه</th></tr></thead>
+          <tbody>
+            <tr><td><b>Chrome / Firefox + DevTools</b> (<code>F12</code>)</td><td>Elements (الـ DOM الحي)، Console، Network (كل request وresponse)، Sources، Application (cookies وstorage). أهم أداة في الكورس كله.</td></tr>
+            <tr><td><b>VS Code</b></td><td>كتابة الصفحات والمشاريع. ضيف extension زي <b>Live Server</b> للمعاينة.</td></tr>
+            <tr><td><b>Burp Suite Community</b></td><td>proxy بيقعد بين المتصفح والسيرفر: تشوف وتعدّل كل request قبل ما يوصل. هنستخدمه من الـ forms وطالع.</td></tr>
+            <tr><td><b>curl</b></td><td>تبعت HTTP requests من الـ terminal وتشوف الـ response الخام من غير متصفح.</td></tr>
+            <tr><td><b>CyberChef</b></td><td>فك الـ encoding (Base64، URL، entities…) — والكورس فيه نسخة مصغّرة منه جوه الصفحة.</td></tr>
+            <tr><td><b>VM معزولة</b> (REMnux / FLARE-VM)</td><td>لأي sample حقيقي من malware أو phishing. <b>عمرك ما تفتح مرفق مشبوه على جهازك الأساسي</b>.</td></tr>
+          </tbody>
+        </table></div>
+
+        <div class="callout danger reveal"><span class="ci">⚖️</span><div><strong>الأخلاقيات والقانون — اقراها بجد</strong><p>كل الهجمات في الكورس بتتعمل جوه <b>sandbox</b> في الصفحة دي، أو على أنظمة <b>إنت مالكها</b>، أو في برامج bug bounty و<b>scope</b> مكتوب ومصرّح بيه. تجربة payload على موقع حد من غير إذن مكتوب = جريمة — في مصر مثلًا <b>قانون مكافحة جرائم تقنية المعلومات رقم 175 لسنة 2018</b> بيجرّم الدخول غير المصرّح بيه للأنظمة والاعتداء على سلامة البيانات، وتقريبًا كل دولة عندها قانون مشابه.</p><p>للتدريب القانوني بعد الكورس: PortSwigger Web Security Academy، وHackTheBox، وTryHackMe، وOWASP Juice Shop على جهازك.</p></div></div>
+
+        <div class="callout info reveal"><span class="ci">📌</span><div><strong>اصطلاحات الكورس</strong><p>الأكواد والتعليقات وأسماء المتغيرات بالإنجليزي (زي الشغل الحقيقي)، والشرح بالعربي. المرجع الرسمي هو <b>HTML Living Standard</b> من WHATWG، و<b>MDN</b> للتوثيق العملي. الـ callouts: <b>👨‍💻</b> زاوية المطوّر، <b>🎯</b> زاوية الـ pentester، <b>🦠</b> الـ malware، <b>🛡️</b> الدفاع، <b>📜</b> تفصيلة من الـ spec.</p></div></div>
+
+        <div class="exercises">
+          <div class="exercises-head"><h3><span class="bulb">✏️</span> قبل ما تبدأ</h3></div>
+          <quiz id="r-q1" answer="2">
+            <q>في مثال الـ login فوق، مين بيقرر القيمة اللي هتتبعت في `csrf_token`؟</q>
+            <o>السيرفر بس، والمستخدم ميقدرش يغيّرها لأنها hidden</o>
+            <o>المتصفح بيولّدها لوحده</o>
+            <o>المستخدم يقدر يغيّرها: من DevTools أو بـ proxy زي Burp قبل ما الـ request يوصل</o>
+            <o>مفيش حد يقدر يغيّرها لأن الصفحة HTTPS</o>
+            <good>بالظبط. `hidden` معناها «مش معروضة» بس، مش «محمية». أي حاجة بتتبعت من المتصفح تحت سيطرة اللي قاعد عليه — والسيرفر لازم يتحقق منها.</good>
+            <bad>`hidden` بتخفي العرض بس. الـ HTML كله عند المستخدم، والـ request بيتبني على جهازه، فيقدر يعدّل أي قيمة. والـ HTTPS بيحمي الـ request من اللي في النص، مش من صاحب المتصفح نفسه.</bad>
+          </quiz>
+          <quiz id="r-q2" answer="1">
+            <q>إيه أكتر وصف دقيق للـ XSS والـ HTML injection في الكورس ده؟</q>
+            <o>قايمة payloads لازم تتحفظ</o>
+            <o>نتيجة لقواعد الـ parsing والـ encoding في المتصفح: لو فهمت القواعد تقدر تبني الـ payload المناسب لأي context</o>
+            <o>مشاكل في السيرفر بس ومالهاش علاقة بالمتصفح</o>
+            <o>حاجة اتصلّحت في المتصفحات الحديثة ومبقتش موجودة</o>
+            <good>ده بالظبط منهج الكورس: هنفهم الـ tokenizer والـ contexts والـ decoding order، والـ payloads هتطلع منطقية.</good>
+            <bad>الـ payloads المحفوظة بتقع قدام أول فلتر مختلف. الثغرة بتحصل لما بيانات بتتحط في الصفحة في مكان المتصفح بيفسّرها فيه ككود — ودي قواعد في المتصفح لازم تفهمها، ولسه موجودة في تطبيقات كتير جدًا.</bad>
+          </quiz>
+          <quiz id="r-q3" answer="3">
+            <q>جالك مرفق إيميل اسمه `invoice.html` من مصدر مشبوه وعايز تحلله. أنسب أول خطوة؟</q>
+            <o>تفتحه في Chrome على جهازك عشان تشوف بيعمل إيه</o>
+            <o>تبعته لزميلك يفتحه</o>
+            <o>تمسحه من غير ما تبص عليه</o>
+            <o>تفتحه كـ <b>نص</b> في editor جوه VM معزولة، وتقرا الكود قبل أي تشغيل</o>
+            <good>صح. التحليل الـ static الأول: تقرا الكود كنص، وتفك أي encoding، وتطلّع الـ IOCs. لو محتاج تشغيل، يبقى في VM معزولة أو sandbox زي اللي في الكورس.</good>
+            <bad>فتح ملف HTML مشبوه في المتصفح = تشغيل الـ JavaScript اللي فيه على جهازك. التحليل بيبدأ static: تقراه كنص في VM معزولة. (المسح من غير تحليل بيضيّع IOCs مهمة للفريق.)</bad>
+          </quiz>
+        </div>
+      </section>

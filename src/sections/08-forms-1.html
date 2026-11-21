@@ -1,0 +1,380 @@
+      <section class="section" id="s08" data-part="الجزء 1 · HTML" data-pk="html" data-nav="الفورمز (1): العناصر" data-icon="📝" data-keywords="form input label name value type text password email number range date color file hidden checkbox radio submit reset button image textarea select option optgroup datalist fieldset legend output progress meter">
+        <div class="section-head">
+          <span class="section-index">08</span>
+          <div>
+            <p class="eyebrow">HTML · الدرس 08</p>
+            <h2>الفورمز (1): كل عنصر وإيه اللي بيبعته</h2>
+            <p class="lede">الفورم هي <b>الباب الرسمي</b> اللي البيانات بتدخل منه للسيرفر: login، بحث، رفع ملفات، دفع. وبالنسبة للـ pentester كل field = <b>parameter</b> لازم يتجرب. أهم فكرة في الدرسين الجايين: الفورم في المتصفح مجرد «واجهة مقترحة» — اللي بيتبعت فعلًا هو أزواج <code>name=value</code> تقدر تغيّرها كلها.</p>
+          </div>
+        </div>
+
+        <h3 class="sub">الـ form والـ name: اللي ملوش name مبيتبعتش</h3>
+        <p><code>&lt;form action="URL" method="get|post"&gt;</code> بيحدد <b>فين</b> و<b>إزاي</b>. وكل عنصر جواه بيتبعت كـ <code>name=value</code> — <b>لو ليه <code>name</code></b>. جرّب: اكتب في الخانتين ودوس Search، وبص على الـ request في الـ log:</p>
+        <html-example file="search.html" auto url="https://shop.example/">
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>Search</title></head>
+          <body>
+            <form action="/search" method="get">
+              <input name="q" value="red shoes">
+              <input value="I have no name">
+              <input type="hidden" name="src" value="header">
+              <button>Search</button>
+            </form>
+          </body>
+          </html>
+        </html-example>
+        <p>النتيجة: <code>/search?q=red+shoes&amp;src=header</code>. الخانة اللي ملهاش <code>name</code> اتجاهلت تمامًا، والـ <code>hidden</code> اتبعت عادي، والمسافة بقت <code>+</code>. ولاحظ إن الـ <code>&lt;button&gt;</code> جوه فورم <b>نوعه submit افتراضيًا</b>.</p>
+
+        <h3 class="sub">الـ label: ربط النص بالخانة</h3>
+        <p>كل خانة لازم يبقى ليها <code>&lt;label&gt;</code>: إما <code>for="id"</code> بيشاور على <code>id</code> الخانة، أو الخانة جوه الـ label. ده بيخلّي الضغط على النص يعمل focus للخانة، وقارئ الشاشة ينطق اسمها. الـ <code>placeholder</code> <b>مش بديل</b> للـ label (بيختفي لما تكتب، ولونه باهت).</p>
+        <code-block lang="html" file="labels.html">
+          <!-- explicit: for → id -->
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email">
+
+          <!-- implicit: the input is inside the label -->
+          <label>Remember me <input type="checkbox" name="remember"></label>
+        </code-block>
+
+        <h3 class="sub">أنواع الـ input</h3>
+        <html-example file="inputs.html" auto url="https://shop.example/profile" max="640">
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>Input types</title>
+          <style>body{font-family:system-ui;font-size:14px}label{display:block;margin:5px 0}</style></head>
+          <body>
+            <form action="/profile" method="post">
+              <label>Text <input name="nick" value="omar"></label>
+              <label>Password <input type="password" name="pw" value="hunter2"></label>
+              <label>Email <input type="email" name="mail" value="f@shop.example"></label>
+              <label>Number <input type="number" name="age" value="25" min="18" max="99"></label>
+              <label>Range <input type="range" name="level" min="0" max="10" value="7"></label>
+              <label>Date <input type="date" name="dob" value="2000-01-31"></label>
+              <label>Color <input type="color" name="theme" value="#ff7a45"></label>
+              <label>Search <input type="search" name="find" value="xss"></label>
+              <label>File <input type="file" name="avatar" accept="image/*"></label>
+              <input type="hidden" name="user_id" value="2291">
+              <button>Save</button>
+            </form>
+          </body>
+          </html>
+        </html-example>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>النوع</th><th>بيعرض إيه</th><th>بيبعت إيه</th><th>🎯</th></tr></thead>
+          <tbody>
+            <tr><td><code>text</code> (الافتراضي)</td><td>سطر نص</td><td>النص</td><td>أي نوع مش معروف بيرجع <code>text</code></td></tr>
+            <tr><td><code>password</code></td><td>نقط بدل الحروف</td><td><b>النص الحقيقي</b> بدون أي تشفير</td><td>الحماية في الـ HTTPS بس، مش في الـ input</td></tr>
+            <tr><td><code>email</code> / <code>url</code> / <code>tel</code></td><td>نص + validation/كيبورد مناسب</td><td>النص</td><td>الـ validation في المتصفح بس</td></tr>
+            <tr><td><code>number</code> / <code>range</code></td><td>رقم / slider</td><td>الرقم كنص</td><td><code>min</code>/<code>max</code> بتتعدّى بـ Burp: جرّب سالب، <code>0</code>، أرقام ضخمة</td></tr>
+            <tr><td><code>date</code>، <code>time</code>، <code>datetime-local</code>، <code>month</code>، <code>week</code></td><td>date pickers</td><td><code>2000-01-31</code> (ISO)</td><td></td></tr>
+            <tr><td><code>color</code></td><td>color picker</td><td><code>#ff7a45</code></td><td></td></tr>
+            <tr><td><code>file</code></td><td>اختيار ملف (<code>accept</code>، <code>multiple</code>)</td><td>اسم الملف + محتواه (محتاج <code>multipart/form-data</code>)</td><td><code>accept</code> فلتر في نافذة الاختيار بس</td></tr>
+            <tr><td><code>hidden</code></td><td>مش بيظهر</td><td>الـ value</td><td>IDs، tokens، أسعار(!) — غيّرها</td></tr>
+            <tr><td><code>checkbox</code></td><td>مربع اختيار</td><td><code>name=value</code> <b>لو متعلّم عليه بس</b> (الـ value الافتراضي <code>on</code>)</td><td>ابعته وهو مش متعلّم عليه، أو بقيمة تانية</td></tr>
+            <tr><td><code>radio</code></td><td>اختيار واحد من مجموعة (نفس الـ <code>name</code>)</td><td>الـ value بتاع المختار</td><td>ابعت value مش من الاختيارات</td></tr>
+            <tr><td><code>submit</code> / <code>reset</code> / <code>button</code></td><td>أزرار</td><td>الـ submit اللي اتداس عليه بيتبعت لو ليه <code>name</code></td><td></td></tr>
+            <tr><td><code>image</code></td><td>صورة بتشتغل submit</td><td><code>name.x</code> و<code>name.y</code> = مكان الضغطة</td><td>parameters غريبة في الـ request</td></tr>
+          </tbody>
+        </table></div>
+
+        <h3 class="sub">checkbox وradio بالتفصيل</h3>
+        <html-example file="choices.html" auto url="https://shop.example/report/new">
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>Choices</title></head>
+          <body>
+            <form action="/report" method="post">
+              <fieldset>
+                <legend>Severity</legend>
+                <label><input type="radio" name="severity" value="low"> Low</label>
+                <label><input type="radio" name="severity" value="medium" checked> Medium</label>
+                <label><input type="radio" name="severity" value="high"> High</label>
+              </fieldset>
+              <fieldset>
+                <legend>Tags</legend>
+                <label><input type="checkbox" name="tags" value="xss" checked> XSS</label>
+                <label><input type="checkbox" name="tags" value="csrf"> CSRF</label>
+                <label><input type="checkbox" name="tags" value="idor" checked> IDOR</label>
+                <label><input type="checkbox" name="public"> Make public</label>
+              </fieldset>
+              <button name="action" value="draft">Save draft</button>
+              <button name="action" value="send">Send</button>
+            </form>
+          </body>
+          </html>
+        </html-example>
+        <ul>
+          <li>radio بنفس الـ <code>name</code> = مجموعة واحدة، تختار واحد بس.</li>
+          <li>checkboxes بنفس الـ <code>name</code> = القيمة بتتكرر: <code>tags=xss&amp;tags=idor</code>. كل backend بيتعامل مع التكرار ده بطريقة (آخر واحدة؟ أول واحدة؟ array؟) — 🎯 ده أساس <b>HTTP Parameter Pollution</b>.</li>
+          <li>الـ checkbox اللي مالوش <code>value</code> بيبعت <code>on</code>، ولو مش متعلّم عليه <b>مبيتبعتش خالص</b> (السيرفر بيعرف «لأ» من الغياب).</li>
+          <li>الزرار اللي دوست عليه (الـ <b>submitter</b>) بيتبعت <code>name=value</code> بتاعه — جرّب الزرارين وقارن.</li>
+        </ul>
+
+        <h3 class="sub">textarea وselect وdatalist</h3>
+        <html-example file="more-controls.html" auto url="https://shop.example/support">
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>Controls</title></head>
+          <body>
+            <form action="/ticket" method="post">
+              <label>Department
+                <select name="dept">
+                  <optgroup label="Tech">
+                    <option value="sec">Security team</option>
+                    <option value="ops" selected>Operations</option>
+                  </optgroup>
+                  <option value="billing">Billing</option>
+                  <option disabled>Legal (closed)</option>
+                </select>
+              </label>
+              <br>
+              <label>Browser <input name="browser" list="browsers"></label>
+              <datalist id="browsers"><option value="Chrome"><option value="Firefox"><option value="Safari"></datalist>
+              <br>
+              <label>Message<br><textarea name="msg" rows="3" cols="30">Line one
+          Line two</textarea></label>
+              <br><button>Open ticket</button>
+            </form>
+          </body>
+          </html>
+        </html-example>
+        <ul>
+          <li><code>select</code> بيبعت <b>الـ <code>value</code></b> بتاع الـ option المختار مش النص المعروض (<code>dept=ops</code> مش «Operations»). لو الـ option مالوش value بيبعت النص. ومع <code>multiple</code> ممكن أكتر من قيمة.</li>
+          <li><code>datalist</code> = <b>اقتراحات</b> بس؛ المستخدم يقدر يكتب أي حاجة.</li>
+          <li><code>textarea</code>: القيمة الابتدائية هي <b>المحتوى</b> بين الـ tags (مش attribute). لاحظ إن السطر الجديد اتبعت <code>%0D%0A</code> (CRLF). 🎯 والمحتوى ده بيتقري <b>RCDATA</b>: لو الـ input بتاعك اتحط جوه textarea، محتاج <code>&lt;/textarea&gt;</code> عشان تخرج منها.</li>
+        </ul>
+
+        <h3 class="sub">الأزرار: النوع الافتراضي فخ</h3>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>الكود</th><th>بيعمل إيه</th></tr></thead>
+          <tbody>
+            <tr><td><code>&lt;button&gt;Go&lt;/button&gt;</code> جوه form</td><td><b>submit</b> (الافتراضي!)</td></tr>
+            <tr><td><code>&lt;button type="button"&gt;</code></td><td>ولا حاجة — للـ JavaScript</td></tr>
+            <tr><td><code>&lt;button type="reset"&gt;</code></td><td>يرجّع القيم الابتدائية</td></tr>
+            <tr><td><code>&lt;input type="submit" value="Go"&gt;</code></td><td>submit، والـ value = النص المكتوب عليه</td></tr>
+          </tbody>
+        </table></div>
+        <p>زرار «Show password» أو «Add item» جوه فورم من غير <code>type="button"</code> هيبعت الفورم كل ما حد يدوس عليه — bug شائع جدًا.</p>
+
+        <h3 class="sub">fieldset وlegend وoutput وprogress وmeter</h3>
+        <html-example file="fieldset.html" auto url="https://shop.example/settings">
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>fieldset</title></head>
+          <body>
+            <form action="/settings" method="post" oninput="total.value = Number(a.value) + Number(b.value)">
+              <fieldset disabled>
+                <legend>Admin settings (disabled for your role)</legend>
+                <label>Max users <input name="max_users" value="50"></label>
+              </fieldset>
+              <p>
+                <input name="a" type="number" value="2"> +
+                <input name="b" type="number" value="3"> =
+                <output name="total" for="a b">5</output>
+              </p>
+              <p>Scan progress: <progress value="70" max="100">70%</progress></p>
+              <p>Disk usage: <meter value="0.9" low="0.5" high="0.8" optimum="0.2">90%</meter></p>
+              <button>Save</button>
+            </form>
+          </body>
+          </html>
+        </html-example>
+        <ul>
+          <li><code>fieldset</code> بيجمع خانات مرتبطة، و<code>legend</code> عنوانها. <code>&lt;fieldset disabled&gt;</code> بيعطّل <b>كل</b> اللي جواه — والخانات الـ disabled <b>مبتتبعتش</b> (لاحظ إن <code>max_users</code> مش في الـ request).</li>
+          <li><code>output</code> بيعرض نتيجة حساب (بيتبعت؟ <b>لأ</b> — مش «submittable»). <code>progress</code> تقدم مهمة، و<code>meter</code> قياس في مدى معروف.</li>
+        </ul>
+        <div class="callout pt reveal"><span class="ci">🎯</span><div><strong>الـ «disabled for your role» ده مش حماية</strong><p>السيرفر رجّع الإعداد بتاع الـ admin للمستخدم العادي، و«حماه» بـ <code>disabled</code>. افتح DevTools، شيل <code>disabled</code> من الـ fieldset، غيّر القيمة، وابعت — أو ابعت <code>max_users=999999</code> مباشرة بـ Burp. لو السيرفر قبلها = <b>Broken Access Control</b> (رقم 1 في OWASP Top 10 2021).</p></div></div>
+
+        <div class="exercises">
+          <div class="exercises-head"><h3><span class="bulb">✏️</span> تمارين الدرس 08</h3></div>
+          <quiz id="s08-q1" answer="1">
+            <q>`<input id="coupon" value="SAVE10">` جوه form من غير `name`. هيتبعت؟</q>
+            <o>أيوه كـ `coupon=SAVE10`</o>
+            <o>لأ — العناصر اللي ملهاش `name` مبتتبعتش</o>
+            <o>أيوه كـ `id=coupon`</o>
+            <o>هيتبعت فاضي</o>
+            <good>الـ `name` هو مفتاح الـ parameter. الـ `id` للـ DOM والـ labels بس.</good>
+            <bad>الـ `id` مش بيستخدم في الإرسال. من غير `name` العنصر مبيدخلش في الـ form data.</bad>
+          </quiz>
+          <quiz id="s08-q2" answer="3">
+            <q>`<input type="checkbox" name="newsletter">` والمستخدم معلّمش عليه. إيه اللي بيتبعت؟</q>
+            <o>`newsletter=off`</o>
+            <o>`newsletter=`</o>
+            <o>`newsletter=false`</o>
+            <o>ولا حاجة — الـ parameter مش موجود في الـ request</o>
+            <good>الـ checkbox غير المختار مبيتبعتش. ولو مختار من غير value: `newsletter=on`.</good>
+            <bad>الـ checkbox المش متعلم عليه بيختفي من الـ request تمامًا — مفيش `off` ولا قيمة فاضية.</bad>
+          </quiz>
+          <quiz id="s08-q3" answer="0">
+            <q>`<select name="role"><option value="2">Viewer</option></select>`. المستخدم اختار Viewer. إيه اللي اتبعت؟</q>
+            <o>`role=2`</o>
+            <o>`role=Viewer`</o>
+            <o>`Viewer=2`</o>
+            <o>`role=Viewer&value=2`</o>
+            <good>الـ `value` هو اللي بيتبعت. وفي Burp تقدر تبعت `role=1` (admin مثلًا) حتى لو مش في القايمة.</good>
+            <bad>الـ option بيبعت الـ `value` attribute بتاعه، والنص للعرض بس.</bad>
+          </quiz>
+          <quiz id="s08-q4" answer="2">
+            <q>زرار «Show password» `<button onclick="toggle()">👁</button>` جوه فورم login. المستخدم داس عليه. إيه اللي حصل؟</q>
+            <o>اتعمل toggle بس</o>
+            <o>مفيش حاجة</o>
+            <o>اتعمل toggle <b>والفورم اتبعتت</b> — لأن النوع الافتراضي للـ button جوه form هو submit</o>
+            <o>الفورم اتعملها reset</o>
+            <good>ضيف `type="button"` لأي زرار مش مفروض يبعت.</good>
+            <bad>`<button>` من غير `type` = `submit`. فالضغط شغّل الـ onclick وبعدها بعت الفورم.</bad>
+          </quiz>
+          <quiz id="s08-q5" answer="1">
+            <q>`<input type="number" name="qty" min="1" max="5">`. إيه الضمانة إن السيرفر هيستقبل رقم من 1 لـ 5؟</q>
+            <o>ضمانة كاملة لأن المتصفح بيمنع غير كده</o>
+            <o>مفيش أي ضمانة — أي حد يقدر يبعت `qty=-3` أو `qty=abc` بـ Burp أو curl</o>
+            <o>ضمانة لو الصفحة HTTPS</o>
+            <o>ضمانة لو فيه `required`</o>
+            <good>كل القيود دي UX. الـ validation الحقيقي في السيرفر. (`qty=-3` في سلة شراء = خصم مجاني أحيانًا!)</good>
+            <bad>المتصفح بيمنع المستخدم «العادي» بس. الـ request ممكن يتبني بأي أداة من غير المتصفح خالص.</bad>
+          </quiz>
+          <quiz id="s08-q6" answer="3">
+            <q>`<input type="image" name="go" src="btn.png">` اتداس عليه. إيه الـ parameters الإضافية؟</q>
+            <o>`go=btn.png`</o>
+            <o>`image=go`</o>
+            <o>ولا حاجة</o>
+            <o>`go.x=…&go.y=…` (إحداثيات الضغطة)</o>
+            <good>الـ image button بيبعت مكان الضغطة. لو شفت `.x` و`.y` في request فده مصدرها.</good>
+            <bad>`type="image"` بيبعت `name.x` و`name.y` بإحداثيات الضغطة على الصورة.</bad>
+          </quiz>
+          <quiz id="s08-q7" answer="0">
+            <q>فورم فيها `<fieldset disabled>` جواها `<input name="price" value="100">`. القيمة هتتبعت؟</q>
+            <o>لأ — العناصر الـ disabled (حتى بالوراثة من fieldset) مبتتبعتش</o>
+            <o>أيوه عادي</o>
+            <o>أيوه بس فاضية</o>
+            <o>بتتبعت لو الفورم POST</o>
+            <good>disabled = مش قابل للتعديل <b>ومش بيتبعت</b>. (عكس `readonly` اللي بيتبعت — الدرس الجاي.)</good>
+            <bad>disabled controls مستبعدة من الـ form data. والـ fieldset disabled بيعطّل كل اللي جواه (إلا اللي جوه أول legend).</bad>
+          </quiz>
+
+          <html-lab id="s08-lab1" title="فورم تسجيل كاملة" level="1" url="https://shop.example/signup">
+            <desc><p>ابني فورم تسجيل:</p>
+            <ul><li><code>action="/register"</code> و<code>method="post"</code>.</li>
+            <li>خانات بالأسماء: <code>username</code> (text)، <code>email</code> (type email)، <code>password</code> (type password)، <code>country</code> (select فيه 3 options على الأقل بـ values)، و<code>terms</code> (checkbox قيمته <code>yes</code>).</li>
+            <li><b>كل</b> خانة ظاهرة ليها <code>label</code> مربوط بيها.</li>
+            <li>زرار submit.</li></ul>
+            <p>ابعت الفورم في المعاينة واتأكد إن الـ body فيه الخمس parameters.</p></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>Sign up</title></head>
+              <body>
+                <h2>Create account</h2>
+                <form>
+                  Username <input>
+                </form>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>Sign up</title></head>
+              <body>
+                <h2>Create account</h2>
+                <form action="/register" method="post">
+                  <p><label for="u">Username</label> <input id="u" name="username"></p>
+                  <p><label for="e">Email</label> <input id="e" type="email" name="email"></p>
+                  <p><label for="p">Password</label> <input id="p" type="password" name="password"></p>
+                  <p><label for="c">Country</label>
+                    <select id="c" name="country">
+                      <option value="eg">Egypt</option>
+                      <option value="sa">Saudi Arabia</option>
+                      <option value="ae">UAE</option>
+                    </select></p>
+                  <p><label><input type="checkbox" name="terms" value="yes"> I accept the terms</label></p>
+                  <button type="submit">Register</button>
+                </form>
+              </body>
+              </html>
+            </solution>
+            <test label="`action=&quot;/register&quot;` و`method=&quot;post&quot;`">attr("form", "action") === "/register" && $("form").method === "post"</test>
+            <test label="الأسماء الخمسة موجودة">["username","email","password","country","terms"].every(n => $("form").elements.namedItem(n))</test>
+            <test label="الأنواع صح: email / password / select / checkbox">$('[name="email"]').type === "email" && $('[name="password"]').type === "password" && $('[name="country"]').localName === "select" && $('[name="terms"]').type === "checkbox"</test>
+            <test label="الـ select فيه 3 options بـ value على الأقل">$$('[name="country"] option[value]').length >= 3</test>
+            <test label="الـ checkbox قيمته yes">$('[name="terms"]').value === "yes"</test>
+            <test label="كل خانة ظاهرة ليها label">$$("form input, form select, form textarea").filter(e => !["hidden","submit","button","reset","image"].includes(e.type)).every(e => e.labels && e.labels.length > 0)</test>
+            <test label="فيه زرار submit">$$("form button, form input[type=submit]").some(b => b.type === "submit")</test>
+            <hint>اربط الـ label بـ `for="id"` أو حط الخانة جوه الـ label. والـ `name` هو اللي بيتبعت مش الـ `id`.</hint>
+          </html-lab>
+
+          <html-lab id="s08-lab2" title="فورم إضافة finding" level="2" url="https://shop.example/findings/new">
+            <desc><ul><li>مجموعة radio اسمها <code>severity</code> بالقيم <code>low</code>/<code>medium</code>/<code>high</code>، و<code>medium</code> مختارة افتراضيًا.</li>
+            <li>3 checkboxes كلهم <code>name="tags"</code> بالقيم <code>xss</code>/<code>csrf</code>/<code>idor</code>.</li>
+            <li><code>textarea</code> اسمها <code>notes</code>.</li>
+            <li>زرارين submit: واحد <code>name="action" value="draft"</code> والتاني <code>value="publish"</code>.</li>
+            <li>زرار تالت «Preview» <b>ميبعتش</b> الفورم.</li></ul></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>New finding</title></head>
+              <body>
+                <form action="/findings" method="post">
+
+                </form>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>New finding</title></head>
+              <body>
+                <form action="/findings" method="post">
+                  <fieldset>
+                    <legend>Severity</legend>
+                    <label><input type="radio" name="severity" value="low"> Low</label>
+                    <label><input type="radio" name="severity" value="medium" checked> Medium</label>
+                    <label><input type="radio" name="severity" value="high"> High</label>
+                  </fieldset>
+                  <fieldset>
+                    <legend>Tags</legend>
+                    <label><input type="checkbox" name="tags" value="xss"> XSS</label>
+                    <label><input type="checkbox" name="tags" value="csrf"> CSRF</label>
+                    <label><input type="checkbox" name="tags" value="idor"> IDOR</label>
+                  </fieldset>
+                  <label>Notes<br><textarea name="notes" rows="4"></textarea></label>
+                  <p>
+                    <button type="button">Preview</button>
+                    <button name="action" value="draft">Save draft</button>
+                    <button name="action" value="publish">Publish</button>
+                  </p>
+                </form>
+              </body>
+              </html>
+            </solution>
+            <test label="3 radios باسم severity بالقيم low/medium/high">$$('input[type=radio][name="severity"]').map(r => r.value).sort().join(",") === "high,low,medium"</test>
+            <test label="medium مختارة افتراضيًا (والـ form data فيها severity=medium)">new FormData($("form")).get("severity") === "medium"</test>
+            <test label="3 checkboxes باسم tags (xss, csrf, idor)">$$('input[type=checkbox][name="tags"]').map(c => c.value).sort().join(",") === "csrf,idor,xss"</test>
+            <test label="`textarea` اسمها notes">has('textarea[name="notes"]')</test>
+            <test label="زرارين submit باسم action (draft و publish)">$$('[name="action"]').filter(b => b.type === "submit").map(b => b.value).sort().join(",") === "draft,publish"</test>
+            <test label="زرار Preview نوعه button (مش submit)">$$("button").some(b => /preview/i.test(b.textContent) && b.type === "button")</test>
+            <hint>الـ radio المختار افتراضيًا عليه `checked`. وزرار الـ Preview محتاج `type="button"` صراحة.</hint>
+          </html-lab>
+
+          <task id="s08-t1" title="الـ query string بالظبط" level="2" answer="q=red+shoes&amp;sort=price&amp;instock=on&amp;csrf=ab12|q=red+shoes&sort=price&instock=on&csrf=ab12" reject="q=red shoes&amp;sort=price&amp;instock=on&amp;csrf=ab12">
+            <desc><p>المستخدم ساب الفورم دي زي ما هي ودوس Search. اكتب الـ <b>query string</b> اللي هتتبعت (اللي بعد <code>?</code>) بالظبط وبنفس الترتيب.</p></desc>
+            <listing lang="html" file="search-form.html">
+              <form action="/search" method="get">
+                <input name="q" value="red shoes">
+                <select name="sort">
+                  <option value="relevance">Best match</option>
+                  <option value="price" selected>Lowest price</option>
+                </select>
+                <label><input type="checkbox" name="instock" checked> In stock</label>
+                <label><input type="checkbox" name="sale"> On sale</label>
+                <input name="page" value="1" disabled>
+                <input type="hidden" name="csrf" value="ab12">
+                <button>Search</button>
+              </form>
+            </listing>
+            <hint>بالترتيب: مين عنده name؟ مين متعلم عليه؟ مين disabled؟ والمسافة بتبقى إيه؟ (الزرار مالوش name.)</hint>
+            <explain>`q=red+shoes&sort=price&instock=on&csrf=ab12`. المسافة = `+`، الـ select بيبعت `price`، الـ checkbox المتعلّم عليه من غير value = `on`، و`sale` مش متعلّم عليه فمبيتبعتش، و`page` disabled فمبيتبعتش، والـ hidden بيتبعت. الترتيب = ترتيب العناصر في الـ DOM.</explain>
+          </task>
+        </div>
+      </section>

@@ -1,0 +1,362 @@
+      <section class="section" id="s01" data-part="الجزء 1 · HTML" data-pk="html" data-nav="الويب من جوه" data-icon="🌐" data-keywords="web http https request response client server dns tcp tls url status codes methods headers cookies content-type mime browser rendering dom cssom view-source devtools curl burp proxy">
+        <div class="section-head">
+          <span class="section-index">01</span>
+          <div>
+            <p class="eyebrow">HTML · الدرس 01</p>
+            <h2>الويب من جوه: المتصفح والسيرفر والـ HTTP</h2>
+            <p class="lede">قبل أول tag، لازم الصورة الكبيرة تبقى واضحة: <b>المتصفح</b> بيبعت <b>request</b>، و<b>السيرفر</b> بيرد بـ <b>response</b> فيه HTML، والمتصفح بيحوّل الـ HTML ده لصفحة. كل ثغرة ويب هتقابلها هي في الآخر حاجة غلط في واحدة من المراحل دي — فلازم تعرفها مرحلة مرحلة.</p>
+          </div>
+        </div>
+
+        <h3 class="sub">إيه اللي بيحصل لما تكتب URL وتدوس Enter؟ <span class="tag">الرحلة كاملة</span></h3>
+        <scene id="sc-load" title="من الـ URL للصفحة اللي قدامك">
+          <svg viewBox="0 0 1000 330" role="img" aria-label="مراحل تحميل صفحة ويب">
+            <rect x="20" y="40" width="430" height="270" rx="18" class="d-box" data-s="1,6-8"/>
+            <text x="40" y="70" class="d-tb d-acc">Browser</text>
+            <text x="430" y="70" text-anchor="end" class="d-ts ar">المتصفح (الـ client)</text>
+            <rect x="40" y="88" width="390" height="34" rx="9" class="d-dim" data-s="1"/>
+            <text x="54" y="110" class="d-t" font-size="12">https://shop.example/products?id=7</text>
+            <rect x="40" y="138" width="120" height="56" rx="10" class="d-box2" data-s="6"/>
+            <text x="100" y="162" text-anchor="middle" class="d-tb" font-size="12">HTML Parser</text>
+            <text x="100" y="182" text-anchor="middle" class="d-tx">bytes → DOM</text>
+            <rect x="175" y="138" width="120" height="56" rx="10" class="d-box3" data-s="7"/>
+            <text x="235" y="162" text-anchor="middle" class="d-tb" font-size="12">CSS → CSSOM</text>
+            <text x="235" y="182" text-anchor="middle" class="d-tx">styles</text>
+            <rect x="310" y="138" width="120" height="56" rx="10" class="d-box4" data-s="8"/>
+            <text x="370" y="162" text-anchor="middle" class="d-tb" font-size="12">JS engine</text>
+            <text x="370" y="182" text-anchor="middle" class="d-tx">runs scripts</text>
+            <rect x="40" y="210" width="390" height="84" rx="10" class="d-dim" data-s="7-8"/>
+            <text x="235" y="236" text-anchor="middle" class="d-ts">render tree → layout → paint</text>
+            <text x="235" y="262" text-anchor="middle" class="d-ts ar">الصفحة اللي بتشوفها على الشاشة</text>
+            <text x="235" y="282" text-anchor="middle" class="d-tx">(JS can change the DOM → re-render)</text>
+
+            <rect x="560" y="18" width="190" height="66" rx="14" class="d-box6" data-s="2"/>
+            <text x="655" y="44" text-anchor="middle" class="d-tb">DNS resolver</text>
+            <text x="655" y="66" text-anchor="middle" class="d-tx">shop.example → 203.0.113.10</text>
+            <rect x="790" y="40" width="190" height="270" rx="18" class="d-box5" data-s="3-5"/>
+            <text x="885" y="70" text-anchor="middle" class="d-tb d-red">Web Server</text>
+            <text x="885" y="92" text-anchor="middle" class="d-tx">203.0.113.10:443</text>
+            <rect x="808" y="110" width="154" height="60" rx="10" class="d-dim" data-s="5"/>
+            <text x="885" y="136" text-anchor="middle" class="d-ts">app code</text>
+            <text x="885" y="156" text-anchor="middle" class="d-tx">PHP / Node / Python…</text>
+            <rect x="808" y="184" width="154" height="44" rx="10" class="d-dim" data-s="5"/>
+            <text x="885" y="211" text-anchor="middle" class="d-ts">database</text>
+            <text x="885" y="262" text-anchor="middle" class="d-ts ar">بيبني الـ response</text>
+
+            <path class="d-ar-tea d-flow" d="M452,80 C500,60 520,52 556,50" data-s="2"/>
+            <g data-s="3"><path class="d-ar-amb" d="M452,120 L786,120"/><text x="620" y="112" text-anchor="middle" class="d-ts">TCP handshake + TLS</text><text x="620" y="138" text-anchor="middle" class="d-tx">certificate, keys → encrypted channel</text></g>
+            <g data-s="4"><path class="d-ar-acc d-flow" d="M452,180 L786,180"/><text x="620" y="172" text-anchor="middle" class="d-ts d-acc">GET /products?id=7 HTTP/1.1</text><text x="620" y="198" text-anchor="middle" class="d-tx">Host · Cookie · User-Agent …</text></g>
+            <g data-s="5-6"><path class="d-ar-vio d-flow" d="M786,240 L452,240"/><text x="620" y="232" text-anchor="middle" class="d-ts d-vio">HTTP/1.1 200 OK + HTML</text><text x="620" y="258" text-anchor="middle" class="d-tx">Content-Type: text/html</text></g>
+            <g data-s="7"><path class="d-ar-acc d-dash" d="M452,290 C600,300 680,300 786,290"/><text x="620" y="318" text-anchor="middle" class="d-tx">more requests: style.css, app.js, logo.png …</text></g>
+          </svg>
+          <step>المتصفح بيـ <b>parse</b> الـ URL: الـ scheme <code>https</code>، الـ host <code>shop.example</code>، الـ path <code>/products</code>، والـ query <code>?id=7</code>. (الـ URL ليه درس كامل: الدرس 04.)</step>
+          <step><b>DNS</b>: المتصفح محتاج IP مش اسم. بيسأل الـ resolver فيرجّعله <code>203.0.113.10</code>. (🎯 الـ subdomains والـ DNS records هي أول خطوة recon في أي pentest.)</step>
+          <step><b>TCP</b> على port 443، وبعده <b>TLS handshake</b>: السيرفر بيقدّم شهادة (certificate) والطرفين بيتفقوا على مفاتيح تشفير. من هنا أي حد في النص (Wi-Fi، ISP) مش هيقدر يقرا أو يعدّل الكلام.</step>
+          <step>المتصفح بيبعت الـ <b>HTTP request</b>: method + path + headers (منهم <code>Host</code> و<code>Cookie</code>). ده النص اللي هتشوفه وتعدّله في Burp طول حياتك المهنية.</step>
+          <step>السيرفر بيشغّل الـ app code (وغالبًا يسأل database)، ويرجّع <b>HTTP response</b>: status code + headers + body فيه الـ HTML. <b>هنا</b> بيحصل أغلب الـ XSS: لو الكود حط input بتاعك في الـ HTML من غير encoding.</step>
+          <step>الـ <b>HTML parser</b> بيقرا الـ bytes ويبني شجرة <b>DOM</b>. وهو بيقرا بيلاقي <code>&lt;link&gt;</code> و<code>&lt;script&gt;</code> و<code>&lt;img&gt;</code> فيبعت requests تانية ليهم.</step>
+          <step>الـ CSS بيتحوّل لـ <b>CSSOM</b>، والـ DOM + CSSOM = <b>render tree</b> → حساب الأماكن (layout) → الرسم (paint). ده اللي بتشوفه.</step>
+          <step>الـ <b>JavaScript</b> بيشتغل: يقدر يغيّر الـ DOM، ويبعت requests (APIs)، ويقرا الـ cookies (لو مش HttpOnly). عشان كده الـ XSS خطير: كود المهاجم بيشتغل بنفس صلاحيات كود الموقع.</step>
+        </scene>
+
+        <h3 class="sub">شكل الـ HTTP request من جوه <span class="tag">نص عادي!</span></h3>
+        <p>HTTP/1.1 بروتوكول <b>نصّي</b>: الـ request حرفيًا شوية سطور. أول سطر هو الـ <b>request line</b>، بعده <b>headers</b> (كل واحد <code>Name: value</code>)، بعدين <b>سطر فاضي</b>، وبعده <b>body</b> اختياري.</p>
+        <div class="http-box reveal"><div class="hb-h">REQUEST — المتصفح ← السيرفر</div><pre>POST /account/login HTTP/1.1
+Host: shop.example
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/131.0
+Accept: text/html,application/xhtml+xml
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 29
+Cookie: lang=ar; cart=3
+Origin: https://shop.example
+Referer: https://shop.example/account/login
+
+user=omar&amp;pass=Sup3r%21Secret</pre></div>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>الجزء</th><th>معناه</th><th>🎯 ليه يهمك</th></tr></thead>
+          <tbody>
+            <tr><td><code>POST /account/login HTTP/1.1</code></td><td>الـ method، والـ path (+ الـ query لو موجودة)، والـ version</td><td>غيّر الـ method أو الـ path وشوف السيرفر بيتصرف إزاي (405؟ 200؟)</td></tr>
+            <tr><td><code>Host</code></td><td>اسم الموقع المطلوب — سيرفر واحد بيشيل مواقع كتير على نفس الـ IP (virtual hosting)</td><td>Host header injection، الوصول لـ vhosts داخلية</td></tr>
+            <tr><td><code>Cookie</code></td><td>الـ cookies اللي المتصفح خزّنها للموقع ده — غالبًا فيها الـ session</td><td>الـ session cookie = مفتاح الحساب. سرقتها = دخول من غير password</td></tr>
+            <tr><td><code>Content-Type</code></td><td>شكل الـ body (هنا: فورم urlencoded)</td><td>تغيير الـ content type ممكن يعدّي فلاتر أو يغيّر الـ parser في السيرفر</td></tr>
+            <tr><td><code>Origin</code> / <code>Referer</code></td><td>الطلب جاي من صفحة أنهي موقع</td><td>أساس فهم الـ CSRF والحمايات بتاعته</td></tr>
+            <tr><td>الـ body</td><td>البيانات نفسها: <code>user=omar&amp;pass=Sup3r%21Secret</code></td><td>لاحظ <code>%21</code> = <code>!</code> — ده percent-encoding (الدرس 04 و14)</td></tr>
+          </tbody>
+        </table></div>
+
+        <h3 class="sub">والـ response</h3>
+        <div class="http-box reveal"><div class="hb-h">RESPONSE — السيرفر ← المتصفح</div><pre>HTTP/1.1 200 OK
+Date: Fri, 20 Nov 2026 10:15:02 GMT
+Server: nginx
+Content-Type: text/html; charset=utf-8
+Set-Cookie: session=7f3a9c2e; Path=/; Secure; HttpOnly; SameSite=Lax
+Cache-Control: no-store
+Content-Length: 1532
+
+&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;&lt;title&gt;My account&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;Welcome back, omar!&lt;/body&gt;
+&lt;/html&gt;</pre></div>
+        <p>الـ <b>status line</b> فيه رقم (<code>200</code>) ووصف (<code>OK</code>). الـ <code>Content-Type</code> بيقول للمتصفح «اتعامل مع الـ body ده كـ HTML وبالـ encoding ده». و<code>Set-Cookie</code> بيخلّي المتصفح يخزّن cookie ويبعتها تلقائيًا مع كل request جاي للموقع — كده الـ HTTP اللي هو <b>stateless</b> (كل request مستقل) بقى «فاكر» إنك عامل login.</p>
+        <div class="callout spec reveal"><span class="ci">📜</span><div><strong>HTTP/2 وHTTP/3</strong><p>المواقع الحديثة غالبًا بتستخدم HTTP/2 أو HTTP/3: نفس المعاني (methods، headers، status codes) بس متبعتة كـ <b>binary frames</b> مش نص، والـ request line بيتحول لـ pseudo-headers زي <code>:method</code> و<code>:path</code> و<code>:authority</code>. Burp وDevTools بيعرضوهم كأنهم HTTP/1.1 عشان تقراهم بسهولة — فالشكل النصي اللي فوق هو اللي هتشتغل بيه.</p></div></div>
+
+        <h3 class="sub">الـ Methods</h3>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>Method</th><th>الاستخدام المعتاد</th><th>safe؟</th><th>idempotent؟</th></tr></thead>
+          <tbody>
+            <tr><td><code>GET</code></td><td>هات resource (صفحة، صورة، بيانات). البيانات في الـ URL query.</td><td class="t-ok">نعم</td><td class="t-ok">نعم</td></tr>
+            <tr><td><code>POST</code></td><td>ابعت بيانات تعمل تغيير (login، طلب، رفع ملف). البيانات في الـ body.</td><td class="t-no">لأ</td><td class="t-no">لأ</td></tr>
+            <tr><td><code>PUT</code> / <code>PATCH</code></td><td>استبدل / عدّل resource (شائعة في الـ REST APIs)</td><td class="t-no">لأ</td><td>PUT نعم · PATCH مش مضمون</td></tr>
+            <tr><td><code>DELETE</code></td><td>امسح resource</td><td class="t-no">لأ</td><td class="t-ok">نعم</td></tr>
+            <tr><td><code>HEAD</code></td><td>زي GET بس من غير body (headers بس)</td><td class="t-ok">نعم</td><td class="t-ok">نعم</td></tr>
+            <tr><td><code>OPTIONS</code></td><td>إيه المسموح؟ (وبيستخدمه المتصفح في الـ CORS preflight)</td><td class="t-ok">نعم</td><td class="t-ok">نعم</td></tr>
+          </tbody>
+        </table></div>
+        <p>«safe» يعني المفروض ميغيّرش حاجة في السيرفر، و«idempotent» يعني تكراره نفس مرة واحدة. ده «المفروض» — في الحقيقة مطورين كتير بيعملوا حذف أو تغيير بـ <code>GET</code>، وده بيفتح ثغرات (لينك أو صورة بتمسح حساب!).</p>
+        <div class="callout pt reveal"><span class="ci">🎯</span><div><strong>معلومة هتحتاجها في الـ CSRF</strong><p>فورم HTML عادية تقدر تبعت <b>GET</b> و<b>POST</b> بس (و<code>method="dialog"</code> اللي مبيبعتش request أصلًا). <code>PUT</code> و<code>DELETE</code> و<code>PATCH</code> محتاجين JavaScript (<code>fetch</code>)، والـ JavaScript بيخضع لقيود الـ <b>CORS</b> لو الطلب لموقع تاني. فـ endpoint بيقبل تغييرات بـ POST form عادي هو أول مكان تدوّر فيه على CSRF.</p></div></div>
+
+        <h3 class="sub">الـ Status codes</h3>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>الكود</th><th>المعنى</th><th>هتقابله فين</th></tr></thead>
+          <tbody>
+            <tr><td><code>200 OK</code> · <code>201 Created</code> · <code>204 No Content</code></td><td>نجاح</td><td>204 شائع في الـ APIs: نجح ومفيش body</td></tr>
+            <tr><td><code>301</code> · <code>308</code></td><td>redirect دائم (308 بيحافظ على الـ method والـ body)</td><td>http → https، الدومين القديم → الجديد</td></tr>
+            <tr><td><code>302</code> · <code>303</code> · <code>307</code></td><td>redirect مؤقت؛ الوجهة في header اسمه <code>Location</code>. 307 بيحافظ على الـ method، و303 بيحوّلها GET</td><td>بعد الـ login، و<b>open redirect</b> لو الـ Location جاي من parameter</td></tr>
+            <tr><td><code>304 Not Modified</code></td><td>النسخة اللي في الـ cache لسه سليمة</td><td>Network tab بعد refresh</td></tr>
+            <tr><td><code>400</code> · <code>404</code> · <code>405</code></td><td>request غلط · مش موجود · الـ method مش مسموح</td><td>الـ fuzzing: اختلاف الكود بيكشف endpoints</td></tr>
+            <tr><td><code>401 Unauthorized</code></td><td>مين انت؟ (محتاج تعمل authentication)</td><td>من غير session أو token</td></tr>
+            <tr><td><code>403 Forbidden</code></td><td>عارف انت مين، بس ممنوع</td><td>اختبار الصلاحيات: 403 بيقولك إن الحاجة <b>موجودة</b></td></tr>
+            <tr><td><code>429 Too Many Requests</code></td><td>rate limiting</td><td>brute force بيتمنع</td></tr>
+            <tr><td><code>500</code> · <code>502</code> · <code>503</code></td><td>error في السيرفر · الـ gateway مش لاقي الـ backend · الخدمة واقفة</td><td>500 بعد input غريب = علامة إن الـ input وصل لحاجة حساسة (SQL؟ template؟)</td></tr>
+          </tbody>
+        </table></div>
+
+        <h3 class="sub">الـ Content-Type: نفس الـ bytes بمعنى مختلف</h3>
+        <p>المتصفح مبيحكمش على الـ response من امتداد الملف في الـ URL. بيحكم من الـ <code>Content-Type</code>. نفس النص <code>&lt;script&gt;alert(1)&lt;/script&gt;</code> لو رجع بـ <code>text/html</code> هيتنفّذ، ولو رجع بـ <code>text/plain</code> أو <code>application/json</code> هيتعرض كنص. لو الـ header مش موجود أصلًا، المتصفح بيعمل <b>MIME sniffing</b> (بيخمّن من المحتوى) — وده اتاستغل كتير زمان، والحماية منه header اسمه <code>X-Content-Type-Options: nosniff</code>.</p>
+        <div class="cmp reveal">
+          <div class="bad"><h5>⚠ ملف «صورة» رجع كـ HTML</h5><div class="http-box"><div class="hb-h">GET /uploads/avatar.png</div><pre>HTTP/1.1 200 OK
+Content-Type: text/html
+
+&lt;script&gt;alert(document.cookie)&lt;/script&gt;</pre></div><p class="small">لو السيرفر بيحدد الـ type من المحتوى أو من غير قواعد، رفع «صورة» فيها HTML ممكن يبقى <b>stored XSS</b>.</p></div>
+          <div class="good"><h5>✅ نفس الملف بـ type صح</h5><div class="http-box"><div class="hb-h">GET /uploads/avatar.png</div><pre>HTTP/1.1 200 OK
+Content-Type: image/png
+X-Content-Type-Options: nosniff
+Content-Disposition: attachment</pre></div><p class="small">المتصفح هيعامله كصورة وبس (أو هينزّله)، ومش هيخمّن.</p></div>
+        </div>
+
+        <h3 class="sub">HTML وCSS وJavaScript: كل واحد بيعمل إيه؟</h3>
+        <div class="grid-3">
+          <div class="card reveal"><div class="ico">🧱</div><h4>HTML = الهيكل والمعنى</h4><p>إيه اللي في الصفحة: عنوان، فقرة، لينك، فورم، صورة. ده الـ <b>content</b> والـ <b>structure</b>.</p></div>
+          <div class="card reveal"><div class="ico">🎨</div><h4>CSS = الشكل</h4><p>الألوان، الخطوط، الأماكن، الحركة. نفس الـ HTML ممكن يبان بألف شكل.</p></div>
+          <div class="card reveal"><div class="ico">⚙️</div><h4>JavaScript = السلوك</h4><p>يتفاعل مع المستخدم، يعدّل الصفحة، يكلم السيرفر. وهو اللي المهاجم عايز يشغّله (XSS).</p></div>
+        </div>
+        <p>المثال ده فيه الـ تلاتة مع بعض. دوس الزرار كذا مرة، وبعدين بص على الـ log تحت المعاينة:</p>
+        <html-example file="triad.html" auto>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <title>Triad</title>
+            <style>
+              .card { font-family: system-ui, sans-serif; border: 2px solid #ff7a45;
+                      border-radius: 12px; padding: 10px 16px; max-width: 280px; }
+              button { background: #ff7a45; color: #fff; border: 0;
+                       border-radius: 8px; padding: 6px 14px; cursor: pointer; }
+            </style>
+          </head>
+          <body>
+            <div class="card">
+              <h3>Login attempts</h3>
+              <p>Count: <b id="n">0</b></p>
+              <button id="btn">Try again</button>
+            </div>
+            <script>
+              let n = 0;
+              document.getElementById("btn").addEventListener("click", () => {
+                n++;
+                document.getElementById("n").textContent = n;
+                if (n >= 3) console.warn("account would be locked after", n, "tries");
+              });
+            </script>
+          </body>
+          </html>
+        </html-example>
+
+        <h3 class="sub">view-source مش هو الـ DOM <span class="tag">فرق مهم جدًا</span></h3>
+        <p>فيه نسختين من أي صفحة: <b>الـ source</b> (الـ HTML زي ما السيرفر بعته — بتشوفه بـ <kbd>Ctrl</kbd>+<kbd>U</kbd> أو <code>view-source:https://…</code>)، و<b>الـ DOM</b> (الشجرة الحية بعد ما الـ parser صلّح الأخطاء والـ JavaScript غيّر فيها — بتشوفها في تاب <b>Elements</b> في DevTools). المثال ده بيضيف لينك بالـ JavaScript. شغّله، وبعدين دوس <b>🌳 DOM</b>:</p>
+        <html-example file="dashboard.html" auto>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>Dashboard</title></head>
+          <body>
+            <h2>Dashboard</h2>
+            <ul id="menu">
+              <li><a href="/profile">Profile</a></li>
+            </ul>
+            <script>
+              // pretend the server told the page this user is an admin
+              const role = "admin";
+              if (role === "admin") {
+                const li = document.createElement("li");
+                li.innerHTML = '<a href="/internal/admin-panel">Admin panel</a>';
+                document.getElementById("menu").appendChild(li);
+              }
+              console.log("menu items:", document.querySelectorAll("#menu li").length);
+            </script>
+          </body>
+          </html>
+        </html-example>
+        <div class="callout pt reveal"><span class="ci">🎯</span><div><strong>ليه ده يفرق معاك كـ pentester؟</strong><p>(1) الـ endpoint <code>/internal/admin-panel</code> مش في أي HTML ثابت — موجود جوه الـ JavaScript. Recon بيكتفي بالـ HTML هيفوّته. (2) الـ <b>DOM-based XSS</b> بيحصل كله جوه المتصفح: الـ source بتاع الصفحة نضيف، بس JavaScript بياخد input (من الـ URL مثلًا) ويحطه في الـ DOM بطريقة خطيرة. مش هتلاقيه في الـ response — هتلاقيه في الـ DOM.</p></div></div>
+
+        <h3 class="sub">DevTools: عدّتك اليومية <span class="tag">F12</span></h3>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>التاب</th><th>بيوريك إيه</th><th>🎯 استخدام في الـ pentest</th></tr></thead>
+          <tbody>
+            <tr><td><b>Elements</b></td><td>الـ DOM الحي، وتقدر تعدّله</td><td>تشيل <code>disabled</code> من زرار، تغيّر <code>type="hidden"</code> لـ <code>text</code>، تلاقي عناصر مستخبية</td></tr>
+            <tr><td><b>Console</b></td><td>الـ errors والـ logs، وتكتب JavaScript في سياق الصفحة</td><td>تختبر الـ DOM XSS، تقرا متغيرات، تنادي functions</td></tr>
+            <tr><td><b>Network</b></td><td>كل request وresponse بالـ headers والـ body والوقت</td><td>تكتشف الـ APIs، الـ tokens، الـ parameters المستخبية — «Copy as cURL»</td></tr>
+            <tr><td><b>Sources</b></td><td>ملفات الـ JS والـ CSS، وdebugger بـ breakpoints</td><td>تقرا منطق التحقق في الـ client، وتلاقي <b>source maps</b> لو موجودة</td></tr>
+            <tr><td><b>Application</b></td><td>الـ cookies والـ localStorage والـ sessionStorage والـ service workers</td><td>تشوف flags الـ cookies (HttpOnly؟ Secure؟) وtokens متخزنة في localStorage</td></tr>
+          </tbody>
+        </table></div>
+
+        <h3 class="sub">curl: HTTP من غير متصفح</h3>
+        <p>الـ <code>curl</code> بيبعت الـ request ويطبع الـ response خام — مفيش JavaScript بيشتغل ولا parser بيصلّح حاجة. ده بيوريك اللي السيرفر بعته <b>بالظبط</b>:</p>
+        <code-block lang="bash" file="terminal">
+          # -i : print the response headers too
+          curl -i https://shop.example/
+
+          # only the headers (HEAD request)
+          curl -I https://shop.example/
+
+          # send a form POST, with a cookie, following redirects (-L)
+          curl -i -L -X POST https://shop.example/account/login \
+               -H "Cookie: lang=ar" \
+               --data-urlencode "user=omar" --data-urlencode "pass=Sup3r!Secret"
+
+          # pretend to be a browser / another site
+          curl -i https://shop.example/ -H "User-Agent: Mozilla/5.0" -H "Referer: https://evil.example/"
+        </code-block>
+
+        <h3 class="sub">الـ Proxy: إنت في النص</h3>
+        <figure class="diagram reveal">
+          <svg viewBox="0 0 1000 190" role="img" aria-label="Burp proxy بين المتصفح والسيرفر">
+            <rect x="30" y="50" width="220" height="90" rx="16" class="d-box"/>
+            <text x="140" y="90" text-anchor="middle" class="d-tb">Browser</text>
+            <text x="140" y="114" text-anchor="middle" class="d-tx">proxy → 127.0.0.1:8080</text>
+            <rect x="390" y="30" width="220" height="130" rx="16" class="d-box3"/>
+            <text x="500" y="72" text-anchor="middle" class="d-tb d-amb">Burp Suite</text>
+            <text x="500" y="98" text-anchor="middle" class="d-ts ar">بيوقف الـ request</text>
+            <text x="500" y="120" text-anchor="middle" class="d-ts ar">تعدّل فيه أي حاجة</text>
+            <text x="500" y="142" text-anchor="middle" class="d-tx">Intercept · Repeater · Intruder</text>
+            <rect x="750" y="50" width="220" height="90" rx="16" class="d-box5"/>
+            <text x="860" y="90" text-anchor="middle" class="d-tb d-red">Server</text>
+            <text x="860" y="114" text-anchor="middle" class="d-tx">shop.example</text>
+            <path class="d-ar-acc d-flow" d="M252,80 L386,80"/>
+            <path class="d-ar-amb d-flow" d="M612,80 L746,80"/>
+            <path class="d-ar-vio d-flow" d="M746,115 L612,115"/>
+            <path class="d-ar-vio d-flow" d="M386,115 L252,115"/>
+          </svg>
+          <figcaption>كل validation بيحصل في المتصفح (JavaScript، <code>required</code>، <code>maxlength</code>، <code>hidden</code>، <code>disabled</code>) بيتعدّى بسهولة: الـ request بيتعدّل <b>بعد</b> ما يخرج من المتصفح. الحماية الحقيقية لازم تبقى في السيرفر.</figcaption>
+        </figure>
+
+        <div class="exercises">
+          <div class="exercises-head"><h3><span class="bulb">✏️</span> تمارين الدرس 01</h3></div>
+          <quiz id="s01-q1" answer="2">
+            <q>رتّب المراحل لما تفتح `https://shop.example` لأول مرة:</q>
+            <o>HTTP request ثم DNS ثم TLS ثم TCP</o>
+            <o>TLS ثم DNS ثم TCP ثم HTTP request</o>
+            <o>DNS ثم TCP ثم TLS ثم HTTP request</o>
+            <o>TCP ثم HTTP request ثم DNS ثم TLS</o>
+            <good>الاسم يتحوّل لـ IP (DNS)، بعدين اتصال (TCP)، بعدين تشفير (TLS)، وجوّه القناة المشفّرة يتبعت الـ HTTP request.</good>
+            <bad>مينفعش تفتح اتصال TCP من غير IP (يبقى DNS الأول)، ومينفعش تبعت HTTP على HTTPS قبل ما الـ TLS يخلص.</bad>
+          </quiz>
+          <quiz id="s01-q2" answer="1">
+            <q>ليه الـ `Host` header مهم لدرجة إنه إجباري في HTTP/1.1؟</q>
+            <o>عشان السيرفر يعرف الـ IP بتاع المستخدم</o>
+            <o>لأن سيرفر واحد (IP واحد) ممكن يشيل مواقع كتير، والـ Host بيقوله أنهي موقع مطلوب</o>
+            <o>عشان الـ TLS يشتغل</o>
+            <o>عشان المتصفح يعرف يحفظ الـ cookies</o>
+            <good>ده الـ virtual hosting. وعشان كده تغيير الـ Host في Burp ممكن يوصّلك لمواقع داخلية على نفس السيرفر، أو يكشف Host header injection.</good>
+            <bad>الـ IP بيوصل من طبقة TCP مش من header. الـ Host وظيفته يحدد أنهي موقع من المواقع اللي على نفس السيرفر (virtual hosting).</bad>
+          </quiz>
+          <quiz id="s01-q3" answer="0">
+            <q>جربت تفتح `/admin` فرجعلك `403 Forbidden`، وجربت `/backup` فرجعلك `404 Not Found`. إيه أدق استنتاج؟</q>
+            <o>`/admin` غالبًا <b>موجود</b> بس ممنوع عليك، و`/backup` غالبًا مش موجود</o>
+            <o>الاتنين مش موجودين</o>
+            <o>الاتنين موجودين</o>
+            <o>السيرفر واقع</o>
+            <good>بالظبط — الفرق بين 403 و404 معلومة recon قيّمة. (مع ملاحظة إن بعض المواقع بترجع 404 عن قصد لأي حاجة ممنوعة عشان متكشفش وجودها.)</good>
+            <bad>403 معناها «عارف إنت عايز إيه، بس ممنوع» — يعني الـ resource غالبًا موجود. 404 «مش لاقيه». الفرق ده بيستخدم في اكتشاف الـ paths.</bad>
+          </quiz>
+          <quiz id="s01-q4" answer="3">
+            <q>صفحة بتضيف لينك للـ admin بالـ JavaScript بعد التحميل. فين هتلاقي اللينك ده؟</q>
+            <o>في `view-source:` بس</o>
+            <o>في الـ response اللي `curl` بيطبعه</o>
+            <o>مش هيظهر في أي مكان</o>
+            <o>في الـ DOM الحي (تاب Elements)، ومنطقه موجود في كود الـ JavaScript نفسه</o>
+            <good>view-source وcurl بيوروك اللي السيرفر بعته قبل أي JavaScript. الـ Elements بيوريك الـ DOM بعد التنفيذ — والمعلومة الحقيقية في ملف الـ JS اللي عمل الإضافة.</good>
+            <bad>`view-source` و`curl` بيعرضوا الـ HTML الخام من السيرفر، قبل ما أي JavaScript يشتغل. اللينك اتضاف للـ DOM بعد كده، فهتلاقيه في تاب Elements وفي كود الـ JS.</bad>
+          </quiz>
+          <quiz id="s01-q5" answer="1">
+            <q>إيه اللي بيحدد إن المتصفح هيعرض الـ response كصفحة HTML ولا كنص؟</q>
+            <o>امتداد الملف في الـ URL (`.html` أو `.txt`)</o>
+            <o>الـ `Content-Type` header</o>
+            <o>الـ `Host` header</o>
+            <o>الـ status code</o>
+            <good>الـ Content-Type هو الحكم. الامتداد في الـ URL مجرد نص — سيرفر ممكن يرجّع HTML من `/image.png` لو قال `text/html`.</good>
+            <bad>المتصفح مبيثقش في الامتداد. بيقرا الـ `Content-Type` (ولو مش موجود بيعمل sniffing، إلا لو فيه `X-Content-Type-Options: nosniff`).</bad>
+          </quiz>
+          <quiz id="s01-q6" answer="2">
+            <q>فورم HTML عادية (من غير JavaScript) تقدر تبعت أنهي methods؟</q>
+            <o>أي method: GET وPOST وPUT وDELETE</o>
+            <o>GET بس</o>
+            <o>GET وPOST (و`dialog` اللي مبيبعتش request)</o>
+            <o>POST بس</o>
+            <good>صح. عشان كده الـ CSRF الكلاسيكي بيستهدف endpoints بتقبل GET أو POST عادي، والـ APIs اللي بتطلب PUT/DELETE أو JSON بتحتاج JavaScript (وده بيدخل الـ CORS في الصورة).</good>
+            <bad>الـ `method` في الفورم بيقبل `get` و`post` و`dialog` بس. أي قيمة تانية زي `put` بترجع للـ default اللي هو GET.</bad>
+          </quiz>
+          <quiz id="s01-q7" answer="0">
+            <q>السيرفر رجّع `Set-Cookie: session=7f3a; HttpOnly`. إيه اللي هيحصل بعد كده؟</q>
+            <o>المتصفح هيخزنها ويبعتها في `Cookie` header مع الـ requests الجاية لنفس الموقع، وJavaScript مش هيقدر يقراها</o>
+            <o>المستخدم لازم يبعتها بإيده</o>
+            <o>هتتبعت مرة واحدة بس</o>
+            <o>JavaScript بس اللي يقدر يقراها</o>
+            <good>ده بالظبط. والـ `HttpOnly` معناها إن `document.cookie` مش هيرجّعها — ده بيصعّب سرقتها بالـ XSS (بس XSS لسه يقدر يعمل requests باسم المستخدم!).</good>
+            <bad>`Set-Cookie` بيخلّي المتصفح يخزن الـ cookie ويبعتها تلقائيًا مع كل request مناسب. و`HttpOnly` بتمنع JavaScript من قرايتها (مش العكس).</bad>
+          </quiz>
+
+          <task id="s01-t1" title="اسم الـ session cookie" level="1" answer="PHPSESSID" reject="theme">
+            <desc><p>ده response حقيقي الشكل من موقع اتعمله scan. <b>إيه اسم الـ cookie اللي شايلة الـ session؟</b></p></desc>
+            <listing lang="http" file="response.txt">
+              HTTP/1.1 200 OK
+              Date: Fri, 20 Nov 2026 10:15:02 GMT
+              Server: nginx/1.18.0 (Ubuntu)
+              Content-Type: text/html; charset=UTF-8
+              X-Powered-By: PHP/7.4.3
+              Set-Cookie: PHPSESSID=9f2c1b7e0a5d4e3c; path=/; HttpOnly
+              Set-Cookie: theme=dark; path=/
+              Cache-Control: no-store
+              Content-Length: 1532
+            </listing>
+            <hint>دوّر على الـ `Set-Cookie` اللي قيمتها شكلها random وطويلة وعليها `HttpOnly`. والاسم نفسه بيقولك اللغة.</hint>
+            <explain>`PHPSESSID` هو الاسم الافتراضي لـ session في PHP. القيمة العشوائية + `HttpOnly` = session. أما `theme=dark` فـ preference عادية. لاحظ كمان إن الـ session cookie ناقصها `Secure` و`SameSite` — دي ملاحظات تتكتب في التقرير.</explain>
+          </task>
+          <task id="s01-t2" title="بصمة التكنولوجيا" level="1" answer="7.4.3|php/7.4.3|php 7.4.3">
+            <desc><p>من نفس الـ response اللي فوق: <b>إيه إصدار PHP</b> اللي السيرفر شغّال بيه؟ (الإجابة بالشكل <code>x.y.z</code>)</p></desc>
+            <hint>فيه header بيفضح لغة الـ backend وإصدارها.</hint>
+            <explain>الـ `X-Powered-By: PHP/7.4.3` (وكمان `Server: nginx/1.18.0 (Ubuntu)`) = <b>version disclosure</b>. إصدار PHP 7.4 خرج من الدعم في نوفمبر 2022 — فأول خطوة بعدها تدوّر على CVEs للإصدار ده. التوصية في التقرير: شيل الـ headers دي (`expose_php = Off` و`server_tokens off`).</explain>
+          </task>
+          <task id="s01-t3" title="رايح فين بعد الـ redirect؟" level="2" answer="/account/orders">
+            <desc><p>بعد ما دوست Login رجع الـ response ده. الـ <code>next</code> parameter هيودّيك على أنهي path بعد فك الـ encoding؟</p></desc>
+            <listing lang="http" file="redirect.txt">
+              HTTP/1.1 302 Found
+              Location: https://sso.shop.example/login?next=%2Faccount%2Forders
+              Content-Length: 0
+            </listing>
+            <hint>`%2F` هي `/` بعد الـ percent-encoding. (جرّب الـ URL Inspector في الدرس 04 أو CyberChef.)</hint>
+            <explain>`%2F` = `/`، فالـ next = `/account/orders`. الـ parameters اللي زي `next` و`returnUrl` و`redirect` هي أشهر مكان لثغرة <b>open redirect</b>: لو غيّرتها لـ `https://evil.example` والموقع ودّاك هناك بعد الـ login، يبقى عندك ثغرة يستخدمها الـ phishing.</explain>
+          </task>
+        </div>
+      </section>

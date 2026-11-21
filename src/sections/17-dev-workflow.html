@@ -1,0 +1,304 @@
+      <section class="section" id="s17" data-part="الجزء 1 · HTML" data-pk="html" data-nav="HTML في الشغل الحقيقي (للمطوّر)" data-icon="👨‍💻" data-keywords="developer workflow vscode extensions emmet prettier htmlhint project structure file naming kebab-case case sensitivity separation of concerns template web components custom elements shadow dom git gitignore deploy github pages netlify cloudflare cache busting progressive enhancement i18n rtl dir auto hreflang html email">
+        <div class="section-head">
+          <span class="section-index">17</span>
+          <div>
+            <p class="eyebrow">HTML · الدرس 17 · للمطوّر</p>
+            <h2>HTML في الشغل الحقيقي: أدوات المطوّر وتنظيم المشروع والنشر</h2>
+            <p class="lede">كتابة tags صح نص الطريق. المطوّر المحترف بيعرف يجهّز بيئته، ينظّم مشروعه بحيث يكبر من غير ما يبوظ، يكتب HTML قابل لإعادة الاستخدام، يحفظ شغله بـ Git، وينشره على الإنترنت. الدرس ده هو «الجسر» من الصفحات التعليمية للمشاريع الحقيقية — وكل قرار هنا ليه أثر أمني كمان.</p>
+          </div>
+        </div>
+
+        <h3 class="sub">بيئة الشغل</h3>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>الأداة</th><th>ليه</th></tr></thead>
+          <tbody>
+            <tr><td><b>VS Code</b></td><td>المحرر الأشهر للويب، ومعاه <b>Emmet</b> مدمج.</td></tr>
+            <tr><td><b>Live Server</b> / <b>Live Preview</b></td><td>سيرفر محلي بيعمل reload أول ما تحفظ.</td></tr>
+            <tr><td><b>Prettier</b></td><td>تنسيق أوتوماتيك (مسافات، quotes) — الفريق كله يكتب بنفس الشكل.</td></tr>
+            <tr><td><b>HTMLHint</b> / W3C Validator</td><td>بيمسك الأخطاء: tags مش مقفولة، ids مكررة، alt ناقص.</td></tr>
+            <tr><td><b>Auto Rename Tag</b></td><td>تغيّر اسم الـ start tag فالـ end tag يتغيّر معاه.</td></tr>
+            <tr><td><b>GitLens</b> / Git المدمج</td><td>مين غيّر إيه وإمتى.</td></tr>
+            <tr><td><b>DevTools</b> (Chrome/Firefox)</td><td>الـ DOM الحي، الـ Network، Lighthouse، وتجربة الموبايل.</td></tr>
+          </tbody>
+        </table></div>
+
+        <h3 class="sub">Emmet: اكتب HTML أسرع 10 مرات</h3>
+        <p>في VS Code اكتب الاختصار ودوس <kbd>Tab</kbd>:</p>
+        <div class="table-wrap reveal"><table class="ref wrap">
+          <thead><tr><th>الاختصار</th><th>الناتج</th></tr></thead>
+          <tbody>
+            <tr><td><code>!</code></td><td>هيكل HTML5 كامل (doctype، head، meta charset، viewport، title)</td></tr>
+            <tr><td><code>ul>li*3</code></td><td><code>&lt;ul&gt;</code> فيه 3 <code>&lt;li&gt;</code></td></tr>
+            <tr><td><code>.card>h2+p</code></td><td><code>&lt;div class="card"&gt;&lt;h2&gt;&lt;/h2&gt;&lt;p&gt;&lt;/p&gt;&lt;/div&gt;</code></td></tr>
+            <tr><td><code>nav>a[href="#"]*4{Link $}</code></td><td>4 لينكات: Link 1 … Link 4</td></tr>
+            <tr><td><code>table>tr*3>td*2</code></td><td>جدول 3×2</td></tr>
+            <tr><td><code>form>label+input:email</code></td><td>label + <code>&lt;input type="email" name="" id=""&gt;</code></td></tr>
+            <tr><td><code>p>lorem10</code></td><td>فقرة فيها 10 كلمات Lorem ipsum</td></tr>
+            <tr><td><code>section#about.hero</code></td><td><code>&lt;section id="about" class="hero"&gt;</code></td></tr>
+          </tbody>
+        </table></div>
+
+        <h3 class="sub">تنظيم المشروع</h3>
+        <code-block lang="text" file="my-site/">
+          my-site/
+          ├── index.html            ← الصفحة الرئيسية (default document)
+          ├── about.html
+          ├── 404.html              ← صفحة «مش موجود» مخصصة
+          ├── css/
+          │   └── style.css
+          ├── js/
+          │   └── main.js
+          ├── img/
+          │   ├── logo.svg
+          │   └── hero-800.webp
+          ├── favicon.ico
+          ├── robots.txt
+          └── .gitignore
+        </code-block>
+        <div class="grid-2">
+          <div class="card reveal"><div class="ico">🔤</div><h4>أسماء الملفات</h4><p>حروف small، كلمات بـ <code>-</code> (kebab-case): <code>contact-us.html</code>. من غير مسافات ولا عربي (هيتحولوا <code>%20</code> و<code>%D8%…</code> في الـ URL).</p></div>
+          <div class="card reveal"><div class="ico">🐧</div><h4>حساسية الحروف</h4><p>Windows مش فارق معاه <code>Logo.PNG</code> و<code>logo.png</code>، لكن سيرفرات Linux فارق معاها جدًا: الموقع شغّال عندك و404 بعد النشر. خلّي كل حاجة small.</p></div>
+          <div class="card reveal"><div class="ico">🧭</div><h4>مسارات relative</h4><p><code>css/style.css</code> مش <code>C:\Users\…</code>. والمسارات اللي بتبدأ بـ <code>/</code> بتفترض إن الموقع على root الدومين — بتبوظ لو اتنشر في subfolder (زي GitHub Pages لمشروع).</p></div>
+          <div class="card reveal"><div class="ico">🗂️</div><h4>ملف لكل لغة</h4><p>الـ HTML للهيكل، الـ CSS في <code>css/</code>، الـ JS في <code>js/</code>. أسهل في الصيانة والـ caching… وفي الأمن (تحت).</p></div>
+        </div>
+
+        <h3 class="sub">فصل المسؤوليات: بلاش inline</h3>
+        <div class="cmp reveal">
+          <div class="bad"><h5>❌ كل حاجة جوه الـ HTML</h5><pre class="q-code"><code class="language-html">&lt;button style="background:red;color:white"
+        onclick="deleteAccount()"&gt;Delete&lt;/button&gt;</code></pre></div>
+          <div class="good"><h5>✅ HTML نضيف + ملفات منفصلة</h5><pre class="q-code"><code class="language-html">&lt;link rel="stylesheet" href="css/style.css"&gt;
+&lt;script src="js/main.js" defer&gt;&lt;/script&gt;
+…
+&lt;button class="btn-danger" id="delete"&gt;Delete&lt;/button&gt;</code></pre></div>
+        </div>
+        <div class="callout dev reveal"><span class="ci">👨‍💻</span><div><strong>ليه ده مهم للمطوّر… وللأمن</strong><p>الكود المفصول أسهل في القراية والتعديل والتجربة والـ caching. والأهم: لو مفيش ولا <code>style=""</code> ولا <code>on…=""</code> ولا <code>&lt;script&gt;</code> inline، تقدر تفعّل <b>CSP صارمة</b> (<code>script-src 'self'</code>) تمنع أي XSS من إنه يشغّل كود حتى لو حصل injection. المطوّر اللي بيكتب كده من الأول بيوفّر على فريق الأمن نص شغله.</p></div></div>
+
+        <h3 class="sub">HTML قابل لإعادة الاستخدام: template وWeb Components</h3>
+        <p>لما يبقى عندك «شكل» بيتكرر (كارت منتج، صف في جدول)، بتكتبه مرة واحدة. <code>&lt;template&gt;</code> بيخزّن HTML <b>خامل</b> (مش بيتعرض ولا بيتنفّذ)، وJavaScript بيعمل منه نسخ. والخطوة الأكبر: <b>Custom Elements</b> — تعمل tag بتاعك زي <code>&lt;user-card&gt;</code> ليه شكله وسلوكه (وده اللي الـ frameworks زي React وVue بتعمله بطريقتها). هنتعمق فيهم في جزء JavaScript، بس شوف الفكرة:</p>
+        <html-example file="components.html" auto max="320">
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>Components</title>
+          <style>body{font-family:system-ui}</style></head>
+          <body>
+            <template id="badge-tpl">
+              <span style="display:inline-block;padding:2px 10px;margin:2px;border-radius:99px;background:#fff1ea;color:#c2410c;font-weight:700">
+                <slot></slot>
+              </span>
+            </template>
+
+            <p>Skills: <skill-badge>HTML</skill-badge> <skill-badge>XSS</skill-badge> <skill-badge>Ghidra</skill-badge></p>
+
+            <script>
+              // a tiny Web Component: <skill-badge>text</skill-badge>
+              customElements.define("skill-badge", class extends HTMLElement {
+                constructor() {
+                  super();
+                  const tpl = document.getElementById("badge-tpl");
+                  this.attachShadow({ mode: "open" }).appendChild(tpl.content.cloneNode(true));
+                }
+              });
+              console.log("custom elements on the page:", document.querySelectorAll("skill-badge").length);
+            </script>
+          </body>
+          </html>
+        </html-example>
+        <div class="callout pt reveal"><span class="ci">🎯</span><div><strong>زاوية أمنية في الـ components</strong><p>الـ frameworks الحديثة (React/JSX، Vue، Angular) بتعمل escaping أوتوماتيك للنص — وده سبب إن الـ XSS قل فيها. الثغرات بتظهر في «فتحات الهروب»: <code>dangerouslySetInnerHTML</code> (React)، <code>v-html</code> (Vue)، <code>[innerHTML]</code>/<code>bypassSecurityTrust…</code> (Angular). أول حاجة بتدوّر عليها في code review.</p></div></div>
+
+        <h3 class="sub">Git: احفظ كل خطوة</h3>
+        <code-block lang="bash" file="terminal">
+          git init                         # start tracking this folder
+          git add index.html css/ js/      # stage changes
+          git commit -m "Add contact form with validation"
+          git log --oneline                # history
+          git switch -c feature/pricing    # new branch for a new feature
+          git push -u origin main          # upload to GitHub (after adding a remote)
+        </code-block>
+        <code-block lang="text" file=".gitignore">
+          # never commit these
+          .env
+          *.log
+          node_modules/
+          .DS_Store
+          Thumbs.db
+        </code-block>
+        <div class="callout danger reveal"><span class="ci">🔑</span><div><strong>Secrets في Git = مكشوفة للأبد</strong><p>لو عملت commit لـ <code>.env</code> فيه API key، مسح الملف في commit جديد <b>مش كفاية</b>: الـ key لسه في الـ history، وفيه bots بتمسح GitHub كل دقيقة بتدوّر على مفاتيح. الإجراء الصح: <b>غيّر (rotate) الـ key فورًا</b>، وبعدين نظّف الـ history. 🎯 وكـ pentester: <code>/.git/</code> مكشوف على سيرفر = تقدر تسحب الكود كله.</p></div></div>
+
+        <h3 class="sub">النشر على الإنترنت</h3>
+        <div class="steps">
+          <div class="step"><span class="n">01</span><div><h4>Static hosting مجاني</h4><p><b>GitHub Pages</b>، <b>Netlify</b>، <b>Cloudflare Pages</b>: ارفع الفولدر (أو اربط الـ repo) والموقع يبقى على HTTPS في دقيقة. الكورس ده نفسه static وبيتنشر بنفس الطريقة.</p></div></div>
+          <div class="step"><span class="n">02</span><div><h4>Domain</h4><p>اشتري دومين واربطه بـ DNS record (CNAME/A) — والـ HTTPS بيتعمل أوتوماتيك (Let's Encrypt).</p></div></div>
+          <div class="step"><span class="n">03</span><div><h4>Cache busting</h4><p>المتصفح بيخزّن الـ CSS والـ JS. لما تحدّثهم، غيّر اسمهم أو ضيف version: <code>style.css?v=2</code> أو <code>style.4f9c2a.css</code> (أدوات الـ build بتعمل ده).</p></div></div>
+          <div class="step"><span class="n">04</span><div><h4>Headers الأمان</h4><p>Netlify وCloudflare بيسمحوا بملف <code>_headers</code> تحط فيه CSP وX-Frame-Options… (GitHub Pages مبيسمحش بـ custom headers — اعرف حدود الـ hosting بتاعك).</p></div></div>
+        </div>
+
+        <h3 class="sub">Progressive enhancement</h3>
+        <p>ابني الصفحة طبقات: <b>HTML</b> لوحده لازم يشتغل (اللينكات بتفتح، الفورم بتتبعت)، بعدين <b>CSS</b> للشكل، بعدين <b>JavaScript</b> لتحسين التجربة (validation فوري، إرسال من غير reload). لو الـ JS فشل (شبكة بطيئة، extension، error) الموقع لسه شغّال. وقبل ما تستخدم feature جديدة: <b>caniuse.com</b> أو علامة <b>Baseline</b> في MDN.</p>
+
+        <h3 class="sub">مواقع عربي: الـ i18n صح</h3>
+        <ul>
+          <li><code>&lt;html lang="ar" dir="rtl"&gt;</code> — والـ CSS logical properties (<code>margin-inline-start</code>) في الجزء التاني بتخلي نفس الـ CSS يشتغل للاتجاهين.</li>
+          <li>أي محتوى من المستخدم (تعليق، اسم) اتجاهه مجهول: <code>dir="auto"</code> على العنصر أو <code>&lt;bdi&gt;</code> حواليه، وكمان على خانات الإدخال.</li>
+          <li>كود أو URLs أو أرقام تليفونات جوه نص عربي: <code>&lt;span dir="ltr"&gt;</code> أو <code>&lt;bdi&gt;</code>.</li>
+          <li>نسخ بلغات تانية: <code>&lt;link rel="alternate" hreflang="en" href="/en/"&gt;</code>.</li>
+        </ul>
+
+        <div class="callout info reveal"><span class="ci">✉️</span><div><strong>HTML الإيميلات عالم تاني</strong><p>برامج الإيميل (Outlook، Gmail) بتدعم HTML قديم ومحدود: layout بالجداول، CSS inline، مفيش JavaScript خالص، والصور غالبًا متقفلة لحد ما المستخدم يسمح — بسبب الـ tracking pixels اللي شفناها في الدرس 06.</p></div></div>
+
+        <div class="exercises">
+          <div class="exercises-head"><h3><span class="bulb">✏️</span> تمارين الدرس 17</h3></div>
+          <quiz id="s17-q1" answer="1">
+            <q>كتبت في VS Code `ul>li*3` ودوست Tab. الناتج؟</q>
+            <o>3 قوائم `ul` جنب بعض</o>
+            <o>`ul` واحدة جواها 3 عناصر `li`</o>
+            <o>`ul` و`li` جنب بعض 3 مرات</o>
+            <o>error</o>
+            <good>`>` = ابن، و`*3` = كرّر 3 مرات. (و`+` = أخ.)</good>
+            <bad>في Emmet: `>` بيدخل جوه العنصر، و`*N` بيكرر العنصر اللي قبله.</bad>
+          </quiz>
+          <quiz id="s17-q2" answer="3">
+            <q>الموقع شغّال على جهازك (Windows) بس بعد النشر على سيرفر Linux صورة `img/Logo.PNG` بقت 404، والملف اسمه `logo.png`. السبب؟</q>
+            <o>السيرفر مش بيدعم PNG</o>
+            <o>لازم HTTPS</o>
+            <o>الصورة كبيرة</o>
+            <o>Linux بيفرّق بين الحروف الكبيرة والصغيرة في أسماء الملفات، وWindows لأ</o>
+            <good>القاعدة: كل أسماء الملفات والفولدرات small وkebab-case، والـ paths في الـ HTML تطابقها حرفيًا.</good>
+            <bad>`Logo.PNG` و`logo.png` ملفين مختلفين على Linux. Windows كان بيداري المشكلة.</bad>
+          </quiz>
+          <quiz id="s17-q3" answer="0">
+            <q>ليه شيل كل الـ `onclick` والـ `style` الـ inline بيساعد في الأمن؟</q>
+            <o>عشان يبقى ممكن تفعّل CSP بتمنع أي inline script/handler — فأي XSS injection ميقدرش يشغّل كود</o>
+            <o>عشان الصفحة تبقى أسرع بس</o>
+            <o>مالوش علاقة بالأمن</o>
+            <o>عشان الـ SEO</o>
+            <good>CSP صارمة = `script-src 'self'` من غير `'unsafe-inline'`، ودي مستحيلة لو الكود معتمد على inline handlers.</good>
+            <bad>الـ inline handlers بتجبرك تسمح بـ `'unsafe-inline'` في الـ CSP، ودي بتلغي أهم حماية ضد XSS.</bad>
+          </quiz>
+          <quiz id="s17-q4" answer="2">
+            <q>عملت commit لملف `.env` فيه API key، وبعدها عملت commit تاني مسحت فيه الملف. الـ key في أمان؟</q>
+            <o>أيوه، اتمسح</o>
+            <o>أيوه لو الـ repo private</o>
+            <o>لأ — لسه موجود في الـ history. لازم تعمل rotate للـ key فورًا (وبعدين تنظّف الـ history)</o>
+            <o>لأ بس مش مهم</o>
+            <good>Git بيحفظ كل نسخة. اعتبر أي secret اتعمله commit «مكشوف» وغيّره.</good>
+            <bad>الـ commit القديم لسه فيه الملف، وأي حد عنده الـ repo يقدر يرجعله. الحل: rotate.</bad>
+          </quiz>
+          <quiz id="s17-q5" answer="1">
+            <q>إيه الفرق بين `<template>` و`<div hidden>` لتخزين HTML هتستخدمه بعدين؟</q>
+            <o>مفيش فرق</o>
+            <o>محتوى `template` خامل: مش جزء من الـ DOM الأساسي، الصور مبتتحمّلش والـ scripts مبتتنفّذش لحد ما تنسخه</o>
+            <o>`template` بيتعرض للمستخدم</o>
+            <o>`div hidden` أسرع</o>
+            <good>`hidden` مخفي بس «حي»: الصور بتتحمّل والـ `onerror` ممكن يشتغل. `template.content` DocumentFragment خامل.</good>
+            <bad>العناصر جوه `div hidden` حية ومحمّلة (حتى لو مش ظاهرة). محتوى `template` خامل تمامًا.</bad>
+          </quiz>
+          <quiz id="s17-q6" answer="3">
+            <q>تعليقات مستخدمين بالعربي والإنجليزي في نفس الصفحة. إزاي تخلي كل تعليق يتعرض باتجاهه الصح؟</q>
+            <o>`dir="rtl"` على الكل</o>
+            <o>`dir="ltr"` على الكل</o>
+            <o>تترجمهم</o>
+            <o>`dir="auto"` على عنصر كل تعليق (المتصفح يحدد من أول حرف قوي)</o>
+            <good>`dir="auto"` (أو `<bdi>`) للمحتوى اللي اتجاهه مش معروف مسبقًا.</good>
+            <bad>المحتوى ده اتجاهه مختلف من تعليق للتاني — `dir="auto"` بيخلي المتصفح يقرر لكل واحد.</bad>
+          </quiz>
+
+          <html-lab id="s17-lab1" title="افصل الـ HTML عن الـ CSS والـ JS" level="1">
+            <desc><p>حوّل الصفحة لصفحة «project-ready»:</p>
+            <ul><li>اربط <code>css/style.css</code> بـ <code>link rel="stylesheet"</code> في الـ head.</li>
+            <li>اربط <code>js/main.js</code> في الـ head بـ <code>defer</code>.</li>
+            <li>شيل <b>كل</b> <code>style=""</code> و<b>كل</b> <code>on…=""</code> من الصفحة.</li>
+            <li>الزرار ياخد <code>id="delete"</code> و<code>class="btn-danger"</code> و<code>type="button"</code>.</li></ul></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Settings</title>
+              </head>
+              <body style="font-family:Arial">
+                <h1 style="color:#c2410c">Settings</h1>
+                <button style="background:red;color:white" onclick="deleteAccount()">Delete account</button>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Settings</title>
+                <link rel="stylesheet" href="css/style.css">
+                <script src="js/main.js" defer></script>
+              </head>
+              <body>
+                <h1>Settings</h1>
+                <button type="button" id="delete" class="btn-danger">Delete account</button>
+              </body>
+              </html>
+            </solution>
+            <test label="`link rel=stylesheet` لـ css/style.css في الـ head">has('head link[rel="stylesheet"][href="css/style.css"]')</test>
+            <test label="`script src=js/main.js` في الـ head بـ defer">has('head script[src="js/main.js"]') && $('script[src="js/main.js"]').defer</test>
+            <test label="مفيش `style` attribute ولا `on*`">!$$("*").some(e => e.hasAttribute("style") || [...e.attributes].some(a => /^on/i.test(a.name)))</test>
+            <test label="الزرار: id=delete و class=btn-danger و type=button">has("button#delete.btn-danger") && $("#delete").getAttribute("type") === "button"</test>
+          </html-lab>
+
+          <html-lab id="s17-lab2" title="صفحة عربي جاهزة للمحتوى المختلط" level="2">
+            <desc><ul><li><code>&lt;html lang="ar" dir="rtl"&gt;</code>.</li>
+            <li>قايمة تعليقات <code>ul.comments</code> فيها 3 <code>li</code> على الأقل، <b>كل</b> واحد عليه <code>dir="auto"</code> (واحد منهم على الأقل إنجليزي).</li>
+            <li>خانة إضافة تعليق <code>textarea</code> عليها <code>dir="auto"</code> وليها label.</li>
+            <li>لينك للنسخة الإنجليزي في الـ head: <code>link rel="alternate" hreflang="en" href="/en/"</code>.</li></ul></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html>
+              <head><meta charset="UTF-8"><title>التعليقات</title></head>
+              <body>
+                <h1>التعليقات</h1>
+                <ul class="comments">
+                  <li>مقال ممتاز!</li>
+                </ul>
+                <textarea name="c"></textarea>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="ar" dir="rtl">
+              <head>
+                <meta charset="UTF-8">
+                <title>التعليقات</title>
+                <link rel="alternate" hreflang="en" href="/en/">
+              </head>
+              <body>
+                <h1>التعليقات</h1>
+                <ul class="comments">
+                  <li dir="auto">مقال ممتاز!</li>
+                  <li dir="auto">Great write-up, thanks!</li>
+                  <li dir="auto">ممكن تشرح الـ CSP أكتر؟</li>
+                </ul>
+                <label for="c">أضف تعليق</label>
+                <textarea id="c" name="c" dir="auto"></textarea>
+              </body>
+              </html>
+            </solution>
+            <test label="html: lang=ar و dir=rtl">attr("html", "lang") === "ar" && attr("html", "dir") === "rtl"</test>
+            <test label="3 تعليقات على الأقل وكلها dir=auto">count("ul.comments > li") >= 3 && $$("ul.comments > li").every(li => li.getAttribute("dir") === "auto")</test>
+            <test label="فيه تعليق إنجليزي">$$("ul.comments > li").some(li => /^[\s\W\d]*[A-Za-z]/.test(li.textContent))</test>
+            <test label="textarea: dir=auto + label">has('textarea[dir="auto"]') && $("textarea").labels.length > 0</test>
+            <test label="alternate hreflang=en">has('head link[rel="alternate"][hreflang="en"][href="/en/"]')</test>
+          </html-lab>
+
+          <task id="s17-t1" title="ليه الصورة 404 بعد النشر؟" level="1" answer="img/logo.png">
+            <desc><p>بعد ما الموقع اتنشر على سيرفر Linux، اللوجو مبيظهرش. ده الـ HTML ومحتوى الفولدر. اكتب قيمة الـ <code>src</code> الصح.</p></desc>
+            <listing lang="text" file="index.html + ls -R">
+              <img src="Img/Logo.PNG" alt="Shop logo" width="120" height="40">
+
+              $ ls -R
+              .:
+              index.html  css  img
+              ./img:
+              logo.png  hero-800.webp
+            </listing>
+            <explain>`img/logo.png` — الفولدر `img` (مش `Img`) والملف `logo.png` (مش `Logo.PNG`). على Windows كان شغّال لأن نظام الملفات مش حساس للحروف.</explain>
+          </task>
+        </div>
+      </section>

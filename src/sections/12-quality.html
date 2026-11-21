@@ -1,0 +1,232 @@
+      <section class="section" id="s12" data-part="الجزء 1 · HTML" data-pk="html" data-nav="الجودة: Accessibility وSEO" data-icon="♿" data-keywords="accessibility a11y aria role aria-label aria-hidden aria-expanded aria-live accessibility tree keyboard focus tabindex skip link wcag screen reader validator lighthouse axe seo structured data json-ld schema.org sitemap robots performance core web vitals lcp cls inp seo spam cloaking">
+        <div class="section-head">
+          <span class="section-index">12</span>
+          <div>
+            <p class="eyebrow">HTML · الدرس 12</p>
+            <h2>الجودة: Accessibility وValidation وSEO والأداء</h2>
+            <p class="lede">الصفحة الاحترافية مش «شكلها حلو» وبس: شغّالة بالكيبورد، قارئ الشاشة فاهمها، محركات البحث فاهماها، وسريعة. وكل ده بيرجع لنفس الفكرة: <b>HTML بمعنى صحيح</b>. وفي الآخر هنشوف إزاي الـ malware بيستغل نفس الأدوات دي (SEO spam وcloaking).</p>
+          </div>
+        </div>
+
+        <h3 class="sub">الـ Accessibility tree</h3>
+        <p>المتصفح بيبني من الـ DOM شجرة تانية اسمها <b>accessibility tree</b>: لكل عنصر مهم <b>role</b> (زرار؟ لينك؟ عنوان؟) و<b>name</b> (اسمه إيه؟) و<b>state</b> (مفتوح؟ متعلّم عليه؟). قارئ الشاشة (NVDA، VoiceOver، TalkBack) بيقرا الشجرة دي. العناصر الـ semantic بتدّي كل ده ببلاش: <code>&lt;button&gt;</code> = role button + focusable + بيشتغل بـ Enter وSpace. الـ <code>&lt;div onclick&gt;</code> مفيهوش أي حاجة من دول. جرّب بالكيبورد (Tab ثم Enter):</p>
+        <html-example file="fake-button.html" auto>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>Buttons</title>
+          <style>.fake{display:inline-block;background:#64748b;color:#fff;padding:6px 12px;border-radius:6px;cursor:pointer}</style></head>
+          <body>
+            <div class="fake" onclick="console.log('fake div clicked')">Fake button (div)</div>
+            <button onclick="console.log('real button activated')">Real button</button>
+            <p>Use <kbd>Tab</kbd>: the div is skipped, the button gets focus and works with <kbd>Enter</kbd>/<kbd>Space</kbd>.</p>
+          </body>
+          </html>
+        </html-example>
+
+        <h3 class="sub">ARIA: لما الـ HTML ميكفيش</h3>
+        <p><b>ARIA</b> (Accessible Rich Internet Applications) attributes بتعدّل الـ accessibility tree. <b>القاعدة الأولى للـ ARIA: متستخدمهاش لو فيه عنصر HTML بيعمل الحاجة.</b> «No ARIA is better than bad ARIA».</p>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>الـ attribute</th><th>الاستخدام</th></tr></thead>
+          <tbody>
+            <tr><td><code>role="…"</code></td><td>يدّي role لعنصر (<code>role="dialog"</code>، <code>role="tablist"</code>، <code>role="alert"</code>…)</td></tr>
+            <tr><td><code>aria-label</code></td><td>اسم للعنصر لو مفيش نص ظاهر (زرار أيقونة: <code>&lt;button aria-label="Close"&gt;✕&lt;/button&gt;</code>)</td></tr>
+            <tr><td><code>aria-labelledby</code> / <code>aria-describedby</code></td><td>الاسم/الوصف موجود في عنصر تاني (بالـ id) — مثلًا رسالة الخطأ تحت خانة</td></tr>
+            <tr><td><code>aria-hidden="true"</code></td><td>اخفي العنصر من قارئ الشاشة بس (لسه ظاهر على الشاشة)</td></tr>
+            <tr><td><code>aria-expanded</code> / <code>aria-pressed</code> / <code>aria-invalid</code></td><td>حالات: مفتوح، مضغوط، فيه خطأ</td></tr>
+            <tr><td><code>aria-live="polite"</code></td><td>المنطقة دي بتتغير — اقرا التغيير (رسائل toast، نتايج بحث)</td></tr>
+          </tbody>
+        </table></div>
+
+        <h3 class="sub">الكيبورد والـ focus</h3>
+        <ul>
+          <li>كل حاجة تفاعلية لازم توصلها بـ <kbd>Tab</kbd> وتشغّلها بـ <kbd>Enter</kbd>/<kbd>Space</kbd>. العناصر الأصلية (<code>a[href]</code>، <code>button</code>، <code>input</code>…) بتعمل كده لوحدها.</li>
+          <li>ترتيب الـ Tab = ترتيب الـ DOM. <code>tabindex="0"</code> يضيف عنصر للترتيب، <code>-1</code> focusable بالكود بس، و<b>الموجب ممنوع</b> عمليًا (بيبوّظ الترتيب).</li>
+          <li>الـ focus لازم يبقى <b>باين</b> (متعملش <code>outline: none</code> من غير بديل).</li>
+          <li>«Skip link» أول حاجة في الصفحة: <code>&lt;a href="#main"&gt;Skip to content&lt;/a&gt;</code>.</li>
+        </ul>
+
+        <h3 class="sub">Checklist سريع</h3>
+        <div class="grid-2">
+          <div class="card reveal"><div class="ico">🏷️</div><h4>كل حاجة ليها اسم</h4><p>صور بـ <code>alt</code>، خانات بـ <code>label</code>، أزرار أيقونات بـ <code>aria-label</code>، iframes بـ <code>title</code>، لينكات بنص مفهوم.</p></div>
+          <div class="card reveal"><div class="ico">🧭</div><h4>هيكل واضح</h4><p><code>lang</code> على <code>html</code>، عناوين بالترتيب من غير قفز، landmarks (<code>main</code>، <code>nav</code>…)، قوائم وجداول حقيقية.</p></div>
+          <div class="card reveal"><div class="ico">⌨️</div><h4>الكيبورد</h4><p>عناصر native، focus باين، مفيش keyboard traps، الـ dialogs بتمسك الـ focus وبتقفل بـ Esc.</p></div>
+          <div class="card reveal"><div class="ico">🎨</div><h4>الشكل (في جزء CSS)</h4><p>contrast كفاية، الحجم يكبر لـ 200% من غير ما يبوظ، والمعلومة مش معتمدة على اللون بس.</p></div>
+        </div>
+        <p>المرجع: <b>WCAG 2.2</b> (مستويات A وAA وAAA). وفي دول كتير الـ accessibility إلزام قانوني (زي European Accessibility Act من يونيو 2025). أدوات: <b>Lighthouse</b> (جوه Chrome DevTools)، <b>axe DevTools</b>، والـ <b>W3C Validator</b> للـ HTML.</p>
+
+        <h3 class="sub">SEO: إن الآلة تفهمك</h3>
+        <p>محركات البحث بتقرا: الـ <code>title</code> والـ <code>description</code>، العناوين، النص، الـ <code>alt</code>، اللينكات، الـ <code>canonical</code>، و<code>robots.txt</code> و<code>sitemap.xml</code>. وفيه <b>structured data</b> بصيغة JSON-LD بتوصف المحتوى بمعجم <b>schema.org</b>:</p>
+        <code-block lang="html" file="json-ld.html">
+          <script type="application/ld+json">
+          {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "Shop",
+            "url": "https://shop.example",
+            "logo": "https://shop.example/logo.png",
+            "sameAs": ["https://twitter.com/shop_example"],
+            "contactPoint": { "@type": "ContactPoint", "email": "security@shop.example" }
+          }
+          </script>
+        </code-block>
+        <div class="callout pt reveal"><span class="ci">🎯</span><div><strong>Recon من ملفات الـ SEO</strong><p><code>/robots.txt</code> فيه <code>Disallow: /admin-backup/</code> = المطوّر قالك فين الحاجات اللي مش عايزها تتشاف. <code>/sitemap.xml</code> = قايمة بكل الصفحات (أحيانًا صفحات قديمة أو staging). والـ JSON-LD فيه إيميلات وحسابات وأسماء — مفيدة في الـ OSINT والـ social engineering (في نطاق مصرّح بيه).</p></div></div>
+
+        <h3 class="sub">الأداء: Core Web Vitals</h3>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>المقياس</th><th>معناه</th><th>بيتحسّن بـ</th></tr></thead>
+          <tbody>
+            <tr><td><b>LCP</b> (Largest Contentful Paint)</td><td>إمتى أكبر عنصر ظهر (هدف: أقل من 2.5 ثانية)</td><td>صور أصغر، <code>preload</code> للصورة الرئيسية، سيرفر أسرع</td></tr>
+            <tr><td><b>CLS</b> (Cumulative Layout Shift)</td><td>قد إيه الصفحة «اتنططت» وهي بتحمّل</td><td><code>width</code>/<code>height</code> على الصور والـ iframes، حجز مكان للإعلانات</td></tr>
+            <tr><td><b>INP</b> (Interaction to Next Paint)</td><td>سرعة الاستجابة لما تدوس على حاجة</td><td>JS أقل، <code>defer</code>، تقسيم الشغل التقيل</td></tr>
+          </tbody>
+        </table></div>
+
+        <h3 class="sub">🦠 الجانب المظلم: SEO spam وcloaking</h3>
+        <div class="callout mal reveal"><span class="ci">🦠</span><div><strong>مواقع مخترقة بتبيع «ترتيب في جوجل»</strong><p>نوع منتشر جدًا من الـ malware على مواقع WordPress المخترقة: بيحقن في الصفحات لينكات مخفية لمواقع قمار أو أدوية (<code>&lt;div style="position:absolute;left:-9999px"&gt;</code> أو <code>display:none</code>) عشان ترفع ترتيب مواقع المهاجمين، أو بيعمل آلاف الصفحات المزيفة بكلمات يابانية («Japanese keyword hack»). وكتير منه بيعمل <b>cloaking</b>: يعرض المحتوى الخبيث لـ <code>Googlebot</code> بس (حسب الـ User-Agent أو IP)، والزائر العادي يشوف الموقع سليم — فصاحب الموقع ميكتشفش حاجة غير لما نتايج جوجل تبوظ. 🔎 الكشف: قارن الصفحة بـ User-Agent عادي وبـ Googlebot، ودوّر على لينكات خارجية مخفية بالـ CSS.</p></div></div>
+
+        <div class="exercises">
+          <div class="exercises-head"><h3><span class="bulb">✏️</span> تمارين الدرس 12</h3></div>
+          <quiz id="s12-q1" answer="1">
+            <q>إيه «القاعدة الأولى» للـ ARIA؟</q>
+            <o>حط `role` على كل عنصر</o>
+            <o>لو فيه عنصر HTML native بيعمل المطلوب، استخدمه بدل ARIA</o>
+            <o>استخدم `aria-label` بدل أي نص</o>
+            <o>ARIA بتحسّن الـ SEO</o>
+            <good>`<button>` أحسن من `<div role="button" tabindex="0">` + JS للكيبورد. الـ native بيجي بكل السلوك ببلاش.</good>
+            <bad>ARIA بتغيّر اللي قارئ الشاشة بيقوله بس، مش السلوك. العنصر الـ native هو الأساس.</bad>
+          </quiz>
+          <quiz id="s12-q2" answer="3">
+            <q>`<div onclick="pay()">Pay</div>` — إيه المشكلة؟</q>
+            <o>مفيش</o>
+            <o>مش هيشتغل بالماوس</o>
+            <o>الـ onclick مش بيشتغل على div</o>
+            <o>مش focusable بالكيبورد، ومالوش role زرار، ومش بيشتغل بـ Enter/Space</o>
+            <good>استخدم `<button>`. لو مضطر للـ div: `role="button" tabindex="0"` + معالجة Enter وSpace — مجهود على الفاضي.</good>
+            <bad>الـ click بيشتغل بالماوس، بس مستخدمين الكيبورد وقارئات الشاشة مش هيعرفوا يوصلوله ولا يعرفوا إنه زرار.</bad>
+          </quiz>
+          <quiz id="s12-q3" answer="0">
+            <q>`aria-hidden="true"` على عنصر بيعمل إيه؟</q>
+            <o>بيخفيه من الـ accessibility tree (قارئ الشاشة) بس — لسه ظاهر على الشاشة وفي الـ DOM</o>
+            <o>بيخفيه من الشاشة</o>
+            <o>بيمسحه من الـ DOM</o>
+            <o>بيمنع الضغط عليه</o>
+            <good>متحطهاش أبدًا على عنصر focusable — هيبقى «شبح»: الكيبورد يوصله والقارئ ميقولش هو إيه.</good>
+            <bad>`aria-hidden` بيأثر على قارئ الشاشة بس. العرض والـ DOM زي ما هما.</bad>
+          </quiz>
+          <quiz id="s12-q4" answer="2">
+            <q>`tabindex="5"` على عنصر. ليه ده مش مستحب؟</q>
+            <o>بيعطّل العنصر</o>
+            <o>مش مدعوم</o>
+            <o>القيم الموجبة بتغيّر ترتيب الـ Tab عن ترتيب الصفحة فبتلخبط المستخدم</o>
+            <o>بيخفي العنصر</o>
+            <good>استخدم `0` أو `-1` بس، وخلّي ترتيب الـ DOM منطقي.</good>
+            <bad>العناصر اللي tabindex بتاعها موجب بتتنقل الأول قبل كل حاجة، بترتيب مختلف عن اللي باين.</bad>
+          </quiz>
+          <quiz id="s12-q5" answer="1">
+            <q>صاحب موقع بيقول «الموقع شكله سليم، بس جوجل بيعرض صفحات منه عن قمار». الأرجح؟</q>
+            <o>خطأ في جوجل</o>
+            <o>SEO spam malware بيعمل cloaking: بيعرض محتوى مختلف لـ Googlebot</o>
+            <o>الـ CSS بايظ</o>
+            <o>الـ robots.txt غلط</o>
+            <good>الفحص: `curl -A "Googlebot/2.1 (+http://www.google.com/bot.html)" https://site/` وقارن بالطلب العادي. وشوف الملفات المعدلة حديثًا على السيرفر.</good>
+            <bad>ده نمط كلاسيكي للـ SEO spam: المحتوى الخبيث بيتعرض لـ crawlers البحث بس، فصاحب الموقع مش شايفه.</bad>
+          </quiz>
+
+          <html-lab id="s12-lab1" title="صلّح مشاكل الـ accessibility" level="2">
+            <desc><p>الصفحة دي فيها 5 مشاكل. صلّحها:</p>
+            <ul><li>الـ «زرار» اللي معمول بـ <code>div</code> → زرار حقيقي (ومفيش أي <code>div[onclick]</code>).</li>
+            <li>الصورة محتاجة <code>alt</code> وصفي.</li>
+            <li>خانة البحث محتاجة <code>label</code> مربوط.</li>
+            <li>العناوين بتقفز من <code>h1</code> لـ <code>h4</code> — خليها <code>h2</code>.</li>
+            <li>نص اللينك «click here» → نص بيوصف الوجهة.</li></ul></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>Reports</title></head>
+              <body>
+                <h1>Reports</h1>
+                <h4>Latest scan</h4>
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='40'%3E%3Crect width='200' height='40' fill='%2316a34a'/%3E%3C/svg%3E" width="200" height="40">
+                <input type="search" name="q" placeholder="Search reports">
+                <div class="btn" onclick="exportPdf()">Export</div>
+                <p>To read the full report <a href="/reports/nov.pdf">click here</a>.</p>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>Reports</title></head>
+              <body>
+                <h1>Reports</h1>
+                <h2>Latest scan</h2>
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='40'%3E%3Crect width='200' height='40' fill='%2316a34a'/%3E%3C/svg%3E" width="200" height="40" alt="Scan status: all checks passed">
+                <label for="q">Search reports</label>
+                <input type="search" id="q" name="q" placeholder="Search reports">
+                <button type="button" onclick="exportPdf()">Export</button>
+                <p><a href="/reports/nov.pdf">Read the full November report (PDF)</a>.</p>
+              </body>
+              </html>
+            </solution>
+            <test label="مفيش `div[onclick]`، وفيه `button` مكتوب عليه Export">!has("div[onclick]") && $$("button").some(b => /export/i.test(b.textContent))</test>
+            <test label="الصورة عليها alt وصفي">(attr("img", "alt") || "").trim().length >= 5</test>
+            <test label="خانة البحث ليها label">has('input[type="search"]') && $('input[type="search"]').labels.length > 0</test>
+            <test label="مفيش قفز في العناوين">(() => { let prev = 0; return $$("h1,h2,h3,h4,h5,h6").every(h => { const l = +h.localName[1]; const ok = l <= prev + 1; prev = l; return ok; }); })()</test>
+            <test label="مفيش لينك نصه «click here» أو «here»">!$$("a").some(a => /^\s*(click here|here|هنا|اضغط هنا)\s*$/i.test(a.textContent))</test>
+          </html-lab>
+
+          <html-lab id="s12-lab2" title="Structured data للموقع" level="1">
+            <desc><p>ضيف في الـ head <code>script</code> نوعه <code>application/ld+json</code> فيه JSON صحيح بيوصف:</p>
+            <ul><li><code>"@context": "https://schema.org"</code></li>
+            <li><code>"@type": "Organization"</code></li>
+            <li><code>"name": "Shop"</code> و<code>"url": "https://shop.example"</code></li></ul></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Shop</title>
+              </head>
+              <body><h1>Shop</h1></body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Shop</title>
+                <script type="application/ld+json">
+                {
+                  "@context": "https://schema.org",
+                  "@type": "Organization",
+                  "name": "Shop",
+                  "url": "https://shop.example"
+                }
+                </script>
+              </head>
+              <body><h1>Shop</h1></body>
+              </html>
+            </solution>
+            <test label="فيه `script[type=&quot;application/ld+json&quot;]` في الـ head">has('head script[type="application/ld+json"]')</test>
+            <test label="الـ JSON صحيح (بيتعمله parse)">(() => { try { JSON.parse($('script[type="application/ld+json"]').textContent); return true; } catch (e) { return false; } })()</test>
+            <test label="@context و@type صح">(() => { try { const j = JSON.parse($('script[type="application/ld+json"]').textContent); return j["@context"] === "https://schema.org" && j["@type"] === "Organization"; } catch (e) { return false; } })()</test>
+            <test label="name = Shop و url = https://shop.example">(() => { try { const j = JSON.parse($('script[type="application/ld+json"]').textContent); return j.name === "Shop" && /^https:\/\/shop\.example\/?$/.test(j.url); } catch (e) { return false; } })()</test>
+          </html-lab>
+
+          <task id="s12-t1" title="موقع مخترق: مين المستفيد؟" level="2" answer="casino-royal.example">
+            <desc><p>صاحب موقع اشتكى إن ترتيبه في جوجل بيقع. لقيت الكود ده في الـ footer بتاع كل الصفحات. إيه <b>الدومين</b> اللي المهاجم بيرفع ترتيبه؟</p></desc>
+            <listing lang="html" file="footer.php (rendered)">
+              <footer>
+                <p>© 2026 Cairo Dental Clinic</p>
+                <div style="position:absolute;left:-9999px;top:-9999px" aria-hidden="true">
+                  <a href="https://casino-royal.example/">best online casino</a>
+                  <a href="https://casino-royal.example/slots">free slots</a>
+                </div>
+                <a href="/privacy">Privacy</a>
+              </footer>
+            </listing>
+            <explain>`casino-royal.example`. الـ div متحرك برا الشاشة (`left:-9999px`) فالزائر مش شايفه، بس الـ crawlers بتقرا اللينكات وبتعتبرها توصية. ده IOC واضح لـ SEO spam injection؛ الخطوة الجاية: دوّر على الكود اللي بيحقنه (غالبًا في theme أو plugin أو database).</explain>
+          </task>
+        </div>
+      </section>

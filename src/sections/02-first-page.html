@@ -1,0 +1,333 @@
+      <section class="section" id="s02" data-part="الجزء 1 · HTML" data-pk="html" data-nav="أول صفحة والـ syntax" data-icon="🧱" data-keywords="doctype quirks standards mode html head body meta charset viewport title element tag attribute void self-closing boolean attributes quotes comments whitespace nesting validator syntax structure">
+        <div class="section-head">
+          <span class="section-index">02</span>
+          <div>
+            <p class="eyebrow">HTML · الدرس 02</p>
+            <h2>أول صفحة: الهيكل والـ Syntax</h2>
+            <p class="lede"><b>HTML</b> = HyperText Markup Language: لغة <b>توصيف</b> مش لغة برمجة. مفيهاش متغيرات ولا loops؛ فيها «علامات» (tags) بتقول للمتصفح «ده عنوان، ده لينك، دي فورم». في الدرس ده هتبني أول صفحة صح 100%، وهتعرف القواعد اللي المتصفح بيقرا بيها — والحاجات اللي بيسامح فيها (وده بالظبط اللي المهاجم بيستغله).</p>
+          </div>
+        </div>
+
+        <h3 class="sub">تشريح الـ element</h3>
+        <figure class="diagram reveal">
+          <svg viewBox="0 0 1000 200" role="img" aria-label="أجزاء الـ element">
+            <text x="500" y="92" text-anchor="middle" class="d-t" font-size="26"><tspan class="tok-punc" style="fill:#7f8ea8">&lt;</tspan><tspan style="fill:#ff8a65">a</tspan> <tspan style="fill:#ffcb6b">href</tspan><tspan style="fill:#7f8ea8">=</tspan><tspan style="fill:#c3e88d">"https://shop.example"</tspan> <tspan style="fill:#ffcb6b">target</tspan><tspan style="fill:#7f8ea8">=</tspan><tspan style="fill:#c3e88d">"_blank"</tspan><tspan style="fill:#7f8ea8">&gt;</tspan><tspan style="fill:#e6edf8">Shop</tspan><tspan style="fill:#7f8ea8">&lt;/</tspan><tspan style="fill:#ff8a65">a</tspan><tspan style="fill:#7f8ea8">&gt;</tspan></text>
+            <path class="d-ar-acc" d="M150,110 L150,140 L640,140 L640,110"/>
+            <text x="395" y="165" text-anchor="middle" class="d-ts d-acc">start tag (opening)</text>
+            <path class="d-ar-amb" d="M195,62 L195,40 L455,40 L455,62"/>
+            <text x="325" y="30" text-anchor="middle" class="d-tx d-amb">attribute: name="value"</text>
+            <path class="d-ar-amb" d="M470,62 L470,40 L620,40 L620,62"/>
+            <text x="545" y="30" text-anchor="middle" class="d-tx d-amb">attribute</text>
+            <path class="d-ar-tea" d="M648,110 L648,128 L706,128 L706,110"/>
+            <text x="677" y="190" text-anchor="middle" class="d-tx d-tea">content</text>
+            <path class="d-ar-tea" d="M677,128 L677,176"/>
+            <path class="d-ar-vio" d="M712,110 L712,140 L842,140 L842,110"/>
+            <text x="777" y="165" text-anchor="middle" class="d-ts d-vio">end tag (closing)</text>
+          </svg>
+          <figcaption>الـ <b>element</b> = start tag + content + end tag. الـ <b>attributes</b> بتتكتب جوه الـ start tag بس، وبتدّي معلومات إضافية (اللينك رايح فين، يفتح في tab جديدة…).</figcaption>
+        </figure>
+
+        <h3 class="sub">أصغر مستند HTML صحيح</h3>
+        <html-example file="index.html" auto>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <title>Recon Notes</title>
+          </head>
+          <body>
+            <h1>Target: shop.example</h1>
+            <p>Scope: <b>*.shop.example</b> — authorized until Dec 31.</p>
+          </body>
+          </html>
+        </html-example>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>السطر</th><th>وظيفته</th></tr></thead>
+          <tbody>
+            <tr><td><code>&lt;!DOCTYPE html&gt;</code></td><td>مش tag؛ ده إعلان بيقول للمتصفح «اشتغل بـ <b>standards mode</b>». لازم يبقى أول حاجة في الملف. لاحظ الـ badge في المعاينة: <span class="tag-pill">standards</span>.</td></tr>
+            <tr><td><code>&lt;html lang="en"&gt;</code></td><td>الـ <b>root element</b> — كل حاجة جواه. الـ <code>lang</code> بيقول لغة المحتوى (لقارئات الشاشة والترجمة والخطوط). للعربي: <code>lang="ar" dir="rtl"</code>.</td></tr>
+            <tr><td><code>&lt;head&gt;</code></td><td>معلومات <b>عن</b> الصفحة مش بتتعرض: الـ encoding، العنوان، الـ CSS، الـ scripts، الـ meta tags.</td></tr>
+            <tr><td><code>&lt;meta charset="UTF-8"&gt;</code></td><td>الـ bytes دي تتقري إزاي. لازم يبقى في <b>أول 1024 byte</b> من الملف. من غيره ممكن العربي يطلع «Ø§Ù„…» (mojibake) — والأخطر إن اختلاف الـ encoding ممكن يكسر الحمايات (الدرس 14).</td></tr>
+            <tr><td><code>&lt;meta name="viewport" …&gt;</code></td><td>عشان الموبايل يعرض الصفحة بعرضه الحقيقي بدل ما يصغّر صفحة desktop.</td></tr>
+            <tr><td><code>&lt;title&gt;</code></td><td>اسم الـ tab والـ bookmark ونتيجة البحث. إجباري في المستند الصحيح.</td></tr>
+            <tr><td><code>&lt;body&gt;</code></td><td>كل اللي بيتعرض للمستخدم.</td></tr>
+          </tbody>
+        </table></div>
+
+        <h3 class="sub">الـ DOCTYPE وquirks mode</h3>
+        <p>زمان قبل المعايير، كل متصفح كان بيرسم الصفحات بطريقته. لما المعايير جت، المتصفحات احتفظت بالسلوك القديم عشان المواقع القديمة متبوظش: لو الصفحة <b>مفيهاش DOCTYPE</b>، المتصفح بيدخل <b>quirks mode</b> ويقلّد سلوك متصفحات التسعينات في الـ CSS والـ layout. شغّل المثال وبص على الـ badge:</p>
+        <html-example file="no-doctype.html" auto>
+          <html>
+          <head><title>No doctype</title></head>
+          <body>
+            <p>This page has no DOCTYPE.</p>
+            <script>
+              // "BackCompat" = quirks mode, "CSS1Compat" = standards mode
+              console.log("document.compatMode =", document.compatMode);
+            </script>
+          </body>
+          </html>
+        </html-example>
+        <div class="callout tip reveal"><span class="ci">💡</span><div><strong>القاعدة</strong><p>أول سطر في أي صفحة تكتبها: <code>&lt;!DOCTYPE html&gt;</code>. الحروف مش فارقة (<code>&lt;!doctype html&gt;</code> نفس الحاجة)، والـ DOCTYPEs الطويلة بتاعة HTML 4 وXHTML ملهاش لازمة في أي مشروع جديد. 🎯 لما تلاقي موقع شغّال quirks mode، ده غالبًا كود قديم — ودي إشارة إن باقي الـ stack قديم برضه.</p></div></div>
+
+        <h3 class="sub">الـ Nesting: الصفحة شجرة</h3>
+        <p>الـ elements بتتداخل جوه بعض، والنتيجة <b>شجرة</b>: <code>html</code> هو الجذر، وأولاده <code>head</code> و<code>body</code>، وهكذا. المصطلحات اللي هتسمعها طول الوقت: <b>parent</b> (الأب)، <b>child</b> (ابن مباشر)، <b>sibling</b> (أخ — نفس الأب)، <b>descendant</b> (أي حد تحته)، <b>ancestor</b> (أي حد فوقه). القاعدة الذهبية: <b>اللي يتفتح آخر يتقفل الأول</b>.</p>
+        <div class="cmp reveal">
+          <div class="good"><h5>✅ صح</h5><pre class="q-code"><code class="language-html">&lt;p&gt;This is &lt;b&gt;very &lt;i&gt;important&lt;/i&gt;&lt;/b&gt;.&lt;/p&gt;</code></pre></div>
+          <div class="bad"><h5>❌ غلط (misnested)</h5><pre class="q-code"><code class="language-html">&lt;p&gt;This is &lt;b&gt;very &lt;i&gt;important&lt;/b&gt;&lt;/i&gt;.&lt;/p&gt;</code></pre><p class="small">المتصفح مش هيوقف — هيصلّحها بخوارزمية اسمها <b>adoption agency</b> وممكن ينتج DOM مختلف عن اللي في دماغك (الدرس 13).</p></div>
+        </div>
+
+        <h3 class="sub">الـ Void elements: مالهاش end tag</h3>
+        <p>شوية elements <b>مينفعش</b> يبقى ليهم محتوى، فمالهمش end tag خالص: <span class="tag-pill">area</span> <span class="tag-pill">base</span> <span class="tag-pill">br</span> <span class="tag-pill">col</span> <span class="tag-pill">embed</span> <span class="tag-pill">hr</span> <span class="tag-pill">img</span> <span class="tag-pill">input</span> <span class="tag-pill">link</span> <span class="tag-pill">meta</span> <span class="tag-pill">source</span> <span class="tag-pill">track</span> <span class="tag-pill">wbr</span>. ممكن تكتب <code>&lt;br&gt;</code> أو <code>&lt;br/&gt;</code> — الاتنين نفس الحاجة، والـ <code>/</code> في HTML <b>ملهاش أي معنى</b> (موجودة عشان التوافق مع XHTML بس).</p>
+        <div class="callout warn reveal"><span class="ci">⚠️</span><div><strong>فخ: <code>&lt;div/&gt;</code> مش «div فاضي»</strong><p>بما إن الـ <code>/</code> متجاهلة في HTML، <code>&lt;div/&gt;</code> = <code>&lt;div&gt;</code> مفتوح! أي حاجة بعده هتبقى جواه. (الاستثناء الوحيد: جوه <code>&lt;svg&gt;</code> و<code>&lt;math&gt;</code> الـ self-closing بيشتغل فعلًا — ودي «foreign content».) شغّل ودوس 🌳 DOM:</p></div></div>
+        <html-example file="self-closing.html" auto>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>Trap</title></head>
+          <body>
+            <div/>First
+            <div/>Second
+            <p>Where am I?</p>
+            <svg width="40" height="20"><rect width="40" height="20" fill="#ff7a45"/><circle/></svg>
+          </body>
+          </html>
+        </html-example>
+
+        <h3 class="sub">الـ Attributes بالتفصيل</h3>
+        <ul>
+          <li><b>الأسماء case-insensitive</b> في HTML: <code>HREF</code> = <code>href</code> (المتصفح بيحوّلها small). القيم غالبًا case-sensitive.</li>
+          <li><b>الـ quotes</b>: double <code>"…"</code> أو single <code>'…'</code> أو <b>من غير quotes</b> لو القيمة مفيهاش مسافات ولا <code>" ' = &lt; &gt; `</code>. القيمة من غير quotes بتخلص عند أول مسافة — مصدر كلاسيكي للثغرات.</li>
+          <li><b>Boolean attributes</b> (<code>disabled</code>، <code>required</code>، <code>checked</code>، <code>hidden</code>…): <b>وجودها</b> = true، أيًّا كانت القيمة. <code>disabled="false"</code> = <b>disabled</b>! عشان تلغيها لازم تشيل الـ attribute كله.</li>
+          <li><b>Attribute مكرر</b>: الأول هو اللي بيكسب والتاني بيتشال (parse error). 🎯 لو فلتر بيتشيك على آخر واحد والمتصفح بياخد الأول — عندك bypass.</li>
+        </ul>
+        <html-example file="attributes.html" auto>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>Attributes</title></head>
+          <body>
+            <button disabled="false">I am still disabled</button>
+            <input type="checkbox" checked="no"> still checked
+            <p ID="first" id="second" CLASS=note>Duplicate id</p>
+            <a href=/search?q=red shoes>unquoted value</a>
+            <script>
+              const p = document.querySelector("p");
+              console.log("id =", p.id, "| class =", p.className);
+              console.log("href attr =", document.querySelector("a").getAttribute("href"));
+              console.log("extra attribute named:", document.querySelector("a").attributes[1].name);
+            </script>
+          </body>
+          </html>
+        </html-example>
+        <p>لاحظ في الـ console: الـ <code>id</code> طلع <code>first</code> (الأول كسب)، والـ <code>href</code> طلع <code>/search?q=red</code> بس، والكلمة <code>shoes&gt;</code>… استنى، دقق: <code>shoes</code> اتحوّلت لـ attribute تاني اسمه <code>shoes</code>! تخيّل لو الكلمة دي جت من المستخدم وكانت <code>onmouseover=alert(1)</code> — ده بالظبط أساس <b>attribute injection</b>.</p>
+
+        <h3 class="sub">الـ Comments</h3>
+        <p><code>&lt;!-- أي نص هنا --&gt;</code>: المتصفح مش بيعرضه، بس <b>موجود في الـ source</b> عند أي حد يدوس <kbd>Ctrl</kbd>+<kbd>U</kbd>. مينفعش تتداخل (أول <code>--&gt;</code> بتقفل).</p>
+        <div class="callout pt reveal"><span class="ci">🎯</span><div><strong>الـ comments كنز recon</strong><p>مطورين بيسيبوا في الـ comments: endpoints قديمة، أسماء موظفين، TODOs زي «remove test account before release»، versions، وأحيانًا credentials. أول حاجة بتعملها في أي صفحة: تدوّر على <code>&lt;!--</code>. (في الدرس 15 هنعمل ده بشكل منهجي.)</p></div></div>
+
+        <h3 class="sub">المسافات (whitespace)</h3>
+        <p>المتصفح بيـ<b>دمج</b> أي مجموعة مسافات/أسطر جديدة/tabs في النص لمسافة واحدة عند العرض. عشان كده الـ indentation في الكود مبيأثرش على الشكل. لو عايز سطر جديد: <code>&lt;br&gt;</code>، ولو عايز المسافات تفضل زي ما هي: <code>&lt;pre&gt;</code>، ولو عايز مسافة «مبتتكسرش»: <code>&amp;nbsp;</code>.</p>
+        <html-example file="whitespace.html" auto>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>Whitespace</title></head>
+          <body>
+            <p>many      spaces
+               and
+               new lines      collapse.</p>
+            <p>line one<br>line two</p>
+            <pre>pre    keeps
+               every   space</pre>
+          </body>
+          </html>
+        </html-example>
+        <p>بس خلّي بالك: الـ whitespace <b>موجود في الـ DOM</b> كـ <code>#text</code> nodes حتى لو مش باين. دوس 🌳 DOM في المثال وفعّل «إظهار الـ whitespace» — هتلاقي nodes من نوع <code>⏎··</code> بين الـ tags. ده مهم لما تكتب JavaScript بيتنقّل في الشجرة.</p>
+
+        <h3 class="sub">HTML متسامحة… جدًا</h3>
+        <p>لو كتبت Python غلط، هيطلع error ويقف. HTML لأ: الـ parser عنده قواعد مفصّلة لـ <b>كل</b> غلطة ممكنة، وبيكمّل ويطلع شجرة. ده كويس للمستخدم (الصفحة بتظهر)، بس معناه إن:</p>
+        <ul>
+          <li>غلطاتك مش هتظهرلك لوحدها — استخدم <b>W3C Validator</b> (<code>validator.w3.org</code>) أو تاب Elements عشان تشوف الـ DOM الحقيقي.</li>
+          <li>🎯 المتصفح بيفهم حاجات «غريبة» كـ HTML صحيح: tag من غير مسافة قبل الـ attribute، <code>/</code> مكان المسافة، attribute من غير quotes… فلتر بيدوّر على «الشكل المثالي» للـ HTML هيتعدّى.</li>
+        </ul>
+
+        <h3 class="sub">تشغيل صفحاتك على جهازك</h3>
+        <p>اعمل فولدر، وجواه <code>index.html</code> (الاسم ده هو الـ «default document» — لما تطلب <code>/</code> السيرفر بيدوّر عليه). تقدر تفتحه بالـ double-click (هيتفتح كـ <code>file:///…</code>)، بس الأحسن تشغّل server محلي، لأن حاجات كتير (modules، fetch، cookies) بتتصرف غير على <code>file://</code>:</p>
+        <code-block lang="bash" file="terminal">
+          # inside your project folder
+          python -m http.server 8000
+          # then open http://localhost:8000/
+        </code-block>
+
+        <div class="exercises">
+          <div class="exercises-head"><h3><span class="bulb">✏️</span> تمارين الدرس 02</h3></div>
+          <quiz id="s02-q1" answer="1">
+            <q>صفحة مفيهاش `<!DOCTYPE html>` خالص. إيه اللي هيحصل؟</q>
+            <o>المتصفح هيرفض يعرضها</o>
+            <o>هتتعرض، بس في <b>quirks mode</b> (`document.compatMode === "BackCompat"`) وبعض سلوك الـ CSS هيختلف</o>
+            <o>هتتعرض كنص عادي</o>
+            <o>مفيش أي فرق</o>
+            <good>صح. الـ DOCTYPE بيختار الـ rendering mode. من غيره المتصفح بيقلّد السلوك القديم عشان التوافق.</good>
+            <bad>المتصفح مش بيرفض أي HTML تقريبًا. غياب الـ DOCTYPE بيشغّل quirks mode — وده بيفرق في الـ layout.</bad>
+          </quiz>
+          <quiz id="s02-q2" answer="2">
+            <q>إيه الـ DOM اللي هيطلع من الكود ده؟<pre-html><body><div/>Hi<span>!</span></body></pre-html></q>
+            <o>`div` فاضي، وبعده النص `Hi` و`span` جنبه</o>
+            <o>parse error والمتصفح هيوقف</o>
+            <o>`div` جواه النص `Hi` والـ `span`</o>
+            <o>النص بس من غير div</o>
+            <good>الـ `/` متجاهلة على العناصر العادية، فـ `<div/>` فتح div وكل اللي بعده دخل جواه.</good>
+            <bad>في HTML العادي (مش SVG)، الـ `/` في آخر start tag ملهاش تأثير على عنصر مش void. يعني `<div/>` = `<div>` مفتوح.</bad>
+          </quiz>
+          <quiz id="s02-q3" answer="0">
+            <q>`<input type="checkbox" checked="false">` — الـ checkbox هيظهر إزاي؟</q>
+            <o>متعلّم عليه (checked)</o>
+            <o>مش متعلّم عليه</o>
+            <o>disabled</o>
+            <o>مش هيظهر</o>
+            <good>الـ boolean attributes بيتحكم عليها بالوجود. أي قيمة (حتى "false") = true. الطريقة الوحيدة: تشيل الـ attribute.</good>
+            <bad>`checked` boolean attribute: مجرد وجوده يعني true، والقيمة "false" مالهاش معنى.</bad>
+          </quiz>
+          <quiz id="s02-q4" answer="3">
+            <q>أنهي مجموعة كلها <b>void elements</b>؟</q>
+            <o>`div`, `span`, `p`</o>
+            <o>`img`, `input`, `textarea`</o>
+            <o>`br`, `hr`, `script`</o>
+            <o>`img`, `input`, `meta`, `link`</o>
+            <good>دول مالهمش end tag ولا محتوى. أما `textarea` و`script` ليهم محتوى وend tag.</good>
+            <bad>`textarea` و`script` بياخدوا محتوى (النص الافتراضي / الكود)، فلازم end tag. الـ void elements: area, base, br, col, embed, hr, img, input, link, meta, source, track, wbr.</bad>
+          </quiz>
+          <quiz id="s02-q5" answer="1">
+            <q>السيرفر بيحط اللون اللي المستخدم اختاره كده: `<div class=COLOR>` (من غير quotes). المستخدم كتب `red onclick=alert(1)`. النتيجة؟</q>
+            <o>`class` قيمتها `red onclick=alert(1)` كلها</o>
+            <o>`class="red"` وattribute جديد `onclick="alert(1)"` — يعني injection</o>
+            <o>المتصفح هيتجاهل الـ tag</o>
+            <o>parse error ومفيش حاجة هتظهر</o>
+            <good>القيمة من غير quotes بتخلص عند أول مسافة، والباقي بيتقري كـ attributes جديدة. عشان كده: <b>دايمًا</b> quotes + encoding للقيم.</good>
+            <bad>من غير quotes، المسافة بتقفل القيمة. `onclick=alert(1)` بقت attribute منفصل — وده event handler بيشغّل JavaScript.</bad>
+          </quiz>
+          <quiz id="s02-q6" answer="2">
+            <q>المطوّر كتب في الصفحة: `<!-- old API: /api/v1/users?debug=1 -->`. مين يقدر يشوف الكلام ده؟</q>
+            <o>المطوّر بس</o>
+            <o>محدش، الـ comments بتتشال قبل ما الصفحة توصل</o>
+            <o>أي حد يفتح الـ source (Ctrl+U) أو DevTools أو curl</o>
+            <o>الـ admins بس</o>
+            <good>الـ HTML comments بتوصل كاملة للمتصفح. المتصفح بس مش بيعرضها. (الـ comments اللي بتتشال هي comments لغة السيرفر زي `<?php /* */ ?>`.)</good>
+            <bad>HTML comment جزء من الـ response نفسه. أي حد يشوف الـ source يقراها — ولذلك هي مصدر recon مهم.</bad>
+          </quiz>
+          <quiz id="s02-q7" answer="0">
+            <q>`<p id="a" id="b">` — قيمة `p.id` في الـ DOM؟</q>
+            <o>`a`</o>
+            <o>`b`</o>
+            <o>`a b`</o>
+            <o>فاضية</o>
+            <good>أول attribute بالاسم ده هو اللي بيكسب، والمكرر بيتشال وقت الـ tokenizing.</good>
+            <bad>الـ tokenizer بيشيل أي attribute مكرر ويحتفظ بالأول. (فلتر بيبص على آخر واحد ممكن يتخدع.)</bad>
+          </quiz>
+
+          <html-lab id="s02-lab1" title="أول صفحة كاملة وصحيحة" level="1">
+            <desc><p>كمّل الصفحة دي عشان تبقى مستند HTML سليم:</p>
+            <ul><li>أول سطر <code>&lt;!DOCTYPE html&gt;</code>، و<code>&lt;html&gt;</code> عليه <code>lang="en"</code>.</li>
+            <li>جوه الـ <code>head</code>: <code>&lt;meta charset="UTF-8"&gt;</code> وعنوان الصفحة <b>Recon Notes</b>.</li>
+            <li>جوه الـ <code>body</code>: عنوان <code>h1</code> نصه <b>Target: shop.example</b>، وتحته فقرة <code>p</code> فيها أي وصف.</li></ul></desc>
+            <starter>
+              <html>
+              <head>
+              </head>
+              <body>
+                <!-- your page here -->
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Recon Notes</title>
+              </head>
+              <body>
+                <h1>Target: shop.example</h1>
+                <p>Scope: *.shop.example — authorized testing only.</p>
+              </body>
+              </html>
+            </solution>
+            <test label="فيه `&lt;!DOCTYPE html&gt;` (standards mode)">doc.doctype !== null && doc.doctype.name === "html" && /^\s*<!doctype html\s*>/i.test(src)</test>
+            <test label="`&lt;html lang=&quot;en&quot;&gt;`">attr("html", "lang") === "en"</test>
+            <test label="`meta charset=&quot;UTF-8&quot;` جوه الـ head">has("head > meta[charset]") && attr("head > meta[charset]", "charset").toLowerCase() === "utf-8"</test>
+            <test label="الـ title هو Recon Notes">text("head > title") === "Recon Notes"</test>
+            <test label="`h1` نصه Target: shop.example">count("h1") === 1 && text("h1") === "Target: shop.example"</test>
+            <test label="فقرة `p` فيها نص في الـ body">has("body p") && text("body p").length > 0</test>
+            <hint>الـ DOCTYPE لازم يبقى قبل `<html>` بالظبط. والـ title بيتكتب `<title>Recon Notes</title>` جوه الـ head.</hint>
+          </html-lab>
+
+          <html-lab id="s02-lab2" title="صلّح التقرير المكسور" level="2">
+            <desc><p>الصفحة دي «شغّالة» بس مليانة أخطاء syntax المتصفح بيداريها. صلّحها بحيث:</p>
+            <ul><li>يبقى فيه <code>h1</code> <b>واحد بس</b> نصه <b>Report</b>.</li>
+            <li>الـ <code>&lt;b&gt;</code> يتقفل <b>جوه</b> الـ <code>&lt;p&gt;</code> (الترتيب الصح للـ end tags).</li>
+            <li>كل <code>li</code> ليه <code>&lt;/li&gt;</code> صريح.</li>
+            <li>الـ checkbox يبقى <b>مش متعلّم عليه</b> فعلًا.</li></ul>
+            <p>استخدم 🌳 DOM في المعاينة عشان تشوف الفرق بين اللي مكتوب واللي المتصفح فهمه.</p></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>Fix me</title></head>
+              <body>
+                <h1>Report<h1>
+                <p>Status: <b>open</p></b>
+                <ul>
+                  <li>XSS in search
+                  <li>Open redirect in login
+                </ul>
+                <input type="checkbox" checked="false"> Verified
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>Fix me</title></head>
+              <body>
+                <h1>Report</h1>
+                <p>Status: <b>open</b></p>
+                <ul>
+                  <li>XSS in search</li>
+                  <li>Open redirect in login</li>
+                </ul>
+                <input type="checkbox"> Verified
+              </body>
+              </html>
+            </solution>
+            <test label="`h1` واحد بس ونصه Report">count("h1") === 1 && text("h1") === "Report"</test>
+            <test label="الـ `b` جوه الـ `p` ومقفول قبل `&lt;/p&gt;`">has("p > b") && !/<\/p>\s*<\/b>/.test(S) && /<b>\s*open\s*<\/b>\s*<\/p>/.test(S)</test>
+            <test label="الـ `ul` فيه 2 `li` وكل واحد مقفول صراحة">count("ul > li") === 2 && (S.match(/<\/li>/g) || []).length === 2</test>
+            <test label="الـ checkbox مش checked">has("input[type=checkbox]") && !$("input[type=checkbox]").hasAttribute("checked")</test>
+            <test label="الـ list والـ checkbox مش جوه أي heading">!has("h1 ul") && !has("h1 input")</test>
+            <hint>`<h1>Report<h1>` فتحت h1 تاني بدل ما تقفل الأول — وكل الصفحة وقعت جواه! والـ boolean attribute بيتلغي بإنك <b>تشيله</b>.</hint>
+          </html-lab>
+
+          <task id="s02-t1" title="comment منسي" level="1" answer="Winter2024!" reject="qa_admin">
+            <desc><p>ده جزء من source صفحة login على staging. <b>إيه الـ password</b> اللي المطوّر نسيها؟</p></desc>
+            <listing lang="html" file="login.html (view-source)">
+              <form action="/auth" method="post">
+                <!-- TODO(ahmed): remove before go-live
+                     test account: qa_admin / Winter2024!  -->
+                <input name="username" autocomplete="username">
+                <input name="password" type="password" autocomplete="current-password">
+                <button>Sign in</button>
+              </form>
+            </listing>
+            <explain>`Winter2024!`. ده نمط حقيقي ومتكرر في الـ pentests: credentials وTODOs في HTML comments. في التقرير: الـ finding اسمه «Sensitive information in HTML comments»، والإصلاح: شيل الـ comments من الـ build (minifiers بتعمل كده)، وغيّر الـ password فورًا لأنه اتكشف.</explain>
+          </task>
+          <task id="s02-t2" title="مين أبو الـ div التاني؟" level="2" answer="div" reject="body">
+            <desc><p>من غير ما تشغّل الكود: في الـ DOM الناتج، الـ <code>div</code> اللي فيه كلمة <code>World</code> — مين الـ <b>parent</b> بتاعه المباشر؟ (اكتب اسم الـ tag)</p></desc>
+            <listing lang="html" file="snippet.html">
+              <body>
+                <div/>Hello
+                <div/>World
+              </body>
+            </listing>
+            <hint>`<div/>` = `<div>` مفتوح. الأول اتقفل؟</hint>
+            <explain>الـ `div` الأول اتفتح ومتقفلش، فـ `Hello` والـ `div` التاني دخلوا جواه. يعني الـ parent هو `div`. اتأكد بنفسك: انسخ الكود في المعمل وبص على تاب الـ DOM.</explain>
+          </task>
+        </div>
+      </section>

